@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🔎 pre-commit: lint/typecheck 실행"
+
+if [ -f package.json ]; then
+  if npm run | grep -q " lint"; then
+    if ! npm run -s lint; then
+      echo "⚠️ lint 실패(또는 미설정) - 현재 단계에서는 경고로 처리합니다."
+    fi
+  else
+    echo "ℹ️ lint 스크립트가 없어 건너뜁니다."
+  fi
+
+  if npm run | grep -q " typecheck"; then
+    if ! npm run -s typecheck; then
+      echo "⚠️ typecheck 실패 - 현재 단계에서는 경고로 처리합니다."
+    fi
+  else
+    echo "ℹ️ typecheck 스크립트가 없어 건너뜁니다."
+  fi
+else
+  echo "ℹ️ package.json 없음. pre-commit 검사 건너뜁니다."
+fi
