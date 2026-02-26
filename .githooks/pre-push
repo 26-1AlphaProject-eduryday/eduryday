@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo ""
+echo "✅ push 전 DONE 체크리스트 확인: docs/DONE_CHECKLIST.md"
+echo "✅ PR에 PDF 대비 스크린샷 첨부 권장"
+echo ""

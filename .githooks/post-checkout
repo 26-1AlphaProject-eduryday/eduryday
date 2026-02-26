@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
+case "$branch" in
+  feature/*|fix/*|chore/*)
+    echo ""
+    echo "📌 [START] 개발 시작 체크리스트를 확인하세요: docs/START_CHECKLIST.md"
+    echo "📘 규칙 문서: docs/DEV_RULES.md"
+    echo ""
+    ;;
+esac
