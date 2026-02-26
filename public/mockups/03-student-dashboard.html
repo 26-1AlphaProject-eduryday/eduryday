@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduRyday - 학생 대시보드</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .placeholder { background: #e5e7eb; border: 2px dashed #9ca3af; }
+    .wireframe-text { color: #6b7280; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-8 h-8 placeholder rounded flex items-center justify-center">
+          <span class="wireframe-text text-xs">L</span>
+        </div>
+        <span class="text-xl font-bold wireframe-text">EduRyday</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="w-8 h-8 placeholder rounded-full flex items-center justify-center">
+          <span class="wireframe-text text-xs">bell</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 placeholder rounded-full"></div>
+          <span class="wireframe-text">심준</span>
+          <span class="wireframe-text">▼</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 min-h-screen p-4">
+      <nav class="space-y-2">
+        <div class="px-4 py-3 bg-gray-100 rounded-lg wireframe-text font-medium">
+          대시보드
+        </div>
+        <div class="px-4 py-3 wireframe-text hover:bg-gray-50 rounded-lg">
+          내 강좌
+        </div>
+        <div class="px-4 py-3 wireframe-text hover:bg-gray-50 rounded-lg">
+          과제
+        </div>
+        <div class="px-4 py-3 wireframe-text hover:bg-gray-50 rounded-lg">
+          성적
+        </div>
+        <div class="px-4 py-3 wireframe-text hover:bg-gray-50 rounded-lg">
+          AI 튜터
+        </div>
+        <div class="px-4 py-3 wireframe-text hover:bg-gray-50 rounded-lg">
+          마이페이지
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <!-- Welcome Section -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold wireframe-text mb-2">안녕하세요, 심준님!</h1>
+        <p class="wireframe-text">오늘도 열심히 학습해봐요</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl border border-gray-200">
+          <div class="wireframe-text text-sm mb-1">수강 중인 강좌</div>
+          <div class="text-2xl font-bold wireframe-text">4개</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-200">
+          <div class="wireframe-text text-sm mb-1">제출 대기 과제</div>
+          <div class="text-2xl font-bold wireframe-text">3개</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-200">
+          <div class="wireframe-text text-sm mb-1">이번 주 학습 시간</div>
+          <div class="text-2xl font-bold wireframe-text">12시간</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-200">
+          <div class="wireframe-text text-sm mb-1">평균 점수</div>
+          <div class="text-2xl font-bold wireframe-text">87점</div>
+        </div>
+      </div>
+
+      <!-- Course Section -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold wireframe-text">수강 중인 강좌</h2>
+          <a href="#" class="wireframe-text text-sm hover:underline">전체 보기 →</a>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6">
+          <!-- Course Card 1 -->
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="h-32 placeholder flex items-center justify-center">
+              <span class="wireframe-text">[강좌 썸네일]</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold wireframe-text mb-1">알고리즘 기초</h3>
+              <p class="text-sm wireframe-text mb-3">이현기 교수님</p>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-gray-600 h-2 rounded-full" style="width: 65%"></div>
+              </div>
+              <div class="text-sm wireframe-text">진행률 65%</div>
+            </div>
+          </div>
+
+          <!-- Course Card 2 -->
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="h-32 placeholder flex items-center justify-center">
+              <span class="wireframe-text">[강좌 썸네일]</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold wireframe-text mb-1">자료구조</h3>
+              <p class="text-sm wireframe-text mb-3">김철수 교수님</p>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-gray-600 h-2 rounded-full" style="width: 40%"></div>
+              </div>
+              <div class="text-sm wireframe-text">진행률 40%</div>
+            </div>
+          </div>
+
+          <!-- Course Card 3 -->
+          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div class="h-32 placeholder flex items-center justify-center">
+              <span class="wireframe-text">[강좌 썸네일]</span>
+            </div>
+            <div class="p-4">
+              <h3 class="font-bold wireframe-text mb-1">웹프로그래밍</h3>
+              <p class="text-sm wireframe-text mb-3">박영희 교수님</p>
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-gray-600 h-2 rounded-full" style="width: 80%"></div>
+              </div>
+              <div class="text-sm wireframe-text">진행률 80%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Deadlines -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-xl font-bold wireframe-text mb-4">다가오는 마감</h2>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 placeholder rounded flex items-center justify-center">
+                <span class="wireframe-text text-xs">code</span>
+              </div>
+              <div>
+                <div class="font-medium wireframe-text">실습 3: 정렬 알고리즘</div>
+                <div class="text-sm wireframe-text">알고리즘 기초</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-medium text-red-500">D-2</div>
+              <div class="text-sm wireframe-text">1월 23일 23:59</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 placeholder rounded flex items-center justify-center">
+                <span class="wireframe-text text-xs">doc</span>
+              </div>
+              <div>
+                <div class="font-medium wireframe-text">과제 2: 스택과 큐 구현</div>
+                <div class="text-sm wireframe-text">자료구조</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-medium wireframe-text">D-5</div>
+              <div class="text-sm wireframe-text">1월 26일 23:59</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
