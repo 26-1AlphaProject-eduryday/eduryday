@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 const allowed = new Set([
   '01-landing',
@@ -13,17 +15,18 @@ const allowed = new Set([
   '10-admin-dashboard',
 ]);
 
+function extractBody(html: string) {
+  const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  return match ? match[1] : html;
+}
+
 export default async function AlphaPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!allowed.has(slug)) return notFound();
 
-  return (
-    <main style={{ width: '100vw', height: '100vh', background: '#f3f4f6' }}>
-      <iframe
-        src={`/mockups/${slug}.html`}
-        title={slug}
-        style={{ width: '100%', height: '100%', border: 0 }}
-      />
-    </main>
-  );
+  const filePath = path.join(process.cwd(), 'public', 'mockups', `${slug}.html`);
+  const html = await readFile(filePath, 'utf-8');
+  const bodyHtml = extractBody(html);
+
+  return <main dangerouslySetInnerHTML={{ __html: bodyHtml }} />;
 }
