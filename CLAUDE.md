@@ -1,251 +1,127 @@
-# EduRyday (에듀리데이) 프로젝트
+# CLAUDE.md
 
-## 프로젝트 개요
-
-AI 기반 통합 교육 플랫폼. 기존 eCampus의 한계를 극복하고 공정한 학습 환경을 제공하는 차세대 LMS.
-
-### 핵심 문제점 (해결 대상)
-1. **교수자 업무 과부하** - 채점/피드백 병목 현상
-2. **기존 LMS 한계** - 행정 중심, 코딩 교육에 부적합한 UI/UX
-3. **학습 도구 파편화** - 유료 AI 도구 접근성에 따른 디지털 격차
-4. **지식의 휘발성** - 학기 종료 후 학습 인프라 단절
-
-### 3대 목표
-1. **운영 효율화** - No-Code AI Grading, 교수자 부담 최소화
-2. **학습 공정성** - 표준화된 AI 튜터, 24시간 실시간 피드백
-3. **기술적 완성도** - All-in-One 플랫폼, 고성능/고가용성
-
-### 4대 설계 원칙
-1. **End-to-End Pipeline Integration** - LMS+IDE+Judge 통합, Split-View 인터페이스
-2. **Natural Language to Logic** - 자연어 기반 채점 로직 생성 (No-Code Rubric Engine)
-3. **Standardized AI Assistance** - 힌트 중심 튜터링, 정답 직접 제공 제한
-4. **Zero-Latency UX** - PPR, Realtime 웹소켓으로 즉각적 피드백
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ---
 
-## 기술 스택
+## Commands
 
-### Frontend
-- **React 19** - Concurrent Mode, React Compiler
-- **Next.js 16** - Server Components, PPR (Partial Prerendering)
-- **TypeScript** - 타입 안전성
-- **Tailwind CSS** - 유틸리티 퍼스트 스타일링
-
-### Backend & Database
-- **Supabase** - BaaS, Auth, Realtime
-- **PostgreSQL** - ACID 트랜잭션, JSONB 지원
-- **pgvector** - RAG용 Vector DB
-
-### Infrastructure
-- **Docker** - 컨테이너화, 코드 실행 샌드박스
-- **AWS** - EC2, RDS, 오토스케일링
-
----
-
-## 디자인 시스템
-
-### 스타일 가이드
-- **모드**: 라이트 모드 중심 (깔끔한 교육 플랫폼 느낌)
-- **컬러**:
-  - Primary: 블루 계열 (신뢰, 학습)
-  - Secondary: 그린 계열 (성공, 완료)
-  - Accent: 퍼플 계열 (AI, 혁신)
-- **타이포그래피**: 가독성 높은 산세리프
-- **레이아웃**: 넓은 여백, 카드 기반 UI
-
----
-
-## 페이지 구조
-
-### 사용자 역할
-- **학생**: 강좌 수강, 과제 제출, AI 튜터 이용
-- **교수**: 강좌 관리, 과제 출제, 채점
-- **관리자**: 시스템 관리, 사용자 관리, 통계
-
-### 강의 콘텐츠 형태
-- 동영상 강의 (임베드 플레이어)
-- PDF 자료 (뷰어 내장)
-- 텍스트/마크다운 설명
-- 코드 예제 (하이라이팅)
-
-### 과제 유형
-- **코딩 문제**: 코드 작성 + 자동 채점 (테스트 케이스)
-- **주관식**: 텍스트 답변 + AI 채점
-- **객관식**: 선택형 문제 + 자동 채점
-- **파일 제출**: 보고서, 프로젝트 파일 등
-
----
-
-### 공통 페이지 (3개)
-| # | 페이지 | 설명 | 주요 요소 |
-|---|--------|------|----------|
-| 1 | 랜딩 페이지 | 서비스 소개, CTA | Hero 섹션, 기능 소개, 팀 소개, CTA |
-| 2 | 로그인 | 사용자 인증 | 이메일/비밀번호, 소셜 로그인, 비밀번호 찾기 |
-| 3 | 회원가입 | 계정 생성 | 역할 선택 (학생/교수), 정보 입력, 약관 동의 |
-
-### 학생용 페이지 (9개)
-| # | 페이지 | 설명 | 주요 요소 |
-|---|--------|------|----------|
-| 4 | 대시보드 | 수강 강좌 목록 | 강좌 카드, 진행률, 알림, 일정 |
-| 5 | 강좌 상세 | 강좌 정보 | 주차별 커리큘럼, 공지사항, 자료실 |
-| 6 | 강의 보기 | 콘텐츠 학습 | 동영상 플레이어, PDF 뷰어, 텍스트 |
-| 7 | Split-View IDE | 코딩 실습 | 좌: 문제/강의, 우: 코드 에디터, 하단: 실행 결과 |
-| 8 | AI 튜터 채팅 | RAG 기반 Q&A | 채팅 UI, 맥락 기반 힌트, 대화 기록 |
-| 9 | 과제 목록 | 제출할 과제 | 마감일, 상태 필터, 유형별 아이콘 |
-| 10 | 과제 제출 | 답안 작성 | 코딩/주관식/객관식/파일 업로드 UI |
-| 11 | 성적 확인 | 과제별 피드백 | 점수, AI 피드백, 오답 분석, 재제출 |
-| 12 | 마이페이지 | 개인 정보 | 프로필, 학습 통계, 포트폴리오, 설정 |
-
-### 교수용 페이지 (8개)
-| # | 페이지 | 설명 | 주요 요소 |
-|---|--------|------|----------|
-| 13 | 대시보드 | 강좌 관리 | 강좌 목록, 제출 현황, 알림, 빠른 액션 |
-| 14 | 강좌 생성/편집 | 강좌 설정 | 기본 정보, 주차 구성, 학생 관리, 조교 배정 |
-| 15 | 콘텐츠 업로드 | 강의 자료 등록 | 동영상/PDF/텍스트 업로드, 순서 정렬 |
-| 16 | 과제 생성 | No-Code Rubric | 문제 입력, 자연어 채점 기준, 테스트 케이스 |
-| 17 | 채점 현황 | 자동/수동 채점 | 제출 목록, AI 채점 결과, 수동 수정 |
-| 18 | 학생 성적 관리 | 성적 통계 | 학생별 점수, 분포도, Excel 내보내기 |
-| 19 | 데이터 대시보드 | 학습 분석 | 자주 틀리는 개념, 질문 패턴, 참여율 |
-| 20 | 공지사항 관리 | 공지 작성 | WYSIWYG 에디터, 파일 첨부, 알림 발송 |
-
-### 관리자용 페이지 (5개)
-| # | 페이지 | 설명 | 주요 요소 |
-|---|--------|------|----------|
-| 21 | 관리자 대시보드 | 시스템 현황 | 사용자 통계, 서버 상태, 알림 |
-| 22 | 사용자 관리 | 계정 관리 | 사용자 목록, 역할 변경, 계정 정지 |
-| 23 | 강좌 관리 | 전체 강좌 | 강좌 승인, 삭제, 통계 |
-| 24 | 시스템 설정 | 환경 설정 | AI 모델 설정, 용량 제한, 알림 설정 |
-| 25 | 로그/모니터링 | 시스템 로그 | 접속 로그, 에러 로그, 채점 로그 |
-
-**총 25개 페이지**
-
----
-
-## 핵심 UI 컴포넌트
-
-### Split-View IDE (핵심 화면)
-```
-┌─────────────────────────────────────────────────────────┐
-│  EduRyday                              심준 ▼  🔔  ⚙️  │
-├─────────────────────────────────────────────────────────┤
-│  ◀ 알고리즘 기초 > 3주차 > 실습 2                        │
-├──────────────────────────┬──────────────────────────────┤
-│                          │  main.py              ▶ Run │
-│  [문제 설명]              │  ┌────────────────────────┐ │
-│                          │  │ def solution(n):      │ │
-│  피보나치 수열의 n번째    │  │     # 코드를 작성하세요 │ │
-│  값을 반환하는 함수를     │  │     pass              │ │
-│  작성하세요.              │  │                        │ │
-│                          │  └────────────────────────┘ │
-│  [입력]                   │                              │
-│  n: 정수 (1 ≤ n ≤ 45)    │  [실행 결과]                 │
-│                          │  테스트 1: ✅ 통과           │
-│  [출력]                   │  테스트 2: ❌ 실패           │
-│  피보나치 수열의 n번째 값 │  테스트 3: ⏳ 대기           │
-│                          │                              │
-│  💬 AI 튜터에게 질문하기  │  [제출하기]                  │
-└──────────────────────────┴──────────────────────────────┘
+```bash
+npm run dev          # Start dev server (localhost:3000)
+npm run build        # Production build
+npm run lint         # ESLint
+npm run typecheck    # tsc --noEmit
 ```
 
-### AI 튜터 채팅
-```
-┌─────────────────────────────────────┐
-│  🤖 AI 튜터                     ✕  │
-├─────────────────────────────────────┤
-│                                     │
-│  [You] 테스트 2가 왜 실패하나요?   │
-│                                     │
-│  [AI] 테스트 2는 n=0일 때의        │
-│  경계 케이스입니다. 피보나치        │
-│  수열에서 F(0)의 값이 무엇인지     │
-│  생각해보세요.                      │
-│                                     │
-│  💡 힌트: 기저 조건(base case)을    │
-│  다시 확인해보세요.                 │
-│                                     │
-├─────────────────────────────────────┤
-│  메시지 입력...              전송 ▶ │
-└─────────────────────────────────────┘
-```
-
-### No-Code Rubric (교수용)
-```
-┌─────────────────────────────────────────────────────────┐
-│  채점 기준 설정 (자연어로 입력)                          │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  [기준 1] 변수명을 직관적으로 작성했는지 확인해줘       │
-│           가중치: 20%                            🗑️    │
-│                                                         │
-│  [기준 2] 시간 복잡도가 O(n) 이하인지 검사해줘         │
-│           가중치: 30%                            🗑️    │
-│                                                         │
-│  [기준 3] 엣지 케이스(n=0, n=1)를 처리했는지 확인       │
-│           가중치: 50%                            🗑️    │
-│                                                         │
-│  + 기준 추가                                            │
-│                                                         │
-│  [미리보기]  [저장]                                     │
-└─────────────────────────────────────────────────────────┘
-```
+No test runner is configured yet.
 
 ---
 
-## 팀 구성
+## Architecture: FSD + Next.js App Router
 
-| 이름 | 역할 | 담당 |
-|------|------|------|
-| 심준 | 팀장/PM | 프론트엔드, MLOps 설계, 기획 |
-| 남호현 | MLOps | 백엔드 아키텍처, API, Vector DB |
-| 목진협 | 풀스택 | Supabase, DevOps, 배포 |
-| 신태환 | 프론트엔드 | UI 구현, API 연동 |
-| 오세웅 | PM/QA | 일정 관리, 테스트, 문서화 |
+This project uses **Feature-Sliced Design (FSD)** with the Next.js 15/16 App Router. The `app/` directory handles routing only — all UI logic lives in FSD layers.
+
+```
+app/                    ← Next.js App Router (routing only, thin wrappers)
+_pages/                 ← FSD: page compositions (언더스코어: Next.js 라우팅 제외)
+widgets/                ← FSD: independent complex blocks (Header, Sidebar)
+features/               ← FSD: user interactions (to be added)
+entities/               ← FSD: business entities (to be added)
+shared/                 ← FSD: reusable primitives
+  ui/                   ← Button, Card, Badge, ProgressBar, Input, StatCard
+  lib/                  ← API helpers (ok, fail)
+```
+
+> **주의**: Next.js의 `pages/` 디렉토리는 Pages Router로 인식되므로 FSD pages 레이어는 `_pages/`로 명명.
+
+### Routing Table
+
+| URL | FSD Page | Description |
+|-----|----------|-------------|
+| `/` | `pages/landing` | 랜딩 페이지 |
+| `/login` | `pages/login` | 로그인 |
+| `/student` | redirect → `/student/dashboard` | |
+| `/student/dashboard` | `pages/student-dashboard` | 학생 대시보드 |
+| `/student/courses/[id]` | `pages/course-detail` | 강좌 상세 |
+| `/student/ide/[id]` | `pages/split-view-ide` | Split-View IDE |
+| `/student/ai-tutor` | `pages/ai-tutor` | AI 튜터 |
+| `/professor` | redirect → `/professor/dashboard` | |
+| `/professor/dashboard` | `pages/professor-dashboard` | 교수 대시보드 |
+| `/professor/courses/[id]/assignments/create` | `pages/create-assignment` | 과제 생성 |
+| `/professor/courses/[id]/grading` | `pages/grading-status` | 채점 현황 |
+| `/admin` | redirect → `/admin/dashboard` | |
+| `/admin/dashboard` | `pages/admin-dashboard` | 관리자 대시보드 |
+
+### Adding a New Page
+
+1. Create `_pages/<page-name>/ui/<PageName>Page.tsx` (FSD page component)
+2. Create the Next.js route file in `app/` that imports and renders it:
+   ```tsx
+   import { MyPage } from '@/_pages/my-page/ui/MyPage';
+   export default function MyRoute() { return <MyPage />; }
+   ```
+
+### Widgets
+
+| Widget | Description |
+|--------|-------------|
+| `widgets/header/LandingHeader` | 랜딩 전용 헤더 (nav + CTA 버튼) |
+| `widgets/header/StudentHeader` | 학생용 헤더 (아바타, 알림) |
+| `widgets/header/ProfessorHeader` | 교수용 헤더 (교수 badge) |
+| `widgets/header/AdminHeader` | 관리자 헤더 (dark, Admin badge) |
+| `widgets/sidebar/StudentSidebar` | 학생 사이드바 (`activeItem` prop) |
+| `widgets/sidebar/ProfessorSidebar` | 교수 사이드바 (`activeItem` prop) |
+| `widgets/sidebar/AdminSidebar` | 관리자 사이드바 dark 테마 (`activeItem` prop) |
+
+### Shared UI
+
+```tsx
+import { Button, Card, Badge, ProgressBar, Input, StatCard } from '@/shared/ui';
+```
+
+- `Button`: `variant` (primary/secondary/danger), `size` (sm/md/lg), `fullWidth`
+- `Badge`: `variant` (default/green/blue/yellow/red/purple)
+- `ProgressBar`: `value` (0-100), `color` (gray/blue/green)
+- `StatCard`: `label`, `value`, `trend?`, `trendColor?`
 
 ---
 
-## 개발 일정 (15주)
+## Dev Conventions
 
-| 주차 | 내용 |
-|------|------|
-| 1-2주 | RAG 파이프라인, 피그마 디자인 |
-| 3-4주 | DB 설계, 테이블 구현 |
-| 5-6주 | API 설계/구현, MVP 개발 |
-| 7주 | 중간 보고서 |
-| 8-9주 | AI API 연결 (튜터, 채점) |
-| 10-11주 | 채점 자동화 (Docker 샌드박스, 큐 시스템) |
-| 12-13주 | 통합 테스트, 성능 최적화 |
-| 14주 | 버그 픽스, 최종 배포 |
-| 15주 | 최종 보고서 |
+### Commits
+Conventional style: `feat(ui): ...`, `fix(api): ...`, `chore(docs): ...`
 
----
+### Branches
+- `feature/*` — new features
+- `fix/*` — bug fixes
+- `chore/*` — config/docs/ops
 
-## PDF용 목업 파일 (Low-Fi)
+### Naming
+- Components/Pages/Widgets: `PascalCase`
+- Utils/hooks: `camelCase`
 
-`/mockups/` 폴더에 10개의 핵심 페이지 HTML 목업이 있습니다.
-브라우저에서 열어 스크린샷을 찍어 PDF에 사용하세요.
+### Design Rule
+**HTML 목업을 기준으로 정확히 구현** — `mockups/*.html` 참조. 임의 리디자인 금지.
+우선순위: 레이아웃 정확도 → 타이포/여백 → 인터랙션
 
-| # | 파일명 | 페이지 |
-|---|--------|--------|
-| 1 | `01-landing.html` | 랜딩 페이지 |
-| 2 | `02-login.html` | 로그인 |
-| 3 | `03-student-dashboard.html` | 학생 대시보드 |
-| 4 | `04-course-detail.html` | 강좌 상세 |
-| 5 | `05-split-view-ide.html` | Split-View IDE (핵심) |
-| 6 | `06-ai-tutor.html` | AI 튜터 채팅 |
-| 7 | `07-professor-dashboard.html` | 교수 대시보드 |
-| 8 | `08-create-assignment.html` | 과제 생성 (No-Code Rubric) |
-| 9 | `09-grading-status.html` | 채점 현황 |
-| 10 | `10-admin-dashboard.html` | 관리자 대시보드 |
+### API Layer
+`lib/api/response.ts`의 `ok()` / `fail()` 헬퍼 사용. 에러 포맷: `{ ok: false, code, message }`.
 
-### 사용 방법
-1. 파일을 브라우저에서 열기
-2. 전체 화면 스크린샷 (macOS: Cmd+Shift+3)
-3. PDF에 이미지 삽입
+### PR Checklist
+`npm run lint` + `npm run typecheck` 통과 필수. 구현 전후 스크린샷 첨부.
 
 ---
 
-## 참고 사항
+## Tailwind CSS
 
-- 프로젝트 문서: `/Users/simjoon/develop/eduryday/`
-- 알파프로젝트 신청서: `2026-1 학생설계형 알파프로젝트 신청서(팀형, 개인형)_교수님컨펌이전.pdf`
-- 목업 파일: `/Users/simjoon/develop/eduryday/mockups/`
+npm 패키지로 설치됨 (CDN 아님). `@import "tailwindcss"` in `app/globals.css`. PostCSS config: `postcss.config.mjs`.
+
+---
+
+## Project Context
+
+EduRyday는 AI 기반 LMS. 3개 역할: **학생(Student)**, **교수(Professor)**, **관리자(Admin)**.
+핵심 기능: Split-View IDE (코딩 실습) + AI 튜터 (RAG 기반 힌트) + No-Code Rubric Engine (자연어 채점).
+
+백엔드 미정 (Supabase 검토 중). 현재 API routes (`app/api/v1/`)는 mock 데이터 반환.
+HTML 목업 원본: `mockups/*.html` (디자인 레퍼런스용).

@@ -1,4 +1,4 @@
-import { fail, ok } from '@/lib/api/response';
+import { fail, ok } from '@/shared/lib/api/response';
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);

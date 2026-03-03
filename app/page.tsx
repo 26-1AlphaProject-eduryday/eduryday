@@ -1,6 +1,5 @@
-import { Shell } from '@/components/ui/layout';
-import { alphaPages } from '@/components/alpha-pages/pages';
+import { LandingPage } from '@/_pages/landing/ui/LandingPage';
 
 export default function Home() {
-  return <Shell>{alphaPages['01-landing']}</Shell>;
+  return <LandingPage />;
 }

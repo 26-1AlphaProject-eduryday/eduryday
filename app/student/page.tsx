@@ -1,6 +1,5 @@
-import { Shell } from '@/components/ui/layout';
-import { alphaPages } from '@/components/alpha-pages/pages';
+import { redirect } from 'next/navigation';
 
 export default function StudentPage() {
-  return <Shell>{alphaPages['03-student-dashboard']}</Shell>;
+  redirect('/student/dashboard');
 }

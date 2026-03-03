@@ -1,6 +1,5 @@
-import { Shell } from '@/components/ui/layout';
-import { alphaPages } from '@/components/alpha-pages/pages';
+import { redirect } from 'next/navigation';
 
 export default function AdminPage() {
-  return <Shell>{alphaPages['10-admin-dashboard']}</Shell>;
+  redirect('/admin/dashboard');
 }

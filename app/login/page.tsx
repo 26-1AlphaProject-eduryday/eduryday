@@ -1,6 +1,5 @@
-import { Shell } from '@/components/ui/layout';
-import { alphaPages } from '@/components/alpha-pages/pages';
+import { LoginPage } from '@/_pages/login/ui/LoginPage';
 
-export default function LoginPage() {
-  return <Shell>{alphaPages['02-login']}</Shell>;
+export default function LoginRoute() {
+  return <LoginPage />;
 }
