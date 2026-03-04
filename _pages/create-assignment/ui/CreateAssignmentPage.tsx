@@ -31,7 +31,7 @@ function StepIndicator() {
             ? 'mt-1.5 text-xs font-semibold text-gray-800'
             : isDone
             ? 'mt-1.5 text-xs font-medium text-gray-600'
-            : 'mt-1.5 text-xs font-medium text-gray-400';
+            : 'mt-1.5 text-xs font-medium text-gray-500';
 
         return (
           <div key={step.number} className="flex items-center">

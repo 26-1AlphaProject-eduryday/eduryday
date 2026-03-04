@@ -241,7 +241,7 @@ function InputArea() {
         <input
           type="text"
           placeholder="질문을 입력하세요..."
-          className="flex-1 rounded-lg border border-gray-200 py-2 pl-4 pr-12 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
+          className="flex-1 rounded-lg border border-gray-200 py-2 pl-4 pr-12 text-sm text-gray-700 placeholder-gray-500 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
           aria-label="질문 입력"
         />
 

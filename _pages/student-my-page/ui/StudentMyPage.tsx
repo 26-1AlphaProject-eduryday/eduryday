@@ -1,3 +1,5 @@
+'use client';
+
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { StatCard, Input, Button } from '@/shared/ui';
@@ -91,14 +93,14 @@ export function StudentMyPage() {
                       >
                         <div>
                           <p className="text-sm font-medium text-gray-700">{c.title}</p>
-                          <p className="text-xs text-gray-400">{c.semester}</p>
+                          <p className="text-xs text-gray-500">{c.semester}</p>
                         </div>
                         <span className="text-sm font-bold text-green-600">{c.grade}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-400">완료한 강좌가 없습니다.</p>
+                  <p className="text-sm text-gray-500">완료한 강좌가 없습니다.</p>
                 )}
               </section>
             </div>

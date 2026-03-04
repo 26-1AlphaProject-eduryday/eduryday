@@ -158,7 +158,7 @@ export function StudentGradesPage() {
                             }`}
                           >
                             {record.score}
-                            <span className="ml-0.5 text-xs font-normal text-gray-400">
+                            <span className="ml-0.5 text-xs font-normal text-gray-500">
                               /{record.maxScore}
                             </span>
                           </span>

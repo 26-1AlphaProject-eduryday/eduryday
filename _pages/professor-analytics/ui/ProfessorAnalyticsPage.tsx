@@ -162,7 +162,7 @@ export function ProfessorAnalyticsPage() {
                 질문 패턴 분석
               </h2>
               <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <p className="mb-4 text-xs text-gray-400">전체 287건 기준</p>
+                <p className="mb-4 text-xs text-gray-500">전체 287건 기준</p>
                 <div className="space-y-4">
                   {QUESTION_PATTERNS.map((p) => (
                     <div key={p.category}>
@@ -189,7 +189,7 @@ export function ProfessorAnalyticsPage() {
                           aria-label={`${p.category}: ${p.percentage}%`}
                         />
                       </div>
-                      <p className="mt-0.5 text-right text-xs text-gray-400">
+                      <p className="mt-0.5 text-right text-xs text-gray-500">
                         {p.percentage}%
                       </p>
                     </div>

@@ -89,7 +89,7 @@ export function AuthRolePage() {
           </div>
 
           {/* Warning notice */}
-          <p className="mt-6 border-t border-gray-100 pt-4 text-center text-xs text-gray-400">
+          <p className="mt-6 border-t border-gray-100 pt-4 text-center text-xs text-gray-500">
             교원 역할은 승인 후 활성화됩니다. 학교 이메일(@kookmin.ac.kr)로 인증이 필요합니다.
           </p>
         </div>

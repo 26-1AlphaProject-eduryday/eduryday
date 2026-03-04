@@ -71,19 +71,19 @@ function SignupCard() {
         <input
           type="email"
           placeholder="이메일"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="email"
         />
         <input
           type="password"
           placeholder="비밀번호 (8자 이상)"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="new-password"
         />
         <input
           type="password"
           placeholder="비밀번호 확인"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="new-password"
         />
       </div>
@@ -122,7 +122,7 @@ export function SignupPage() {
         </p>
 
         {/* Terms */}
-        <p className="mt-4 text-center text-xs text-gray-400">
+        <p className="mt-4 text-center text-xs text-gray-500">
           회원가입 시 서비스 이용약관 및 개인정보처리방침에 동의하게 됩니다.
         </p>
       </div>

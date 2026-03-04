@@ -53,7 +53,7 @@ function LoginCard() {
           id="email"
           type="email"
           placeholder="example@kookmin.ac.kr"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="email"
         />
       </div>
@@ -78,7 +78,7 @@ function LoginCard() {
           id="password"
           type="password"
           placeholder="••••••••"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="current-password"
         />
       </div>

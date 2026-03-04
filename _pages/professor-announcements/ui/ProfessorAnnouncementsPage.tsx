@@ -136,7 +136,7 @@ export function ProfessorAnnouncementsPage() {
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="공지사항 제목을 입력하세요"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     required
                   />
                 </div>
@@ -155,7 +155,7 @@ export function ProfessorAnnouncementsPage() {
                     onChange={(e) => setFormContent(e.target.value)}
                     placeholder="공지사항 내용을 입력하세요"
                     rows={5}
-                    className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-500 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     required
                   />
                 </div>

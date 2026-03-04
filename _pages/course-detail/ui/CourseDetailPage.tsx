@@ -15,7 +15,7 @@ const statusLabel: Record<WeekStatus, string> = {
 const statusClass: Record<WeekStatus, string> = {
   done: 'text-green-500',
   'in-progress': 'text-gray-600',
-  locked: 'text-gray-400',
+  locked: 'text-gray-500',
 };
 
 export function CourseDetailPage() {
@@ -87,7 +87,7 @@ export function CourseDetailPage() {
                             )}
                             <span>{lesson.title}</span>
                             {lesson.completed && (
-                              <span className="ml-auto text-xs text-gray-400">시청완료</span>
+                              <span className="ml-auto text-xs text-gray-500">시청완료</span>
                             )}
                           </div>
                         </li>

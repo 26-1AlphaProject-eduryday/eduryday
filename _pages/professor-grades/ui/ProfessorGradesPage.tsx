@@ -239,7 +239,7 @@ export function ProfessorGradesPage() {
             <section aria-label="성적 분포">
               <h2 className="mb-3 text-base font-semibold text-gray-700">성적 분포</h2>
               <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <p className="mb-4 text-xs text-gray-400">학점별 학생 수</p>
+                <p className="mb-4 text-xs text-gray-500">학점별 학생 수</p>
                 <div className="space-y-3">
                   {DISTRIBUTION_BUCKETS.map((bucket) => (
                     <div key={bucket.label} className="flex items-center gap-3">

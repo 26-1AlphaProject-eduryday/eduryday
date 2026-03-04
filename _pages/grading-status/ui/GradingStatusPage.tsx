@@ -122,7 +122,7 @@ export function GradingStatusPage() {
                   id="filter-search"
                   type="search"
                   placeholder="학생 이름 또는 학번 검색"
-                  className="w-64 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  className="w-64 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 />
               </div>
             </div>

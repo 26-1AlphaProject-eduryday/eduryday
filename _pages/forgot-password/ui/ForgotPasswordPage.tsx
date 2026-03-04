@@ -61,7 +61,7 @@ export function ForgotPasswordPage() {
                 <br />
                 메일함을 확인해주세요.
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 메일이 도착하지 않았나요?{' '}
                 <button
                   type="button"

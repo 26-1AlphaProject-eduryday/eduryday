@@ -171,7 +171,7 @@ export function StudentAssignmentsPage() {
                               assignment.ddayUrgent
                                 ? 'text-red-500'
                                 : assignment.dday.startsWith('D+')
-                                ? 'text-gray-400'
+                                ? 'text-gray-500'
                                 : 'text-gray-600'
                             }`}
                           >

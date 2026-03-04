@@ -122,7 +122,7 @@ export function ProfessorCoursesPage() {
                             채점하기
                           </a>
 
-                          <span className="ml-auto text-xs text-gray-400">
+                          <span className="ml-auto text-xs text-gray-500">
                             마지막 수정: 3일 전
                           </span>
                         </div>
@@ -136,7 +136,7 @@ export function ProfessorCoursesPage() {
 
           {/* Empty state hint */}
           <div className="mt-6 rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               새 강좌를 개설하려면 오른쪽 상단의{' '}
               <strong className="font-medium text-gray-600">새 강좌 만들기</strong>{' '}
               버튼을 클릭하세요.

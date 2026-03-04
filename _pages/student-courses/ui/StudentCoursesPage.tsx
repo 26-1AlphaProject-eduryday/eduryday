@@ -101,7 +101,7 @@ export function StudentCoursesPage() {
                       </div>
 
                       {/* Status label */}
-                      <p className="mt-3 text-xs text-gray-400">
+                      <p className="mt-3 text-xs text-gray-500">
                         {course.progress === 100
                           ? '강좌 완료'
                           : course.progress === 0
