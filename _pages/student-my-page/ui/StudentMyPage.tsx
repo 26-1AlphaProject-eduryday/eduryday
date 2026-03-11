@@ -3,19 +3,20 @@
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { StatCard, Input, Button } from '@/shared/ui';
-import { MOCK_CURRENT_STUDENT } from '@/entities/user';
+import type { Student } from '@/entities/user';
+import type { CompletedCourseRecord, LearningStatRecord } from '@/shared/lib/supabase/ui-seed';
 
-const LEARNING_STATS = [
-  { label: '총 학습시간', value: '48시간', trend: '이번 달 +12시간', trendColor: 'green' as const },
-  { label: '완료 강좌', value: '1개', trend: '수강 중 3개', trendColor: 'green' as const },
-  { label: '평균 점수', value: '87.5점', trend: '상위 15%', trendColor: 'green' as const },
-];
+interface StudentMyPageProps {
+  student: Student;
+  learningStats: LearningStatRecord[];
+  completedCourses: CompletedCourseRecord[];
+}
 
-const COMPLETED_COURSES = [
-  { id: 'c0', title: '컴퓨터과학 개론', semester: '2025-2학기', grade: 'A+' },
-];
-
-export function StudentMyPage() {
+export function StudentMyPage({
+  student,
+  learningStats,
+  completedCourses,
+}: StudentMyPageProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <StudentHeader />
@@ -47,14 +48,14 @@ export function StudentMyPage() {
                     aria-hidden="true"
                   >
                     <span className="text-2xl font-bold text-gray-400">
-                      {MOCK_CURRENT_STUDENT.name.charAt(0)}
+                      {student.name.charAt(0)}
                     </span>
                   </div>
                   <div className="text-center">
                     <h2 className="text-lg font-bold text-gray-800">
-                      {MOCK_CURRENT_STUDENT.name}
+                      {student.name}
                     </h2>
-                    <p className="text-sm text-gray-500">{MOCK_CURRENT_STUDENT.email}</p>
+                    <p className="text-sm text-gray-500">{student.email}</p>
                   </div>
                 </div>
 
@@ -84,9 +85,9 @@ export function StudentMyPage() {
                 className="rounded-xl border border-gray-200 bg-white p-6"
               >
                 <h3 className="mb-4 text-sm font-semibold text-gray-700">수강 완료 강좌</h3>
-                {COMPLETED_COURSES.length > 0 ? (
+                {completedCourses.length > 0 ? (
                   <ul className="space-y-2">
-                    {COMPLETED_COURSES.map((c) => (
+                    {completedCourses.map((c) => (
                       <li
                         key={c.id}
                         className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
@@ -111,7 +112,7 @@ export function StudentMyPage() {
               <section aria-label="학습 통계">
                 <h2 className="mb-4 text-base font-semibold text-gray-700">학습 통계</h2>
                 <div className="grid grid-cols-3 gap-4">
-                  {LEARNING_STATS.map((stat) => (
+                  {learningStats.map((stat) => (
                     <StatCard
                       key={stat.label}
                       label={stat.label}
@@ -140,7 +141,7 @@ export function StudentMyPage() {
                       label="이름"
                       id="name"
                       name="name"
-                      defaultValue={MOCK_CURRENT_STUDENT.name}
+                      defaultValue={student.name}
                       placeholder="이름 입력"
                     />
                     <Input
@@ -148,7 +149,7 @@ export function StudentMyPage() {
                       id="email"
                       name="email"
                       type="email"
-                      defaultValue={MOCK_CURRENT_STUDENT.email}
+                      defaultValue={student.email}
                       placeholder="이메일 입력"
                       disabled
                     />

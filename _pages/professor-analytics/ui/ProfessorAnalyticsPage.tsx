@@ -1,36 +1,12 @@
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { StatCard, Badge } from '@/shared/ui';
-
-const STAT_CARDS = [
-  { label: '평균 점수', value: '76.2점', trend: '지난 학기 대비 +3.1점', trendColor: 'green' as const },
-  { label: '출석률', value: '91%', trend: '지난 주 대비 -1%', trendColor: 'red' as const },
-  { label: 'AI 질문 수', value: '287건', trend: '이번 주 누적', trendColor: 'green' as const },
-  { label: '과제 완료율', value: '84%', trend: '전체 과제 기준', trendColor: 'green' as const },
-];
-
-const TOP_MISCONCEPTIONS = [
-  { rank: 1, concept: '재귀 함수의 기저 조건(base case) 설정', count: 24, course: '알고리즘 기초', severity: 'high' as const },
-  { rank: 2, concept: '시간 복잡도 Big-O 계산 방법', count: 19, course: '알고리즘 기초', severity: 'high' as const },
-  { rank: 3, concept: '스택과 큐의 동작 차이', count: 15, course: '자료구조', severity: 'medium' as const },
-  { rank: 4, concept: '포인터와 참조 개념', count: 11, course: '자료구조', severity: 'medium' as const },
-  { rank: 5, concept: '동적 프로그래밍 메모이제이션', count: 8, course: '알고리즘 기초', severity: 'low' as const },
-];
-
-const WEEKLY_PARTICIPATION = [
-  { week: '1주', rate: 95, questions: 12 },
-  { week: '2주', rate: 92, questions: 18 },
-  { week: '3주', rate: 89, questions: 34 },
-  { week: '4주', rate: 91, questions: 28 },
-  { week: '5주', rate: 88, questions: 41 },
-];
-
-const QUESTION_PATTERNS = [
-  { category: '개념 이해', count: 98, percentage: 34, variant: 'blue' as const },
-  { category: '코드 디버깅', count: 87, percentage: 30, variant: 'red' as const },
-  { category: '과제 힌트 요청', count: 65, percentage: 23, variant: 'yellow' as const },
-  { category: '기타', count: 37, percentage: 13, variant: 'default' as const },
-];
+import {
+  getProfessorAnalyticsStatCards,
+  getProfessorMisconceptions,
+  getProfessorQuestionPatterns,
+  getProfessorWeeklyParticipation,
+} from '@/shared/lib/supabase/ui-seed';
 
 const SEVERITY_STYLES = {
   high: 'bg-red-100 text-red-700',
@@ -40,8 +16,14 @@ const SEVERITY_STYLES = {
 
 const SEVERITY_LABELS = { high: '높음', medium: '보통', low: '낮음' };
 
-export function ProfessorAnalyticsPage() {
-  const maxWeeklyRate = Math.max(...WEEKLY_PARTICIPATION.map((w) => w.rate));
+export async function ProfessorAnalyticsPage() {
+  const [statCards, topMisconceptions, weeklyParticipation, questionPatterns] = await Promise.all([
+    getProfessorAnalyticsStatCards(),
+    getProfessorMisconceptions(),
+    getProfessorWeeklyParticipation(),
+    getProfessorQuestionPatterns(),
+  ]);
+  const maxWeeklyRate = Math.max(...weeklyParticipation.map((w) => w.rate));
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -61,7 +43,7 @@ export function ProfessorAnalyticsPage() {
 
           {/* Stat cards */}
           <div className="mb-8 grid grid-cols-4 gap-5">
-            {STAT_CARDS.map((stat) => (
+            {statCards.map((stat) => (
               <StatCard
                 key={stat.label}
                 label={stat.label}
@@ -116,7 +98,7 @@ export function ProfessorAnalyticsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {TOP_MISCONCEPTIONS.map((item) => (
+                    {topMisconceptions.map((item) => (
                       <tr key={item.rank} className="hover:bg-gray-50 transition-colors">
                         <td className="px-5 py-3.5">
                           <span
@@ -164,7 +146,7 @@ export function ProfessorAnalyticsPage() {
               <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-xs text-gray-500">전체 287건 기준</p>
                 <div className="space-y-4">
-                  {QUESTION_PATTERNS.map((p) => (
+                  {questionPatterns.map((p) => (
                     <div key={p.category}>
                       <div className="mb-1 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -206,7 +188,7 @@ export function ProfessorAnalyticsPage() {
             </h2>
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="flex items-end justify-around gap-4" aria-hidden="true">
-                {WEEKLY_PARTICIPATION.map((w) => (
+                {weeklyParticipation.map((w) => (
                   <div key={w.week} className="flex flex-1 flex-col items-center gap-2">
                     {/* Questions bar */}
                     <div className="flex w-full flex-col items-center gap-1">

@@ -2,9 +2,7 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { ProgressBar, Badge, Button } from '@/shared/ui';
 import type { WeekStatus } from '@/entities/course';
-import { MOCK_STUDENT_COURSES, MOCK_COURSE_WEEKS, MOCK_COURSE_RESOURCES } from '@/entities/course';
-
-const CURRENT_COURSE = MOCK_STUDENT_COURSES[0];
+import { getCourseResources, getCourseWeeks, getStudentCourses } from '@/shared/lib/supabase/ui-seed';
 
 const statusLabel: Record<WeekStatus, string> = {
   done: '완료',
@@ -18,7 +16,18 @@ const statusClass: Record<WeekStatus, string> = {
   locked: 'text-gray-500',
 };
 
-export function CourseDetailPage() {
+export async function CourseDetailPage() {
+  const [courses, courseWeeks, courseResources] = await Promise.all([
+    getStudentCourses(),
+    getCourseWeeks(),
+    getCourseResources(),
+  ]);
+  const currentCourse = courses[0];
+
+  if (!currentCourse) {
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       {/* Header */}
@@ -32,16 +41,16 @@ export function CourseDetailPage() {
         >
           {/* Course info */}
           <div className="p-5 border-b border-gray-200">
-            <h2 className="font-bold text-gray-800 text-base">{CURRENT_COURSE.title}</h2>
-            <p className="mt-0.5 text-sm text-gray-500">{CURRENT_COURSE.professor}</p>
-            <ProgressBar value={CURRENT_COURSE.progress} color="blue" className="mt-3" />
-            <p className="mt-1 text-xs text-gray-500">진행률 {CURRENT_COURSE.progress}%</p>
+            <h2 className="font-bold text-gray-800 text-base">{currentCourse.title}</h2>
+            <p className="mt-0.5 text-sm text-gray-500">{currentCourse.professor}</p>
+            <ProgressBar value={currentCourse.progress} color="blue" className="mt-3" />
+            <p className="mt-1 text-xs text-gray-500">진행률 {currentCourse.progress}%</p>
           </div>
 
           {/* Week navigation */}
           <nav className="flex-1 overflow-y-auto p-3" aria-label="주차 목록">
             <ul className="space-y-1">
-              {MOCK_COURSE_WEEKS.map((week) => (
+              {courseWeeks.map((week) => (
                 <li key={week.id}>
                   {/* Week header */}
                   <div
@@ -178,7 +187,7 @@ export function CourseDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="mb-4 text-base font-semibold text-gray-800">관련 자료</h2>
             <ul className="space-y-2">
-              {MOCK_COURSE_RESOURCES.map((res) => (
+              {courseResources.map((res) => (
                 <li
                   key={res.id}
                   className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"

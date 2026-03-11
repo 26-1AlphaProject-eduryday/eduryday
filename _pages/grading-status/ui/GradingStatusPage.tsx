@@ -2,15 +2,7 @@ import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
 import type { SubmissionStatus } from '@/entities/submission';
-import { MOCK_SUBMISSIONS } from '@/entities/submission';
-
-const STATS = [
-  { label: '전체 학생', value: '45', valueClassName: 'text-gray-900' },
-  { label: '제출 완료', value: '38', valueClassName: 'text-green-600' },
-  { label: '채점 완료', value: '35', valueClassName: 'text-blue-600' },
-  { label: '검토 필요', value: '3', valueClassName: 'text-yellow-600' },
-  { label: '평균 점수', value: '82.4', valueClassName: 'text-gray-900' },
-];
+import { getSubmissions } from '@/shared/lib/supabase/ui-seed';
 
 const STATUS_BADGE: Record<SubmissionStatus, { label: string; variant: 'green' | 'yellow' | 'red' }> = {
   complete: { label: '완료', variant: 'green' },
@@ -24,7 +16,28 @@ const ROW_STYLE: Record<SubmissionStatus, { rowClassName: string; finalScoreClas
   unsubmitted: { rowClassName: 'bg-red-50', finalScoreClassName: 'border-gray-300 focus:ring-gray-300', actionLabel: '알림보내기', actionClassName: 'text-red-600 hover:text-red-800 font-medium' },
 };
 
-export function GradingStatusPage() {
+export async function GradingStatusPage() {
+  const submissions = await getSubmissions();
+  const submittedCount = submissions.filter((row) => row.status !== 'unsubmitted').length;
+  const completeCount = submissions.filter((row) => row.status === 'complete').length;
+  const reviewingCount = submissions.filter((row) => row.status === 'reviewing').length;
+  const scoreRows = submissions
+    .filter((row) => row.status !== 'unsubmitted')
+    .map((row) => Number.parseInt(row.finalScore, 10))
+    .filter((score) => Number.isFinite(score));
+  const averageScore =
+    scoreRows.length > 0
+      ? (scoreRows.reduce((sum, score) => sum + score, 0) / scoreRows.length).toFixed(1)
+      : '0.0';
+
+  const stats = [
+    { label: '전체 학생', value: `${submissions.length}`, valueClassName: 'text-gray-900' },
+    { label: '제출 완료', value: `${submittedCount}`, valueClassName: 'text-green-600' },
+    { label: '채점 완료', value: `${completeCount}`, valueClassName: 'text-blue-600' },
+    { label: '검토 필요', value: `${reviewingCount}`, valueClassName: 'text-yellow-600' },
+    { label: '평균 점수', value: averageScore, valueClassName: 'text-gray-900' },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
@@ -68,7 +81,7 @@ export function GradingStatusPage() {
 
           {/* Stats grid */}
           <div className="mb-8 grid grid-cols-5 gap-4">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="rounded-xl border border-gray-200 bg-white p-5"
@@ -150,7 +163,7 @@ export function GradingStatusPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {MOCK_SUBMISSIONS.map((row) => {
+                {submissions.map((row) => {
                   const statusBadge = STATUS_BADGE[row.status];
                   const rowStyle = ROW_STYLE[row.status];
                   return (

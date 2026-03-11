@@ -31,13 +31,13 @@ export function LandingHeader() {
         <div className="flex items-center gap-3">
           <a
             href="/login"
-            className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 active:bg-gray-200"
           >
             로그인
           </a>
           <a
             href="/signup"
-            className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 active:bg-gray-900"
+            className="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium !text-white transition-colors hover:bg-gray-800 active:bg-black"
           >
             시작하기
           </a>

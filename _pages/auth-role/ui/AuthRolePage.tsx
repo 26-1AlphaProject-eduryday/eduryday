@@ -12,8 +12,8 @@ function LogoMark() {
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200">
         <span className="text-xs text-gray-700">Logo</span>
       </div>
-      <h1 className="text-2xl font-bold text-gray-700">EduRyday</h1>
-      <p className="mt-2 text-sm text-gray-500">AI 기반 통합 교육 플랫폼</p>
+      <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
+      <p className="mt-2 text-sm text-gray-600">AI 기반 통합 교육 플랫폼</p>
     </div>
   );
 }
@@ -35,7 +35,7 @@ function RoleCard({ icon, iconBg, title, description, onClick }: RoleCardProps) 
     <button
       type="button"
       onClick={onClick}
-      className="cursor-pointer rounded-xl border-2 border-gray-200 p-6 text-center transition-colors hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+      className="cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-6 text-center transition-colors hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
     >
       <div
         className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${iconBg}`}
@@ -44,8 +44,8 @@ function RoleCard({ icon, iconBg, title, description, onClick }: RoleCardProps) 
           {icon}
         </span>
       </div>
-      <p className="mb-2 text-lg font-bold text-gray-700">{title}</p>
-      <p className="text-sm text-gray-500">{description}</p>
+      <p className="mb-2 text-lg font-bold text-gray-900">{title}</p>
+      <p className="text-sm text-gray-600">{description}</p>
     </button>
   );
 }
@@ -63,7 +63,7 @@ export function AuthRolePage() {
         <LogoMark />
 
         <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-2 text-center text-xl font-bold text-gray-700">
+          <h2 className="mb-2 text-center text-xl font-bold text-gray-900">
             어떤 역할로 시작하시나요?
           </h2>
           <p className="mb-8 text-center text-sm text-gray-500">

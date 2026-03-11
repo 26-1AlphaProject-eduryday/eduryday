@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
-import { MOCK_SUBMISSIONS } from '@/entities/submission';
-import { MOCK_PROFESSOR_COURSES } from '@/entities/course';
+import type { Submission } from '@/entities/submission';
+import type { ProfessorCourse } from '@/entities/course';
 
 function getGrade(score: number): { label: string; variant: 'green' | 'blue' | 'yellow' | 'red' | 'default' } {
   if (score >= 90) return { label: 'A', variant: 'green' };
@@ -15,8 +15,13 @@ function getGrade(score: number): { label: string; variant: 'green' | 'blue' | '
   return { label: 'F', variant: 'default' };
 }
 
-// Extended mock data for richer grade view
-const MOCK_GRADE_ROWS = MOCK_SUBMISSIONS.map((s) => {
+interface ProfessorGradesPageProps {
+  submissions: Submission[];
+  courses: ProfessorCourse[];
+}
+
+function buildGradeRows(submissions: Submission[]) {
+  return submissions.map((s) => {
   const score = parseInt(s.finalScore, 10) || 0;
   return {
     id: s.id,
@@ -29,22 +34,16 @@ const MOCK_GRADE_ROWS = MOCK_SUBMISSIONS.map((s) => {
     status: s.status,
   };
 });
+}
 
-const DISTRIBUTION_BUCKETS = [
-  { label: 'A (90~100)', count: 1, color: 'bg-green-500' },
-  { label: 'B (80~89)', count: 1, color: 'bg-blue-500' },
-  { label: 'C (70~79)', count: 1, color: 'bg-yellow-400' },
-  { label: 'D (60~69)', count: 0, color: 'bg-orange-400' },
-  { label: 'F (0~59)', count: 1, color: 'bg-red-400' },
-];
-
-export function ProfessorGradesPage() {
-  const [selectedCourse, setSelectedCourse] = useState(MOCK_PROFESSOR_COURSES[0].id);
+export function ProfessorGradesPage({ submissions, courses }: ProfessorGradesPageProps) {
+  const gradeRows = buildGradeRows(submissions);
+  const [selectedCourse, setSelectedCourse] = useState(courses[0]?.id ?? '');
 
   const selectedCourseName =
-    MOCK_PROFESSOR_COURSES.find((c) => c.id === selectedCourse)?.title ?? '';
+    courses.find((c) => c.id === selectedCourse)?.title ?? '';
 
-  const scores = MOCK_GRADE_ROWS
+  const scores = gradeRows
     .filter((r) => r.status !== 'unsubmitted')
     .map((r) => r.total);
   const avgScore =
@@ -52,7 +51,21 @@ export function ProfessorGradesPage() {
       ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
       : 0;
   const maxScore = scores.length > 0 ? Math.max(...scores) : 0;
-  const maxBarCount = Math.max(...DISTRIBUTION_BUCKETS.map((b) => b.count), 1);
+  const distributionBuckets = [
+    { label: 'A (90~100)', count: scores.filter((score) => score >= 90).length, color: 'bg-green-500' },
+    { label: 'B (80~89)', count: scores.filter((score) => score >= 80 && score < 90).length, color: 'bg-blue-500' },
+    { label: 'C (70~79)', count: scores.filter((score) => score >= 70 && score < 80).length, color: 'bg-yellow-400' },
+    { label: 'D (60~69)', count: scores.filter((score) => score >= 60 && score < 70).length, color: 'bg-orange-400' },
+    { label: 'F (0~59)', count: scores.filter((score) => score < 60).length, color: 'bg-red-400' },
+  ];
+  const submissionRate =
+    gradeRows.length > 0
+      ? Math.round(
+          (gradeRows.filter((r) => r.status !== 'unsubmitted').length / gradeRows.length) *
+            100,
+        )
+      : 0;
+  const maxBarCount = Math.max(...distributionBuckets.map((bucket) => bucket.count), 1);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -108,7 +121,7 @@ export function ProfessorGradesPage() {
               onChange={(e) => setSelectedCourse(e.target.value)}
               className="w-72 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
-              {MOCK_PROFESSOR_COURSES.map((course) => (
+              {courses.map((course) => (
                 <option key={course.id} value={course.id}>
                   {course.title} ({course.semester})
                 </option>
@@ -121,7 +134,7 @@ export function ProfessorGradesPage() {
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">수강생 수</p>
               <p className="mt-1 text-2xl font-bold text-gray-800">
-                {MOCK_GRADE_ROWS.length}명
+                 {gradeRows.length}명
               </p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-white p-5">
@@ -135,7 +148,7 @@ export function ProfessorGradesPage() {
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">미제출</p>
               <p className="mt-1 text-2xl font-bold text-red-500">
-                {MOCK_GRADE_ROWS.filter((r) => r.status === 'unsubmitted').length}명
+                 {gradeRows.filter((r) => r.status === 'unsubmitted').length}명
               </p>
             </div>
           </div>
@@ -196,7 +209,7 @@ export function ProfessorGradesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {MOCK_GRADE_ROWS.map((row) => {
+                    {gradeRows.map((row) => {
                       const grade = getGrade(row.total);
                       return (
                         <tr key={row.id} className="hover:bg-gray-50 transition-colors">
@@ -241,7 +254,7 @@ export function ProfessorGradesPage() {
               <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-xs text-gray-500">학점별 학생 수</p>
                 <div className="space-y-3">
-                  {DISTRIBUTION_BUCKETS.map((bucket) => (
+                  {distributionBuckets.map((bucket) => (
                     <div key={bucket.label} className="flex items-center gap-3">
                       <span className="w-20 flex-shrink-0 text-xs text-gray-600">
                         {bucket.label}
@@ -275,11 +288,7 @@ export function ProfessorGradesPage() {
                   <div className="mt-1 flex justify-between text-xs text-gray-500">
                     <span>제출률</span>
                     <span className="font-semibold text-gray-700">
-                      {Math.round(
-                        (MOCK_GRADE_ROWS.filter((r) => r.status !== 'unsubmitted').length /
-                          MOCK_GRADE_ROWS.length) *
-                          100,
-                      )}
+                      {submissionRate}
                       %
                     </span>
                   </div>

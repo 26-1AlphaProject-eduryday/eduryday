@@ -1,9 +1,20 @@
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge, ProgressBar } from '@/shared/ui';
-import { MOCK_PROFESSOR_COURSES } from '@/entities/course';
+import { getProfessorCourses } from '@/shared/lib/supabase/ui-seed';
 
-export function ProfessorCoursesPage() {
+export async function ProfessorCoursesPage() {
+  const courses = await getProfessorCourses();
+  const avgProgress =
+    courses.length > 0
+      ? Math.round(
+          courses.reduce(
+            (sum, c) => sum + (c.currentWeek / c.totalWeeks) * 100,
+            0,
+          ) / courses.length,
+        )
+      : 0;
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
@@ -33,33 +44,25 @@ export function ProfessorCoursesPage() {
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">운영 중인 강좌</p>
               <p className="mt-1 text-2xl font-bold text-gray-800">
-                {MOCK_PROFESSOR_COURSES.length}개
+                 {courses.length}개
               </p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">전체 수강생</p>
               <p className="mt-1 text-2xl font-bold text-gray-800">
-                {MOCK_PROFESSOR_COURSES.reduce((sum, c) => sum + c.students, 0)}명
+                 {courses.reduce((sum, c) => sum + c.students, 0)}명
               </p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">평균 진행률</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">
-                {Math.round(
-                  MOCK_PROFESSOR_COURSES.reduce(
-                    (sum, c) => sum + (c.currentWeek / c.totalWeeks) * 100,
-                    0,
-                  ) / MOCK_PROFESSOR_COURSES.length,
-                )}
-                %
-              </p>
+              <p className="mt-1 text-2xl font-bold text-gray-800">{avgProgress}%</p>
             </div>
           </div>
 
           {/* Course cards */}
           <section aria-label="강좌 목록">
             <div className="space-y-4">
-              {MOCK_PROFESSOR_COURSES.map((course) => {
+              {courses.map((course) => {
                 const progress = Math.round(
                   (course.currentWeek / course.totalWeeks) * 100,
                 );

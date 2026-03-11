@@ -14,8 +14,8 @@ function LogoMark() {
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200">
         <span className="text-xs text-gray-700">Logo</span>
       </div>
-      <h1 className="text-2xl font-bold text-gray-700">EduRyday</h1>
-      <p className="mt-2 text-sm text-gray-700">AI 기반 통합 교육 플랫폼</p>
+      <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
+      <p className="mt-2 text-sm text-gray-600">AI 기반 통합 교육 플랫폼</p>
     </div>
   );
 }
@@ -24,7 +24,7 @@ function Divider() {
   return (
     <div className="mb-6 flex items-center gap-4">
       <div className="h-px flex-1 bg-gray-200" />
-      <span className="text-sm text-gray-700">또는</span>
+      <span className="text-sm text-gray-600">또는</span>
       <div className="h-px flex-1 bg-gray-200" />
     </div>
   );
@@ -39,7 +39,7 @@ function LoginCard() {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-      <h2 className="mb-6 text-center text-xl font-bold text-gray-700">로그인</h2>
+      <h2 className="mb-6 text-center text-xl font-bold text-gray-900">로그인</h2>
 
       {/* Email */}
       <div className="mb-4">
@@ -53,7 +53,7 @@ function LoginCard() {
           id="email"
           type="email"
           placeholder="example@kookmin.ac.kr"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="email"
         />
       </div>
@@ -69,7 +69,7 @@ function LoginCard() {
           </label>
           <Link
             href="/forgot-password"
-            className="text-sm text-gray-700 hover:underline"
+            className="text-sm font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
           >
             비밀번호 찾기
           </Link>
@@ -78,7 +78,7 @@ function LoginCard() {
           id="password"
           type="password"
           placeholder="••••••••"
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-500 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500"
           autoComplete="current-password"
         />
       </div>
@@ -87,7 +87,7 @@ function LoginCard() {
       <button
         type="button"
         onClick={() => router.push('/student/dashboard')}
-        className="mb-6 w-full rounded-lg bg-gray-800 py-3 font-medium text-white transition-colors hover:bg-gray-700 active:bg-gray-900"
+        className="mb-6 w-full rounded-lg bg-gray-900 py-3 font-medium text-white transition-colors hover:bg-gray-800 active:bg-black"
       >
         로그인
       </button>
@@ -99,7 +99,7 @@ function LoginCard() {
         <button
           type="button"
           onClick={() => router.push('/auth/role')}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 py-3 text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 text-gray-700 transition-colors hover:bg-gray-100"
         >
           {/* Google icon placeholder */}
           <div className="h-5 w-5 rounded border-2 border-dashed border-gray-300 bg-gray-200" />
@@ -109,7 +109,7 @@ function LoginCard() {
         <button
           type="button"
           onClick={() => router.push('/student/dashboard')}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 py-3 text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 text-gray-700 transition-colors hover:bg-gray-100"
         >
           {/* School icon placeholder */}
           <div className="h-5 w-5 rounded border-2 border-dashed border-gray-300 bg-gray-200" />
@@ -132,11 +132,11 @@ export function LoginPage() {
         <LoginCard />
 
         {/* Sign-up link */}
-        <p className="mt-6 text-center text-gray-700">
+        <p className="mt-6 text-center text-gray-600">
           계정이 없으신가요?{' '}
           <Link
             href="/signup"
-            className="font-medium text-gray-800 hover:underline"
+            className="font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
           >
             회원가입
           </Link>

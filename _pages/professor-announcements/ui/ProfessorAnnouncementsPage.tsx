@@ -4,56 +4,21 @@ import { useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
-import { MOCK_PROFESSOR_COURSES } from '@/entities/course';
+import type { ProfessorCourse } from '@/entities/course';
+import type { ProfessorAnnouncementRecord } from '@/shared/lib/supabase/ui-seed';
 
-interface MockAnnouncement {
-  id: string;
-  title: string;
-  course: string;
-  createdAt: string;
-  views: number;
-  pinned: boolean;
+interface ProfessorAnnouncementsPageProps {
+  courses: ProfessorCourse[];
+  announcements: ProfessorAnnouncementRecord[];
 }
 
-const MOCK_ANNOUNCEMENTS: MockAnnouncement[] = [
-  {
-    id: '1',
-    title: '3주차 실습 과제 제출 기한 연장 안내',
-    course: '알고리즘 기초',
-    createdAt: '2026-03-03',
-    views: 42,
-    pinned: true,
-  },
-  {
-    id: '2',
-    title: '중간고사 일정 및 범위 안내',
-    course: '자료구조',
-    createdAt: '2026-03-01',
-    views: 51,
-    pinned: true,
-  },
-  {
-    id: '3',
-    title: '강의 자료 업데이트 완료 (2주차)',
-    course: '알고리즘 기초',
-    createdAt: '2026-02-24',
-    views: 38,
-    pinned: false,
-  },
-  {
-    id: '4',
-    title: '수업 보강 일정 공지 (3/10 → 3/15)',
-    course: '자료구조',
-    createdAt: '2026-02-20',
-    views: 47,
-    pinned: false,
-  },
-];
-
-export function ProfessorAnnouncementsPage() {
+export function ProfessorAnnouncementsPage({
+  courses,
+  announcements,
+}: ProfessorAnnouncementsPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [formTitle, setFormTitle] = useState('');
-  const [formCourse, setFormCourse] = useState(MOCK_PROFESSOR_COURSES[0].id);
+  const [formCourse, setFormCourse] = useState(courses[0]?.id ?? '');
   const [formContent, setFormContent] = useState('');
   const [formPinned, setFormPinned] = useState(false);
 
@@ -114,7 +79,7 @@ export function ProfessorAnnouncementsPage() {
                     className="w-72 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     required
                   >
-                    {MOCK_PROFESSOR_COURSES.map((course) => (
+                    {courses.map((course) => (
                       <option key={course.id} value={course.id}>
                         {course.title}
                       </option>
@@ -202,7 +167,7 @@ export function ProfessorAnnouncementsPage() {
             <p className="text-sm text-gray-600">
               전체{' '}
               <strong className="font-semibold text-gray-800">
-                {MOCK_ANNOUNCEMENTS.length}개
+                 {announcements.length}개
               </strong>{' '}
               공지사항
             </p>
@@ -210,7 +175,7 @@ export function ProfessorAnnouncementsPage() {
             <p className="text-sm text-gray-500">
               고정{' '}
               <strong className="font-semibold text-gray-700">
-                {MOCK_ANNOUNCEMENTS.filter((a) => a.pinned).length}개
+                 {announcements.filter((a) => a.pinned).length}개
               </strong>
             </p>
           </div>
@@ -257,7 +222,7 @@ export function ProfessorAnnouncementsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {MOCK_ANNOUNCEMENTS.map((announcement) => (
+                  {announcements.map((announcement) => (
                     <tr
                       key={announcement.id}
                       className="hover:bg-gray-50 transition-colors"

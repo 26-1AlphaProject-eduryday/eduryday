@@ -1,79 +1,10 @@
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
+import { getProfessorAssignments, type ProfessorAssignmentRecord } from '@/shared/lib/supabase/ui-seed';
 
 type AssignmentType = 'coding' | 'essay' | 'multiple-choice' | 'file';
 type AssignmentStatus = 'active' | 'closed' | 'draft';
-
-interface MockAssignment {
-  id: string;
-  title: string;
-  course: string;
-  type: AssignmentType;
-  deadline: string;
-  submitted: number;
-  total: number;
-  graded: number;
-  status: AssignmentStatus;
-}
-
-const MOCK_ASSIGNMENTS: MockAssignment[] = [
-  {
-    id: '1',
-    title: '실습 3: 정렬 알고리즘 구현',
-    course: '알고리즘 기초',
-    type: 'coding',
-    deadline: '2026-03-06 23:59',
-    submitted: 38,
-    total: 45,
-    graded: 30,
-    status: 'active',
-  },
-  {
-    id: '2',
-    title: '과제 2: 스택과 큐 구현',
-    course: '자료구조',
-    type: 'coding',
-    deadline: '2026-03-09 23:59',
-    submitted: 25,
-    total: 52,
-    graded: 25,
-    status: 'active',
-  },
-  {
-    id: '3',
-    title: '주관식 에세이: 알고리즘 복잡도 분석',
-    course: '알고리즘 기초',
-    type: 'essay',
-    deadline: '2026-02-28 23:59',
-    submitted: 45,
-    total: 45,
-    graded: 45,
-    status: 'closed',
-  },
-  {
-    id: '4',
-    title: '중간고사 대비 퀴즈',
-    course: '자료구조',
-    type: 'multiple-choice',
-    deadline: '2026-02-20 23:59',
-    submitted: 52,
-    total: 52,
-    graded: 52,
-    status: 'closed',
-  },
-  {
-    id: '5',
-    title: '프로젝트 보고서 제출',
-    course: '알고리즘 기초',
-    type: 'file',
-    deadline: '2026-03-20 23:59',
-    submitted: 0,
-    total: 45,
-    graded: 0,
-    status: 'draft',
-  },
-];
 
 const TYPE_LABELS: Record<AssignmentType, string> = {
   coding: '코딩',
@@ -101,10 +32,11 @@ const STATUS_BADGE_VARIANTS: Record<AssignmentStatus, 'green' | 'default' | 'yel
   draft: 'yellow',
 };
 
-export function ProfessorAssignmentsPage() {
-  const activeCount = MOCK_ASSIGNMENTS.filter((a) => a.status === 'active').length;
-  const totalSubmitted = MOCK_ASSIGNMENTS.reduce((sum, a) => sum + a.submitted, 0);
-  const totalGraded = MOCK_ASSIGNMENTS.reduce((sum, a) => sum + a.graded, 0);
+export async function ProfessorAssignmentsPage() {
+  const assignments = await getProfessorAssignments();
+  const activeCount = assignments.filter((a) => a.status === 'active').length;
+  const totalSubmitted = assignments.reduce((sum, a) => sum + a.submitted, 0);
+  const totalGraded = assignments.reduce((sum, a) => sum + a.graded, 0);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -134,7 +66,7 @@ export function ProfessorAssignmentsPage() {
           <div className="mb-6 grid grid-cols-4 gap-4">
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">전체 과제</p>
-              <p className="mt-1 text-2xl font-bold text-gray-800">{MOCK_ASSIGNMENTS.length}개</p>
+              <p className="mt-1 text-2xl font-bold text-gray-800">{assignments.length}개</p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">진행 중</p>
@@ -204,7 +136,7 @@ export function ProfessorAssignmentsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {MOCK_ASSIGNMENTS.map((assignment) => {
+                  {assignments.map((assignment: ProfessorAssignmentRecord) => {
                     const submissionRate = Math.round(
                       (assignment.submitted / assignment.total) * 100,
                     );

@@ -1,5 +1,5 @@
 import { ProfessorHeader } from '@/widgets/header';
-import { MOCK_RUBRIC_CRITERIA } from '@/entities/assignment';
+import { getRubricCriteria } from '@/shared/lib/supabase/ui-seed';
 
 const STEPS = [
   { number: 1, label: '기본정보', state: 'done' },
@@ -9,8 +9,6 @@ const STEPS = [
 ] as const;
 
 type StepState = (typeof STEPS)[number]['state'];
-
-const TOTAL_WEIGHT = MOCK_RUBRIC_CRITERIA.reduce((sum, c) => sum + c.weight, 0);
 
 function StepIndicator() {
   return (
@@ -87,7 +85,10 @@ function ConnectorLine({
   );
 }
 
-export function CreateAssignmentPage() {
+export async function CreateAssignmentPage() {
+  const rubricCriteria = await getRubricCriteria();
+  const totalWeight = rubricCriteria.reduce((sum, c) => sum + c.weight, 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with breadcrumb */}
@@ -152,7 +153,7 @@ export function CreateAssignmentPage() {
 
           {/* No-Code Rubric criteria */}
           <div className="mt-8 space-y-4" aria-label="채점 기준 목록">
-            {MOCK_RUBRIC_CRITERIA.map((criterion) => (
+            {rubricCriteria.map((criterion) => (
               <div
                 key={criterion.id}
                 className="rounded-lg border border-gray-200 p-4"
@@ -212,22 +213,22 @@ export function CreateAssignmentPage() {
           <div className="mt-6 rounded-lg border border-gray-200 p-4">
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-medium text-gray-700">총 가중치</span>
-              <span className="font-bold text-gray-900">{TOTAL_WEIGHT}%</span>
+               <span className="font-bold text-gray-900">{totalWeight}%</span>
             </div>
             <div
               className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
               role="progressbar"
-              aria-valuenow={TOTAL_WEIGHT}
+               aria-valuenow={totalWeight}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="총 가중치"
             >
               <div
                 className="h-full rounded-full bg-gray-800 transition-all duration-300"
-                style={{ width: `${TOTAL_WEIGHT}%` }}
-              />
-            </div>
-          </div>
+                 style={{ width: `${totalWeight}%` }}
+               />
+             </div>
+           </div>
 
           {/* Bottom navigation */}
           <div className="mt-8 flex items-center justify-between">

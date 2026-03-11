@@ -13,7 +13,7 @@ function LogoMark() {
       >
         <span className="text-xs text-gray-700">Logo</span>
       </div>
-      <h1 className="text-2xl font-bold text-gray-700">EduRyday</h1>
+      <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
       <p className="mt-2 text-sm text-gray-500">AI 기반 통합 교육 플랫폼</p>
     </div>
   );
@@ -55,7 +55,7 @@ export function ForgotPasswordPage() {
                   />
                 </svg>
               </div>
-              <h2 className="mb-2 text-xl font-bold text-gray-700">인증 메일 발송 완료</h2>
+      <h2 className="mb-2 text-xl font-bold text-gray-900">인증 메일 발송 완료</h2>
               <p className="mb-6 text-sm text-gray-500">
                 입력하신 이메일로 비밀번호 재설정 링크를 발송했습니다.
                 <br />
@@ -66,7 +66,7 @@ export function ForgotPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="font-medium text-gray-700 hover:underline"
+                   className="font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
                 >
                   다시 보내기
                 </button>
@@ -75,7 +75,7 @@ export function ForgotPasswordPage() {
           ) : (
             /* Form state */
             <>
-              <h2 className="mb-2 text-center text-xl font-bold text-gray-700">
+               <h2 className="mb-2 text-center text-xl font-bold text-gray-900">
                 비밀번호 찾기
               </h2>
               <p className="mb-6 text-center text-sm text-gray-500">
@@ -100,7 +100,7 @@ export function ForgotPasswordPage() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-lg bg-gray-800 py-3 font-medium text-white transition-colors hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                   className="w-full rounded-lg bg-gray-900 py-3 font-medium text-white transition-colors hover:bg-gray-800 active:bg-black focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
                   인증 코드 발송
                 </button>
@@ -113,7 +113,7 @@ export function ForgotPasswordPage() {
         <p className="mt-6 text-center text-sm text-gray-500">
           <Link
             href="/login"
-            className="font-medium text-gray-700 hover:underline"
+            className="font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
           >
             &larr; 로그인으로 돌아가기
           </Link>

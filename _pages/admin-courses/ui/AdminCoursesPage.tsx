@@ -1,73 +1,9 @@
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Badge, Button } from '@/shared/ui';
-
-const STATS = [
-  { label: '전체 강좌', value: '12개' },
-  { label: '진행중', value: '8개' },
-  { label: '종료', value: '3개' },
-  { label: '대기', value: '1개' },
-];
+import { getAdminCourseStats, getAdminCourses } from '@/shared/lib/supabase/ui-seed';
 
 type CourseStatus = '진행중' | '종료' | '대기';
-
-interface Course {
-  id: number;
-  name: string;
-  professor: string;
-  semester: string;
-  studentCount: number;
-  status: CourseStatus;
-  createdAt: string;
-}
-
-const COURSES: Course[] = [
-  {
-    id: 1,
-    name: '알고리즘 기초',
-    professor: '이현기',
-    semester: '2026-1',
-    studentCount: 48,
-    status: '진행중',
-    createdAt: '2026-02-28',
-  },
-  {
-    id: 2,
-    name: '데이터구조와 알고리즘',
-    professor: '정소연',
-    semester: '2026-1',
-    studentCount: 52,
-    status: '진행중',
-    createdAt: '2026-02-27',
-  },
-  {
-    id: 3,
-    name: '웹 프로그래밍',
-    professor: '이현기',
-    semester: '2026-1',
-    studentCount: 45,
-    status: '진행중',
-    createdAt: '2026-03-01',
-  },
-  {
-    id: 4,
-    name: '운영체제',
-    professor: '정소연',
-    semester: '2025-2',
-    studentCount: 60,
-    status: '종료',
-    createdAt: '2025-09-01',
-  },
-  {
-    id: 5,
-    name: '고급 알고리즘',
-    professor: '이현기',
-    semester: '2026-1',
-    studentCount: 0,
-    status: '대기',
-    createdAt: '2026-03-04',
-  },
-];
 
 const STATUS_BADGE: Record<CourseStatus, 'green' | 'default' | 'yellow'> = {
   진행중: 'green',
@@ -75,9 +11,11 @@ const STATUS_BADGE: Record<CourseStatus, 'green' | 'default' | 'yellow'> = {
   대기: 'yellow',
 };
 
-export function AdminCoursesPage() {
+export async function AdminCoursesPage() {
+  const [stats, courses] = await Promise.all([getAdminCourseStats(), getAdminCourses()]);
+
   return (
-    <div className="flex min-h-screen flex-col bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <AdminHeader />
 
       <div className="flex flex-1">
@@ -92,7 +30,7 @@ export function AdminCoursesPage() {
 
           {/* Stat cards */}
           <div className="mb-8 grid grid-cols-4 gap-4">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="rounded-xl border border-gray-200 bg-white p-5"
@@ -149,7 +87,7 @@ export function AdminCoursesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {COURSES.map((course) => (
+                  {courses.map((course) => (
                     <tr key={course.id} className="hover:bg-gray-50">
                       <td className="px-5 py-3 font-medium text-gray-900">{course.name}</td>
                       <td className="px-5 py-3 text-gray-600">{course.professor}</td>

@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
-import { MOCK_DEADLINES } from '@/entities/course';
 import type { Deadline } from '@/entities/course';
+import { getDeadlines, getStudentGrades } from '@/shared/lib/supabase/ui-seed';
 
 type AssignmentStatus = 'pending' | 'submitted' | 'graded';
 
@@ -28,64 +28,44 @@ const STATUS_CONFIG: Record<
   graded: { label: '채점완료', variant: 'green' },
 };
 
-// Combine MOCK_DEADLINES (pending) with extra dummy assignments
-const ASSIGNMENTS: Assignment[] = [
-  ...MOCK_DEADLINES.map(
-    (d: Deadline): Assignment => ({
-      id: d.id,
-      title: d.title,
-      course: d.course,
-      dday: d.dday,
-      ddayUrgent: d.ddayUrgent,
-      date: d.date,
-      status: 'pending',
-      type: '코딩',
-    }),
-  ),
-  {
-    id: '3',
-    title: '보고서: 알고리즘 분석',
-    course: '알고리즘 기초',
-    dday: 'D+2',
-    ddayUrgent: false,
-    date: '1월 18일 23:59',
-    status: 'submitted',
-    type: '파일제출',
-  },
-  {
-    id: '4',
-    title: '퀴즈 1: 시간복잡도',
-    course: '알고리즘 기초',
-    dday: 'D+7',
-    ddayUrgent: false,
-    date: '1월 14일 23:59',
-    status: 'graded',
-    type: '주관식',
-    score: 92,
-  },
-  {
-    id: '5',
-    title: '과제 1: 배열과 연결리스트',
-    course: '자료구조',
-    dday: 'D+10',
-    ddayUrgent: false,
-    date: '1월 11일 23:59',
-    status: 'graded',
-    type: '코딩',
-    score: 78,
-  },
-];
-
 const TYPE_ICON: Record<string, string> = {
   코딩: '</> ',
   주관식: 'T ',
   파일제출: '첨 ',
 };
 
-export function StudentAssignmentsPage() {
-  const pending = ASSIGNMENTS.filter((a) => a.status === 'pending');
-  const submitted = ASSIGNMENTS.filter((a) => a.status === 'submitted');
-  const graded = ASSIGNMENTS.filter((a) => a.status === 'graded');
+export async function StudentAssignmentsPage() {
+  const [deadlines, grades] = await Promise.all([getDeadlines(), getStudentGrades()]);
+
+  const assignments: Assignment[] = [
+    ...deadlines.map(
+      (d: Deadline): Assignment => ({
+        id: d.id,
+        title: d.title,
+        course: d.course,
+        dday: d.dday,
+        ddayUrgent: d.ddayUrgent,
+        date: d.date,
+        status: 'pending',
+        type: '코딩',
+      }),
+    ),
+    ...grades.map((grade): Assignment => ({
+      id: grade.id,
+      title: grade.assignment,
+      course: grade.course,
+      dday: 'D+0',
+      ddayUrgent: false,
+      date: grade.submittedAt,
+      status: grade.status === 'graded' ? 'graded' : 'submitted',
+      type: grade.assignment.includes('퀴즈') ? '주관식' : grade.assignment.includes('보고서') ? '파일제출' : '코딩',
+      score: grade.status === 'graded' ? grade.score : undefined,
+    })),
+  ];
+
+  const pending = assignments.filter((a) => a.status === 'pending');
+  const submitted = assignments.filter((a) => a.status === 'submitted');
+  const graded = assignments.filter((a) => a.status === 'graded');
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -126,7 +106,7 @@ export function StudentAssignmentsPage() {
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
                     <th className="px-6 py-3">과제명</th>
                     <th className="px-6 py-3">강좌</th>
                     <th className="px-6 py-3">유형</th>
@@ -137,7 +117,7 @@ export function StudentAssignmentsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {ASSIGNMENTS.map((assignment) => {
+                  {assignments.map((assignment) => {
                     const statusCfg = STATUS_CONFIG[assignment.status];
                     return (
                       <tr

@@ -1,39 +1,9 @@
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Badge, Button } from '@/shared/ui';
-
-const STATS = [
-  {
-    label: '오늘 오류',
-    value: '3건',
-    valueClassName: 'text-red-600',
-  },
-  {
-    label: '채점 완료',
-    value: '47건',
-    valueClassName: 'text-green-600',
-  },
-  {
-    label: 'API 호출',
-    value: '1,234건',
-    valueClassName: 'text-gray-900',
-  },
-  {
-    label: '활성 세션',
-    value: '89명',
-    valueClassName: 'text-gray-900',
-  },
-];
+import { getAdminLogStats, getAdminLogs } from '@/shared/lib/supabase/ui-seed';
 
 type LogType = 'error' | 'access' | 'grading' | 'ai';
-
-interface LogEntry {
-  id: number;
-  timestamp: string;
-  type: LogType;
-  user: string;
-  message: string;
-}
 
 const LOG_BADGE: Record<LogType, { label: string; variant: 'red' | 'blue' | 'green' | 'purple' }> = {
   error: { label: '오류', variant: 'red' },
@@ -42,68 +12,11 @@ const LOG_BADGE: Record<LogType, { label: string; variant: 'red' | 'blue' | 'gre
   ai: { label: 'AI', variant: 'purple' },
 };
 
-const LOGS: LogEntry[] = [
-  {
-    id: 1,
-    timestamp: '2026-03-04 15:28:42',
-    type: 'error',
-    user: '시스템',
-    message: 'Docker 채점 컨테이너 타임아웃 (과제 ID: 204)',
-  },
-  {
-    id: 2,
-    timestamp: '2026-03-04 15:26:18',
-    type: 'access',
-    user: '김철수',
-    message: '로그인 성공 — 192.168.1.42',
-  },
-  {
-    id: 3,
-    timestamp: '2026-03-04 15:24:55',
-    type: 'ai',
-    user: '이영희',
-    message: 'AI 튜터 질문 — 피보나치 수열 힌트 요청',
-  },
-  {
-    id: 4,
-    timestamp: '2026-03-04 15:22:30',
-    type: 'grading',
-    user: '박민수',
-    message: '알고리즘 기초 실습3 자동 채점 완료 — 85점',
-  },
-  {
-    id: 5,
-    timestamp: '2026-03-04 15:18:11',
-    type: 'error',
-    user: '시스템',
-    message: 'Claude API 응답 지연 (3,200ms) — 재시도 성공',
-  },
-  {
-    id: 6,
-    timestamp: '2026-03-04 15:15:04',
-    type: 'access',
-    user: '이현기',
-    message: '교수 로그인 — 강좌 관리 페이지 접근',
-  },
-  {
-    id: 7,
-    timestamp: '2026-03-04 15:10:47',
-    type: 'grading',
-    user: '최지훈',
-    message: '웹 프로그래밍 과제1 자동 채점 완료 — 92점',
-  },
-  {
-    id: 8,
-    timestamp: '2026-03-04 15:05:33',
-    type: 'error',
-    user: '시스템',
-    message: 'DB 쿼리 응답 지연 (2,800ms) — 슬로우 쿼리 감지',
-  },
-];
+export async function AdminLogsPage() {
+  const [stats, logs] = await Promise.all([getAdminLogStats(), getAdminLogs()]);
 
-export function AdminLogsPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <AdminHeader />
 
       <div className="flex flex-1">
@@ -118,7 +31,7 @@ export function AdminLogsPage() {
 
           {/* Stat cards */}
           <div className="mb-8 grid grid-cols-4 gap-4">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="rounded-xl border border-gray-200 bg-white p-5"
@@ -183,7 +96,7 @@ export function AdminLogsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {LOGS.map((log) => {
+                  {logs.map((log) => {
                     const badgeInfo = LOG_BADGE[log.type];
                     const isError = log.type === 'error';
                     return (

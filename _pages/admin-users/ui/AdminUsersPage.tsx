@@ -1,74 +1,10 @@
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Badge, Button } from '@/shared/ui';
-
-const STATS = [
-  { label: '전체 사용자', value: '342명' },
-  { label: '학생', value: '298명' },
-  { label: '교수', value: '44명' },
-  { label: '오늘 접속', value: '127명' },
-];
+import { getAdminUserStats, getAdminUsers } from '@/shared/lib/supabase/ui-seed';
 
 type UserRole = '학생' | '교수';
 type UserStatus = '활성' | '정지';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: UserRole;
-  status: UserStatus;
-  joinedAt: string;
-  lastLogin: string;
-}
-
-const USERS: User[] = [
-  {
-    id: 1,
-    name: '김철수',
-    email: 'chulsoo.kim@university.ac.kr',
-    role: '학생',
-    status: '활성',
-    joinedAt: '2026-03-02',
-    lastLogin: '2026-03-04 14:23',
-  },
-  {
-    id: 2,
-    name: '이영희',
-    email: 'younghee.lee@university.ac.kr',
-    role: '학생',
-    status: '활성',
-    joinedAt: '2026-03-02',
-    lastLogin: '2026-03-04 09:15',
-  },
-  {
-    id: 3,
-    name: '박민수',
-    email: 'minsu.park@university.ac.kr',
-    role: '학생',
-    status: '정지',
-    joinedAt: '2026-03-01',
-    lastLogin: '2026-03-03 18:42',
-  },
-  {
-    id: 4,
-    name: '이현기',
-    email: 'hyungi.lee@university.ac.kr',
-    role: '교수',
-    status: '활성',
-    joinedAt: '2026-02-28',
-    lastLogin: '2026-03-04 11:05',
-  },
-  {
-    id: 5,
-    name: '정소연',
-    email: 'soyeon.jung@university.ac.kr',
-    role: '교수',
-    status: '활성',
-    joinedAt: '2026-02-27',
-    lastLogin: '2026-03-04 08:50',
-  },
-];
 
 const ROLE_BADGE: Record<UserRole, 'blue' | 'green'> = {
   학생: 'blue',
@@ -80,9 +16,11 @@ const STATUS_BADGE: Record<UserStatus, 'green' | 'red'> = {
   정지: 'red',
 };
 
-export function AdminUsersPage() {
+export async function AdminUsersPage() {
+  const [stats, users] = await Promise.all([getAdminUserStats(), getAdminUsers()]);
+
   return (
-    <div className="flex min-h-screen flex-col bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <AdminHeader />
 
       <div className="flex flex-1">
@@ -97,7 +35,7 @@ export function AdminUsersPage() {
 
           {/* Stat cards */}
           <div className="mb-8 grid grid-cols-4 gap-4">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="rounded-xl border border-gray-200 bg-white p-5"
@@ -158,7 +96,7 @@ export function AdminUsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {USERS.map((user) => (
+                  {users.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-5 py-3 font-medium text-gray-900">{user.name}</td>
                       <td className="px-5 py-3 text-gray-600">{user.email}</td>

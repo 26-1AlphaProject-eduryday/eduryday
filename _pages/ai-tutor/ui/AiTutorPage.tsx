@@ -1,6 +1,6 @@
 import { StudentHeader } from '@/widgets/header';
 import type { Conversation } from '@/entities/chat';
-import { MOCK_CONVERSATIONS } from '@/entities/chat';
+import { getConversations } from '@/shared/lib/supabase/ui-seed';
 
 // ---------------------------------------------------------------------------
 // Sidebar
@@ -38,7 +38,7 @@ function ConversationListItem({ item }: { item: Conversation }) {
   );
 }
 
-function Sidebar() {
+function Sidebar({ conversations }: { conversations: Conversation[] }) {
   return (
     <aside className="flex w-80 shrink-0 flex-col border-r border-gray-200 bg-white">
       {/* New conversation button */}
@@ -55,7 +55,7 @@ function Sidebar() {
       <nav className="flex-1 overflow-auto p-4" aria-label="대화 목록">
         <p className="mb-3 text-sm font-medium text-gray-700">최근 대화</p>
         <ul className="space-y-1">
-          {MOCK_CONVERSATIONS.map((item) => (
+          {conversations.map((item) => (
             <ConversationListItem key={item.id} item={item} />
           ))}
         </ul>
@@ -288,12 +288,14 @@ function ChatArea() {
 // Page
 // ---------------------------------------------------------------------------
 
-export function AiTutorPage() {
+export async function AiTutorPage() {
+  const conversations = await getConversations();
+
   return (
     <div className="flex h-screen flex-col bg-white">
       <StudentHeader />
       <div className="flex h-[calc(100vh-73px)]">
-        <Sidebar />
+        <Sidebar conversations={conversations} />
         <ChatArea />
       </div>
     </div>
