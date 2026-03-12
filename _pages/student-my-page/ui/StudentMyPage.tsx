@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { StatCard, Input, Button } from '@/shared/ui';
@@ -17,6 +18,27 @@ export function StudentMyPage({
   learningStats,
   completedCourses,
 }: StudentMyPageProps) {
+  const [name, setName] = useState(student.name);
+  const [message, setMessage] = useState('');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const res = await fetch('/api/v1/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    const json = await res.json();
+
+    if (json.ok) {
+      setMessage('저장되었습니다.');
+      return;
+    }
+
+    setMessage('저장에 실패했습니다.');
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <StudentHeader />
@@ -132,7 +154,7 @@ export function StudentMyPage({
                 <h2 className="mb-6 text-base font-semibold text-gray-700">계정 설정</h2>
 
                 <form
-                  onSubmit={(e) => e.preventDefault()}
+                  onSubmit={handleSubmit}
                   className="space-y-5"
                   aria-label="프로필 편집 양식"
                 >
@@ -141,7 +163,8 @@ export function StudentMyPage({
                       label="이름"
                       id="name"
                       name="name"
-                      defaultValue={student.name}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       placeholder="이름 입력"
                     />
                     <Input
@@ -185,6 +208,7 @@ export function StudentMyPage({
                       저장
                     </Button>
                   </div>
+                  {message ? <p className="text-sm text-gray-600">{message}</p> : null}
                 </form>
               </section>
 
