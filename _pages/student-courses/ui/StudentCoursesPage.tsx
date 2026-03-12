@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { ProgressBar, Badge } from '@/shared/ui';
-import { MOCK_STUDENT_COURSES } from '@/entities/course';
+import { getStudentCourses } from '@/shared/lib/supabase/ui-seed';
 
 const COURSE_CATEGORIES: Record<string, { label: string; variant: 'blue' | 'green' | 'purple' | 'yellow' }> = {
   '1': { label: '알고리즘', variant: 'blue' },
@@ -16,7 +16,9 @@ function getCategoryColor(progress: number): 'blue' | 'green' | 'gray' {
   return 'gray';
 }
 
-export function StudentCoursesPage() {
+export async function StudentCoursesPage() {
+  const courses = await getStudentCourses();
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <StudentHeader />
@@ -37,20 +39,20 @@ export function StudentCoursesPage() {
           <div className="mb-6 flex items-center gap-6 rounded-xl border border-gray-200 bg-white px-6 py-4">
             <div>
               <span className="text-sm text-gray-500">전체 강좌</span>
-              <span className="ml-2 text-lg font-bold text-gray-700">{MOCK_STUDENT_COURSES.length}개</span>
+              <span className="ml-2 text-lg font-bold text-gray-700">{courses.length}개</span>
             </div>
             <div className="h-5 w-px bg-gray-200" aria-hidden="true" />
             <div>
               <span className="text-sm text-gray-500">완료 강좌</span>
               <span className="ml-2 text-lg font-bold text-green-600">
-                {MOCK_STUDENT_COURSES.filter((c) => c.progress === 100).length}개
+                {courses.filter((c) => c.progress === 100).length}개
               </span>
             </div>
             <div className="h-5 w-px bg-gray-200" aria-hidden="true" />
             <div>
               <span className="text-sm text-gray-500">진행 중</span>
               <span className="ml-2 text-lg font-bold text-blue-600">
-                {MOCK_STUDENT_COURSES.filter((c) => c.progress > 0 && c.progress < 100).length}개
+                {courses.filter((c) => c.progress > 0 && c.progress < 100).length}개
               </span>
             </div>
           </div>
@@ -58,7 +60,7 @@ export function StudentCoursesPage() {
           {/* Course grid */}
           <section aria-label="강좌 목록">
             <div className="grid grid-cols-3 gap-6">
-              {MOCK_STUDENT_COURSES.map((course) => {
+              {courses.map((course) => {
                 const category = COURSE_CATEGORIES[course.id];
                 const barColor = getCategoryColor(course.progress);
 

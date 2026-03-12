@@ -1,6 +1,6 @@
 import type { TestResult } from '@/entities/assignment';
-import { MOCK_TEST_RESULTS } from '@/entities/assignment';
-import { MOCK_CURRENT_STUDENT } from '@/entities/user';
+import type { Student } from '@/entities/user';
+import { getCurrentStudent, getTestResults } from '@/shared/lib/supabase/ui-seed';
 
 // ---------------------------------------------------------------------------
 // Data
@@ -102,7 +102,7 @@ const CODE_LINES: { num: number; tokens: React.ReactNode }[] = [
 // Sub-components
 // ---------------------------------------------------------------------------
 
-function IdeHeader() {
+function IdeHeader({ student }: { student: Student }) {
   return (
     <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-2">
       {/* Left: logo + breadcrumb */}
@@ -137,7 +137,7 @@ function IdeHeader() {
           aria-label="사용자 메뉴"
         >
           <div className="h-6 w-6 rounded-full bg-gray-300" aria-hidden="true" />
-          <span className="text-xs font-medium">{MOCK_CURRENT_STUDENT.name}</span>
+          <span className="text-xs font-medium">{student.name}</span>
           <span className="text-xs text-gray-400" aria-hidden="true">▼</span>
         </button>
       </div>
@@ -344,21 +344,21 @@ function TestResultItem({ result }: { result: TestResult }) {
   );
 }
 
-function ResultPanel() {
-  const passCount = MOCK_TEST_RESULTS.filter((r) => r.status === 'pass').length;
+function ResultPanel({ testResults }: { testResults: TestResult[] }) {
+  const passCount = testResults.filter((r) => r.status === 'pass').length;
   return (
     <div className="flex h-48 flex-col border-t border-gray-200">
       {/* Result header */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-2">
         <span className="text-xs font-medium text-gray-700">실행 결과</span>
         <span className="text-xs text-gray-500">
-          {passCount}/{MOCK_TEST_RESULTS.length} 통과
+          {passCount}/{testResults.length} 통과
         </span>
       </div>
 
       {/* Result list */}
       <div className="flex-1 overflow-auto p-3 space-y-1.5">
-        {MOCK_TEST_RESULTS.map((result) => (
+        {testResults.map((result) => (
           <TestResultItem key={result.label} result={result} />
         ))}
       </div>
@@ -366,12 +366,12 @@ function ResultPanel() {
   );
 }
 
-function RightPanel() {
+function RightPanel({ testResults }: { testResults: TestResult[] }) {
   return (
     <div className="flex w-1/2 flex-col bg-white">
       <EditorHeader />
       <CodeEditor />
-      <ResultPanel />
+      <ResultPanel testResults={testResults} />
 
       {/* Submit button */}
       <div className="border-t border-gray-200 bg-gray-50 p-4">
@@ -390,13 +390,18 @@ function RightPanel() {
 // Page
 // ---------------------------------------------------------------------------
 
-export function SplitViewIdePage() {
+export async function SplitViewIdePage() {
+  const [student, testResults] = await Promise.all([
+    getCurrentStudent(),
+    getTestResults(),
+  ]);
+
   return (
     <div className="flex h-screen flex-col bg-white">
-      <IdeHeader />
+      <IdeHeader student={student} />
       <main className="flex h-[calc(100vh-52px)]">
         <LeftPanel />
-        <RightPanel />
+        <RightPanel testResults={testResults} />
       </main>
     </div>
   );

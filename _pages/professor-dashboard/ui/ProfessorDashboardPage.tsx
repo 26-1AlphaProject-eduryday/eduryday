@@ -1,24 +1,21 @@
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge, ProgressBar } from '@/shared/ui';
-import { MOCK_CURRENT_PROFESSOR } from '@/entities/user';
-import { MOCK_PROFESSOR_COURSES } from '@/entities/course';
+import {
+  getCurrentProfessor,
+  getProfessorActivities,
+  getProfessorCourses,
+  getProfessorDashboardStats,
+} from '@/shared/lib/supabase/ui-seed';
 
-const STATS = [
-  { label: '운영중인 강좌', value: '3개' },
-  { label: '전체 수강생', value: '127명' },
-  { label: '미채점 과제', value: '12건', valueClassName: 'text-red-500' },
-  { label: '이번주 질문', value: '34건' },
-];
+export async function ProfessorDashboardPage() {
+  const [professor, courses, stats, activities] = await Promise.all([
+    getCurrentProfessor(),
+    getProfessorCourses(),
+    getProfessorDashboardStats(),
+    getProfessorActivities(),
+  ]);
 
-const ACTIVITIES = [
-  { color: 'bg-blue-500', text: '실습3 제출 마감 D-2' },
-  { color: 'bg-red-500', text: '12건 미채점 과제' },
-  { color: 'bg-yellow-400', text: '학생 질문 5건 대기' },
-  { color: 'bg-green-500', text: '자동 채점 완료' },
-];
-
-export function ProfessorDashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
@@ -30,7 +27,7 @@ export function ProfessorDashboardPage() {
           {/* Welcome */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-700">
-              안녕하세요, {MOCK_CURRENT_PROFESSOR.name} {MOCK_CURRENT_PROFESSOR.title}!
+              안녕하세요, {professor.name} {professor.title}!
             </h1>
             <p className="mt-1 text-sm text-gray-500">
               오늘의 강좌 현황을 확인하세요
@@ -39,7 +36,7 @@ export function ProfessorDashboardPage() {
 
           {/* Stats grid */}
           <div className="mb-8 grid grid-cols-4 gap-6">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="rounded-xl border border-gray-200 bg-white p-6"
@@ -71,7 +68,7 @@ export function ProfessorDashboardPage() {
               </div>
 
               <div className="space-y-4">
-                {MOCK_PROFESSOR_COURSES.map((course) => (
+                {courses.map((course) => (
                   <article
                     key={course.id}
                     className="rounded-xl border border-gray-200 bg-white p-6"
@@ -142,7 +139,7 @@ export function ProfessorDashboardPage() {
 
               <div className="rounded-xl border border-gray-200 bg-white p-6">
                 <ul className="space-y-4">
-                  {ACTIVITIES.map((item) => (
+                  {activities.map((item) => (
                     <li key={item.text} className="flex items-start gap-3">
                       <span
                         className={`mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full ${item.color}`}

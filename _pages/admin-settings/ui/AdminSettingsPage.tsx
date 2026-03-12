@@ -132,7 +132,7 @@ function Toggle({ id, defaultChecked = false, label, description }: ToggleProps)
         <input
           id={id}
           type="checkbox"
-          className="sr-only"
+          className="peer sr-only"
           defaultChecked={defaultChecked}
           aria-label={label}
         />
@@ -347,7 +347,7 @@ export function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('ai');
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-900">
+    <div className="flex min-h-screen flex-col bg-gray-50">
       <AdminHeader />
 
       <div className="flex flex-1">

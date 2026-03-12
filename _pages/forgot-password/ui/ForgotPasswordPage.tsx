@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Input } from '@/shared/ui';
+import { getSupabaseBrowserClient } from '@/shared/lib/supabase/auth-browser';
 
 function LogoMark() {
   return (
@@ -13,18 +14,44 @@ function LogoMark() {
       >
         <span className="text-xs text-gray-700">Logo</span>
       </div>
-      <h1 className="text-2xl font-bold text-gray-700">EduRyday</h1>
+      <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
       <p className="mt-2 text-sm text-gray-500">AI 기반 통합 교육 플랫폼</p>
     </div>
   );
 }
 
 export function ForgotPasswordPage() {
+  const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMessage('');
+
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      setErrorMessage('Supabase 환경변수가 누락되었습니다.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const redirectTo = `${window.location.origin}/login`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -34,7 +61,6 @@ export function ForgotPasswordPage() {
 
         <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
           {submitted ? (
-            /* Success state */
             <div className="text-center">
               <div
                 className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100"
@@ -55,7 +81,7 @@ export function ForgotPasswordPage() {
                   />
                 </svg>
               </div>
-              <h2 className="mb-2 text-xl font-bold text-gray-700">인증 메일 발송 완료</h2>
+              <h2 className="mb-2 text-xl font-bold text-gray-900">인증 메일 발송 완료</h2>
               <p className="mb-6 text-sm text-gray-500">
                 입력하신 이메일로 비밀번호 재설정 링크를 발송했습니다.
                 <br />
@@ -66,18 +92,15 @@ export function ForgotPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="font-medium text-gray-700 hover:underline"
+                  className="font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
                 >
                   다시 보내기
                 </button>
               </p>
             </div>
           ) : (
-            /* Form state */
             <>
-              <h2 className="mb-2 text-center text-xl font-bold text-gray-700">
-                비밀번호 찾기
-              </h2>
+              <h2 className="mb-2 text-center text-xl font-bold text-gray-900">비밀번호 찾기</h2>
               <p className="mb-6 text-center text-sm text-gray-500">
                 가입 시 사용한 이메일 주소를 입력하시면
                 <br />
@@ -94,26 +117,30 @@ export function ForgotPasswordPage() {
                     placeholder="example@kookmin.ac.kr"
                     autoComplete="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full"
                   />
                 </div>
 
+                {errorMessage ? <p className="mb-4 text-sm text-red-600">{errorMessage}</p> : null}
+
                 <button
                   type="submit"
-                  className="w-full rounded-lg bg-gray-800 py-3 font-medium text-white transition-colors hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                  disabled={isSubmitting}
+                  className="w-full rounded-lg bg-gray-900 py-3 font-medium text-white transition-colors hover:bg-gray-800 active:bg-black focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  인증 코드 발송
+                  {isSubmitting ? '전송 중...' : '인증 코드 발송'}
                 </button>
               </form>
             </>
           )}
         </div>
 
-        {/* Back to login */}
         <p className="mt-6 text-center text-sm text-gray-500">
           <Link
             href="/login"
-            className="font-medium text-gray-700 hover:underline"
+            className="font-medium text-gray-700 underline-offset-2 hover:text-gray-900 hover:underline"
           >
             &larr; 로그인으로 돌아가기
           </Link>

@@ -1,18 +1,22 @@
 import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
-import { StatCard, ProgressBar } from '@/shared/ui';
-import { MOCK_CURRENT_STUDENT } from '@/entities/user';
-import { MOCK_STUDENT_COURSES, MOCK_DEADLINES } from '@/entities/course';
+import { ProgressBar } from '@/shared/ui';
+import {
+  getCurrentStudent,
+  getDeadlines,
+  getStudentCourses,
+  getStudentDashboardStats,
+} from '@/shared/lib/supabase/ui-seed';
 
-const STAT_ITEMS = [
-  { label: '수강중인 강좌', value: '4개' },
-  { label: '제출대기 과제', value: '3개' },
-  { label: '이번주 학습시간', value: '12시간' },
-  { label: '평균점수', value: '87점' },
-];
+export async function StudentDashboardPage() {
+  const [student, courses, deadlines, stats] = await Promise.all([
+    getCurrentStudent(),
+    getStudentCourses(),
+    getDeadlines(),
+    getStudentDashboardStats(),
+  ]);
 
-export function StudentDashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <StudentHeader />
@@ -23,13 +27,13 @@ export function StudentDashboardPage() {
         <main className="flex-1 p-8">
           {/* Welcome */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">안녕하세요, {MOCK_CURRENT_STUDENT.name}님!</h1>
+            <h1 className="text-2xl font-bold text-gray-700">안녕하세요, {student.name}님!</h1>
             <p className="mt-1 text-sm text-gray-500">오늘도 열심히 학습해봐요</p>
           </div>
 
           {/* Stats grid */}
           <div className="mb-8 grid grid-cols-4 gap-6">
-            {STAT_ITEMS.map((item) => (
+            {stats.map((item) => (
               <div
                 key={item.label}
                 className="bg-white p-6 rounded-xl border border-gray-200"
@@ -53,7 +57,7 @@ export function StudentDashboardPage() {
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-              {MOCK_STUDENT_COURSES.map((course) => (
+              {courses.map((course) => (
                 <Link
                   key={course.id}
                   href={`/student/courses/${course.id}`}
@@ -87,7 +91,7 @@ export function StudentDashboardPage() {
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <ul className="space-y-3">
-                {MOCK_DEADLINES.map((item) => (
+                {deadlines.map((item) => (
                   <li
                     key={item.id}
                     className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
