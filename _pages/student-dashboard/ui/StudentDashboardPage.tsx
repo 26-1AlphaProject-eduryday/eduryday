@@ -32,17 +32,23 @@ export async function StudentDashboardPage() {
           </div>
 
           {/* Stats grid */}
-          <div className="mb-8 grid grid-cols-4 gap-6">
-            {stats.map((item) => (
-              <div
-                key={item.label}
-                className="bg-white p-6 rounded-xl border border-gray-200"
-              >
-                <p className="text-sm text-gray-600">{item.label}</p>
-                <p className="mt-2 text-2xl font-bold text-gray-700">{item.value}</p>
-              </div>
-            ))}
-          </div>
+          {stats.length > 0 ? (
+            <div className="mb-8 grid grid-cols-4 gap-6">
+              {stats.map((item) => (
+                <div
+                  key={item.label}
+                  className="bg-white p-6 rounded-xl border border-gray-200"
+                >
+                  <p className="text-sm text-gray-600">{item.label}</p>
+                  <p className="mt-2 text-2xl font-bold text-gray-700">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+              학습 통계 데이터가 아직 없습니다.
+            </div>
+          )}
 
           {/* Courses section */}
           <section className="mb-8" aria-label="수강 중인 강좌">
@@ -56,31 +62,36 @@ export async function StudentDashboardPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
-              {courses.map((course) => (
-                <Link
-                  key={course.id}
-                  href={`/student/courses/${course.id}`}
-                  className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-                  aria-label={`${course.title} 강좌 상세 보기`}
-                >
-                  {/* Thumbnail placeholder */}
-                  <div
-                    className="h-32 bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center"
-                    aria-hidden="true"
+            {courses.length > 0 ? (
+              <div className="grid grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <Link
+                    key={course.id}
+                    href={`/student/courses/${course.id}`}
+                    className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    aria-label={`${course.title} 강좌 상세 보기`}
                   >
-                    <span className="text-xs text-gray-400">강좌 썸네일</span>
-                  </div>
+                    <div
+                      className="h-32 bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center"
+                      aria-hidden="true"
+                    >
+                      <span className="text-xs text-gray-400">강좌 썸네일</span>
+                    </div>
 
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-700">{course.title}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{course.professor}</p>
-                    <ProgressBar value={course.progress} color="blue" className="mt-3" />
-                    <p className="mt-1.5 text-xs text-gray-500">진행률 {course.progress}%</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-gray-700">{course.title}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{course.professor}</p>
+                      <ProgressBar value={course.progress} color="blue" className="mt-3" />
+                      <p className="mt-1.5 text-xs text-gray-500">진행률 {course.progress}%</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+                수강 중인 강좌가 없습니다.
+              </div>
+            )}
           </section>
 
           {/* Upcoming deadlines */}
@@ -90,29 +101,33 @@ export async function StudentDashboardPage() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <ul className="space-y-3">
-                {deadlines.map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-gray-700">{item.title}</span>
-                      <span className="text-xs text-gray-500">{item.course}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`text-sm font-semibold ${
-                          item.ddayUrgent ? 'text-red-500' : 'text-gray-600'
-                        }`}
-                      >
-                        {item.dday}
-                      </span>
-                      <span className="text-sm text-gray-500">{item.date}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {deadlines.length > 0 ? (
+                <ul className="space-y-3">
+                  {deadlines.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium text-gray-700">{item.title}</span>
+                        <span className="text-xs text-gray-500">{item.course}</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span
+                          className={`text-sm font-semibold ${
+                            item.ddayUrgent ? 'text-red-500' : 'text-gray-600'
+                          }`}
+                        >
+                          {item.dday}
+                        </span>
+                        <span className="text-sm text-gray-500">{item.date}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">다가오는 마감 일정이 없습니다.</p>
+              )}
             </div>
           </section>
         </main>
