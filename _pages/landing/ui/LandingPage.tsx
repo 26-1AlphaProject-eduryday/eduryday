@@ -47,9 +47,17 @@ function HeroSection() {
           </div>
         </div>
 
-        {/* Right: placeholder image */}
-        <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-200">
-          <span className="text-lg text-gray-700">[Hero Image / Screenshot]</span>
+        <div className="relative h-96 overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-slate-100 via-white to-gray-200">
+          <div className="absolute -left-8 top-10 h-44 w-44 rounded-full bg-blue-200/50 blur-2xl" />
+          <div className="absolute right-8 top-16 h-32 w-32 rounded-full bg-emerald-200/50 blur-2xl" />
+          <div className="absolute bottom-6 left-8 right-8 rounded-xl border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
+            <div className="mb-2 h-3 w-28 rounded bg-gray-300" />
+            <div className="mb-3 h-2 w-full rounded bg-gray-200" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-20 rounded-lg bg-gray-100" />
+              <div className="h-20 rounded-lg bg-gray-100" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -63,21 +71,24 @@ function FeaturesSection({ features }: { features: LandingFeatureRecord[] }) {
         <h2 className="mb-4 text-center text-3xl font-bold text-gray-900">핵심 기능</h2>
         <p className="mb-12 text-center text-gray-600">분절된 학습 환경을 하나로 통합합니다</p>
 
-        <div className="grid grid-cols-3 gap-8">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-xl border border-gray-200 bg-white p-8"
-            >
-              {/* Icon placeholder */}
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200">
-                <span className="text-xs text-gray-700">icon</span>
+        {features.length > 0 ? (
+          <div className="grid grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="rounded-xl border border-gray-200 bg-white p-8"
+              >
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 text-lg">
+                  <span aria-hidden="true">✦</span>
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-gray-900">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
-              <h3 className="mb-2 text-xl font-bold text-gray-900">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm text-gray-500">기능 소개 데이터가 준비 중입니다.</p>
+        )}
       </div>
     </section>
   );
@@ -92,16 +103,20 @@ function TeamSection({ team }: { team: LandingTeamRecord[] }) {
           국민대학교 소프트웨어학과 팀원들이 만들어갑니다
         </p>
 
-        <div className="mx-auto grid max-w-5xl grid-cols-5 gap-6">
-          {team.map((member) => (
-            <div key={member.name} className="text-center">
-              <div className="mx-auto mb-3 h-16 w-16 rounded-full border-2 border-dashed border-gray-300 bg-gray-200" />
-              <div className="font-bold text-gray-900">{member.name}</div>
-              <div className="mt-1 text-sm text-gray-500">{member.role}</div>
-              <div className="mt-1 text-xs text-gray-500">{member.description}</div>
-            </div>
-          ))}
-        </div>
+        {team.length > 0 ? (
+          <div className="mx-auto grid max-w-5xl grid-cols-5 gap-6">
+            {team.map((member) => (
+              <div key={member.name} className="text-center">
+                <div className="mx-auto mb-3 h-16 w-16 rounded-full border-2 border-dashed border-gray-300 bg-gray-200" />
+                <div className="font-bold text-gray-900">{member.name}</div>
+                <div className="mt-1 text-sm text-gray-500">{member.role}</div>
+                <div className="mt-1 text-xs text-gray-500">{member.description}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm text-gray-500">팀 소개 데이터가 준비 중입니다.</p>
+        )}
       </div>
     </section>
   );
@@ -110,14 +125,20 @@ function TeamSection({ team }: { team: LandingTeamRecord[] }) {
 function StatsSection({ stats }: { stats: LandingStatRecord[] }) {
   return (
     <section className="px-8 py-16">
-      <div className="mx-auto grid max-w-7xl grid-cols-4 gap-8 text-center">
-        {stats.map((stat) => (
-          <div key={stat.label}>
-            <div className="text-4xl font-bold text-gray-900">{stat.value}</div>
-            <div className="text-gray-600">{stat.label}</div>
-          </div>
-        ))}
-      </div>
+      {stats.length > 0 ? (
+        <div className="mx-auto grid max-w-7xl grid-cols-4 gap-8 text-center">
+          {stats.map((stat) => (
+            <div key={stat.label}>
+              <div className="text-4xl font-bold text-gray-900">{stat.value}</div>
+              <div className="text-gray-600">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mx-auto max-w-7xl text-center text-sm text-gray-500">
+          통계 데이터가 준비 중입니다.
+        </div>
+      )}
     </section>
   );
 }
@@ -131,22 +152,26 @@ function FaqSection({ faq }: { faq: LandingFaqRecord[] }) {
           궁금한 점이 있으시면 언제든 문의해주세요
         </p>
 
-        <div className="mx-auto max-w-3xl space-y-4">
-          {faq.map((item) => (
-            <div
-              key={item.question}
-              className="rounded-xl border border-gray-200 bg-white px-6 py-5"
-            >
-              <div className="flex items-start">
-                <span className="mr-3 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-white">
-                  Q
-                </span>
-                <span className="font-medium text-gray-900">{item.question}</span>
+        {faq.length > 0 ? (
+          <div className="mx-auto max-w-3xl space-y-4">
+            {faq.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-xl border border-gray-200 bg-white px-6 py-5"
+              >
+                <div className="flex items-start">
+                  <span className="mr-3 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-white">
+                    Q
+                  </span>
+                  <span className="font-medium text-gray-900">{item.question}</span>
+                </div>
+                <p className="ml-9 mt-3 text-sm leading-6 text-gray-500">{item.answer}</p>
               </div>
-              <p className="ml-9 mt-3 text-sm leading-6 text-gray-500">{item.answer}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm text-gray-500">FAQ 데이터가 준비 중입니다.</p>
+        )}
       </div>
     </section>
   );

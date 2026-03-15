@@ -61,22 +61,28 @@ export async function AdminDashboardPage() {
           </div>
 
           {/* Stats grid */}
-          <div className="mb-8 grid grid-cols-5 gap-4">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-gray-200 bg-white p-5"
-              >
-                <p className="text-sm text-gray-500">{stat.label}</p>
-                <p className="mt-1 text-3xl font-bold text-gray-900">{stat.value}</p>
-                {stat.trend ? (
-                  <p className={`mt-1 text-xs font-medium ${stat.trendClassName}`}>
-                    {stat.trend}
-                  </p>
-                ) : null}
-              </div>
-            ))}
-          </div>
+          {stats.length > 0 ? (
+            <div className="mb-8 grid grid-cols-5 gap-4">
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-xl border border-gray-200 bg-white p-5"
+                >
+                  <p className="text-sm text-gray-500">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-gray-900">{stat.value}</p>
+                  {stat.trend ? (
+                    <p className={`mt-1 text-xs font-medium ${stat.trendClassName}`}>
+                      {stat.trend}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+              대시보드 통계 데이터가 없습니다.
+            </div>
+          )}
 
           {/* 3-column section */}
           <div className="mb-8 grid grid-cols-3 gap-6">
@@ -86,30 +92,34 @@ export async function AdminDashboardPage() {
               className="rounded-xl border border-gray-200 bg-white p-6"
             >
               <h2 className="mb-5 text-base font-semibold text-gray-900">사용자 분포</h2>
-              <ul className="space-y-5">
-                {userDistribution.map((item) => (
-                  <li key={item.role}>
-                    <div className="mb-1.5 flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700">{item.role}</span>
-                      <span className="text-gray-500">{item.count}</span>
-                    </div>
-                    <div
-                      className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
-                      role="progressbar"
-                      aria-valuenow={item.percent}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`${item.role} ${item.percent}%`}
-                    >
+              {userDistribution.length > 0 ? (
+                <ul className="space-y-5">
+                  {userDistribution.map((item) => (
+                    <li key={item.role}>
+                      <div className="mb-1.5 flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">{item.role}</span>
+                        <span className="text-gray-500">{item.count}</span>
+                      </div>
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
-                        style={{ width: `${item.percent}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 text-right text-xs text-gray-400">{item.percent}%</p>
-                  </li>
-                ))}
-              </ul>
+                        className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
+                        role="progressbar"
+                        aria-valuenow={item.percent}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${item.role} ${item.percent}%`}
+                      >
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
+                          style={{ width: `${item.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 text-right text-xs text-gray-400">{item.percent}%</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">사용자 분포 데이터가 없습니다.</p>
+              )}
             </section>
 
             {/* Server resources */}
@@ -118,31 +128,35 @@ export async function AdminDashboardPage() {
               className="rounded-xl border border-gray-200 bg-white p-6"
             >
               <h2 className="mb-5 text-base font-semibold text-gray-900">서버 리소스</h2>
-              <ul className="space-y-5">
-                {serverResources.map((item) => (
-                  <li key={item.label}>
-                    <div className="mb-1.5 flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700">{item.label}</span>
-                      <span className="text-gray-500">
-                        {item.displayValue ?? `${item.value}%`}
-                      </span>
-                    </div>
-                    <div
-                      className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
-                      role="progressbar"
-                      aria-valuenow={item.value}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`${item.label} ${item.value}%`}
-                    >
+              {serverResources.length > 0 ? (
+                <ul className="space-y-5">
+                  {serverResources.map((item) => (
+                    <li key={item.label}>
+                      <div className="mb-1.5 flex items-center justify-between text-sm">
+                        <span className="font-medium text-gray-700">{item.label}</span>
+                        <span className="text-gray-500">
+                          {item.displayValue ?? `${item.value}%`}
+                        </span>
+                      </div>
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
-                        style={{ width: `${item.value}%` }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                        className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
+                        role="progressbar"
+                        aria-valuenow={item.value}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${item.label} ${item.value}%`}
+                      >
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
+                          style={{ width: `${item.value}%` }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">서버 리소스 데이터가 없습니다.</p>
+              )}
             </section>
 
             {/* Recent alerts */}
@@ -151,25 +165,29 @@ export async function AdminDashboardPage() {
               className="rounded-xl border border-gray-200 bg-white p-6"
             >
               <h2 className="mb-5 text-base font-semibold text-gray-900">최근 알림</h2>
-              <ul className="space-y-3">
-                {alerts.map((alert) => (
-                  <li
-                    key={alert.message}
-                    className={`flex items-start gap-3 rounded-lg border p-3 ${alert.bgClassName}`}
-                  >
-                    <span
-                      className="mt-px flex-shrink-0 text-sm"
-                      aria-hidden="true"
+              {alerts.length > 0 ? (
+                <ul className="space-y-3">
+                  {alerts.map((alert) => (
+                    <li
+                      key={alert.message}
+                      className={`flex items-start gap-3 rounded-lg border p-3 ${alert.bgClassName}`}
                     >
-                      {alert.icon}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-800">{alert.message}</p>
-                      <p className="text-xs text-gray-500">{alert.time}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                      <span
+                        className="mt-px flex-shrink-0 text-sm"
+                        aria-hidden="true"
+                      >
+                        {alert.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-800">{alert.message}</p>
+                        <p className="text-xs text-gray-500">{alert.time}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">최근 알림이 없습니다.</p>
+              )}
             </section>
           </div>
 
@@ -213,7 +231,7 @@ export async function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {activityLogs.map((log) => {
+                  {activityLogs.length > 0 ? activityLogs.map((log) => {
                     const badgeInfo = LOG_BADGE[log.type];
                     return (
                       <tr key={`${log.time}-${log.user}`} className="hover:bg-gray-50">
@@ -229,7 +247,13 @@ export async function AdminDashboardPage() {
                         <td className="px-5 py-3 font-mono text-gray-500">{log.ip}</td>
                       </tr>
                     );
-                  })}
+                  }) : (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-8 text-center text-gray-500">
+                        최근 활동 로그가 없습니다.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

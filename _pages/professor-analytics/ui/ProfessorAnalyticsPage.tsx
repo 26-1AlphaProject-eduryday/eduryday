@@ -23,7 +23,10 @@ export async function ProfessorAnalyticsPage() {
     getProfessorWeeklyParticipation(),
     getProfessorQuestionPatterns(),
   ]);
-  const maxWeeklyRate = Math.max(...weeklyParticipation.map((w) => w.rate));
+  const maxWeeklyRate =
+    weeklyParticipation.length > 0
+      ? Math.max(...weeklyParticipation.map((w) => w.rate), 1)
+      : 1;
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

@@ -35,23 +35,29 @@ export async function ProfessorDashboardPage() {
           </div>
 
           {/* Stats grid */}
-          <div className="mb-8 grid grid-cols-4 gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-gray-200 bg-white p-6"
-              >
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p
-                  className={`mt-2 text-2xl font-bold ${
-                    stat.valueClassName ?? 'text-gray-700'
-                  }`}
+          {stats.length > 0 ? (
+            <div className="mb-8 grid grid-cols-4 gap-6">
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-xl border border-gray-200 bg-white p-6"
                 >
-                  {stat.value}
-                </p>
-              </div>
-            ))}
-          </div>
+                  <p className="text-sm text-gray-600">{stat.label}</p>
+                  <p
+                    className={`mt-2 text-2xl font-bold ${
+                      stat.valueClassName ?? 'text-gray-700'
+                    }`}
+                  >
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+              강의 통계 데이터가 아직 없습니다.
+            </div>
+          )}
 
           {/* 2-column layout (3:1) */}
           <div className="mb-8 grid grid-cols-3 gap-6">
@@ -67,68 +73,73 @@ export async function ProfessorDashboardPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {courses.map((course) => (
-                  <article
-                    key={course.id}
-                    className="rounded-xl border border-gray-200 bg-white p-6"
-                    aria-label={`${course.title} 강좌 카드`}
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Thumbnail */}
-                      <div
-                        className="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-200 border border-dashed border-gray-300"
-                        aria-hidden="true"
-                      />
+              {courses.length > 0 ? (
+                <div className="space-y-4">
+                  {courses.map((course) => (
+                    <article
+                      key={course.id}
+                      className="rounded-xl border border-gray-200 bg-white p-6"
+                      aria-label={`${course.title} 강좌 카드`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-200 border border-dashed border-gray-300"
+                          aria-hidden="true"
+                        />
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-base font-bold text-gray-800">
-                            {course.title}
-                          </h3>
-                          <Badge variant="green">진행 중</Badge>
-                          <Badge variant="default">{course.students}명</Badge>
-                        </div>
-
-                        <p className="mt-0.5 text-sm text-gray-500">
-                          {course.semester}
-                        </p>
-
-                        <div className="mt-3">
-                          <div className="mb-1 flex items-center justify-between">
-                            <span className="text-xs text-gray-500">진행률</span>
-                            <span className="text-xs text-gray-500">
-                              {course.currentWeek}/{course.totalWeeks}주차
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-base font-bold text-gray-800">
+                              {course.title}
+                            </h3>
+                            <Badge variant="green">진행 중</Badge>
+                            <Badge variant="default">{course.students}명</Badge>
                           </div>
-                          <ProgressBar value={Math.round((course.currentWeek / course.totalWeeks) * 100)} color="blue" />
-                        </div>
 
-                        <div className="mt-4 flex gap-2">
-                          <button
-                            type="button"
-                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
-                          >
-                            강좌관리
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
-                          >
-                            과제출제
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
-                          >
-                            채점하기
-                          </button>
+                          <p className="mt-0.5 text-sm text-gray-500">
+                            {course.semester}
+                          </p>
+
+                          <div className="mt-3">
+                            <div className="mb-1 flex items-center justify-between">
+                              <span className="text-xs text-gray-500">진행률</span>
+                              <span className="text-xs text-gray-500">
+                                {course.currentWeek}/{course.totalWeeks}주차
+                              </span>
+                            </div>
+                            <ProgressBar value={Math.round((course.currentWeek / course.totalWeeks) * 100)} color="blue" />
+                          </div>
+
+                          <div className="mt-4 flex gap-2">
+                            <button
+                              type="button"
+                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                            >
+                              강좌관리
+                            </button>
+                            <button
+                              type="button"
+                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                            >
+                              과제출제
+                            </button>
+                            <button
+                              type="button"
+                              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                            >
+                              채점하기
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
+                  운영 중인 강좌가 없습니다.
+                </div>
+              )}
             </section>
 
             {/* Right col: recent activity */}
@@ -138,17 +149,21 @@ export async function ProfessorDashboardPage() {
               </h2>
 
               <div className="rounded-xl border border-gray-200 bg-white p-6">
-                <ul className="space-y-4">
-                  {activities.map((item) => (
-                    <li key={item.text} className="flex items-start gap-3">
-                      <span
-                        className={`mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full ${item.color}`}
-                        aria-hidden="true"
-                      />
-                      <span className="text-sm text-gray-700">{item.text}</span>
-                    </li>
-                  ))}
-                </ul>
+                {activities.length > 0 ? (
+                  <ul className="space-y-4">
+                    {activities.map((item) => (
+                      <li key={item.text} className="flex items-start gap-3">
+                        <span
+                          className={`mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full ${item.color}`}
+                          aria-hidden="true"
+                        />
+                        <span className="text-sm text-gray-700">{item.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">최근 활동이 없습니다.</p>
+                )}
 
                 <div className="mt-6 border-t border-gray-100 pt-4">
                   <a
