@@ -88,7 +88,7 @@ export async function proxy(request: NextRequest) {
   const role = isAdminEmail(email) ? 'admin' : normalizeRole(profile?.role);
   const status = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
 
-  // Legacy auth/role path → redirect to signup
+  // Legacy auth/role → signup
   if (pathname === '/auth/role') {
     return NextResponse.redirect(new URL('/signup', request.url));
   }
@@ -98,7 +98,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // Public paths: only redirect active users away from login/signup/pending
+  // Public paths: only redirect active users away from login/signup
   if (isPublicPath(pathname)) {
     if (role && status === 'active' && (pathname === '/login' || pathname === '/signup' || pathname === '/pending')) {
       return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
@@ -108,23 +108,19 @@ export async function proxy(request: NextRequest) {
 
   // --- Protected page routes below ---
 
-  // No role → must complete signup
   if (!role) {
     return NextResponse.redirect(new URL('/signup', request.url));
   }
 
-  // Suspended → sign out and redirect (no loop since /login is public and handled above)
   if (status === 'suspended') {
     await supabase.auth.signOut();
     return NextResponse.redirect(new URL('/login?error=suspended', request.url));
   }
 
-  // Pending → waiting for approval
   if (status === 'pending') {
     return NextResponse.redirect(new URL('/pending', request.url));
   }
 
-  // Role mismatch → redirect to correct dashboard
   if (needRole && needRole !== role) {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
   }
