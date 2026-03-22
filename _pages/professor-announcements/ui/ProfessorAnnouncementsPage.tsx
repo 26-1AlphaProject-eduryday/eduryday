@@ -5,7 +5,17 @@ import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
 import type { ProfessorCourse } from '@/entities/course';
-import type { ProfessorAnnouncementRecord } from '@/shared/lib/supabase/ui-seed';
+
+interface ProfessorAnnouncementRecord {
+  id: string;
+  title: string;
+  content: string;
+  courseId: string;
+  course: string;
+  createdAt: string;
+  views: number;
+  pinned: boolean;
+}
 
 interface ProfessorAnnouncementsPageProps {
   courses: ProfessorCourse[];
@@ -74,9 +84,8 @@ export function ProfessorAnnouncementsPage({ courses, announcements }: Professor
     setShowForm(true);
     setFormTitle(item.title);
     setFormPinned(item.pinned);
-    const course = courses.find((courseItem) => courseItem.title === item.course);
-    setFormCourse(course?.id ?? courses[0]?.id ?? '');
-    setFormContent('공지 내용 수정');
+    setFormCourse(item.courseId || courses[0]?.id || '');
+    setFormContent(item.content);
   }
 
   return (

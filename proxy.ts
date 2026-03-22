@@ -19,7 +19,6 @@ function isPublicPath(pathname: string) {
     '/',
     '/login',
     '/signup',
-    '/forgot-password',
     '/auth/callback',
     '/auth/role',
     '/pending',
@@ -76,7 +75,15 @@ export async function proxy(request: NextRequest) {
   const role = isAdminEmail(email) ? 'admin' : normalizeRole(profile?.role);
   const status = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
 
-  if (status === 'pending' && pathname !== '/pending' && !pathname.startsWith('/auth/role')) {
+  if (pathname === '/auth/role') {
+    return NextResponse.redirect(new URL('/signup', request.url));
+  }
+
+  if (!role && pathname !== '/signup') {
+    return NextResponse.redirect(new URL('/signup', request.url));
+  }
+
+  if (status === 'pending' && role && pathname !== '/pending') {
     return NextResponse.redirect(new URL('/pending', request.url));
   }
 
@@ -84,15 +91,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login?error=suspended', request.url));
   }
 
-  if (!role && pathname !== '/auth/role' && pathname !== '/pending') {
-    return NextResponse.redirect(new URL('/auth/role', request.url));
-  }
-
   if (needRole && role && needRole !== role) {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
   }
 
-  if ((pathname === '/login' || pathname === '/signup') && role && status === 'active') {
+  if ((pathname === '/login' || pathname === '/signup' || pathname === '/pending') && role && status === 'active') {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
   }
 

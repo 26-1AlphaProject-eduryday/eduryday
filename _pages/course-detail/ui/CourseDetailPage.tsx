@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { ProgressBar, Badge, Button } from '@/shared/ui';
-import type { WeekStatus } from '@/entities/course';
-import { getCourseResources, getCourseWeeks, getStudentCourses } from '@/shared/lib/supabase/ui-seed';
+import type { CourseResource, StudentCourse, WeekStatus, Week } from '@/entities/course';
 
 const statusLabel: Record<WeekStatus, string> = {
   done: '완료',
@@ -16,16 +15,25 @@ const statusClass: Record<WeekStatus, string> = {
   locked: 'text-gray-500',
 };
 
-export async function CourseDetailPage() {
-  const [courses, courseWeeks, courseResources] = await Promise.all([
-    getStudentCourses(),
-    getCourseWeeks(),
-    getCourseResources(),
-  ]);
-  const currentCourse = courses[0];
+export async function CourseDetailPage({
+  currentCourse,
+  courseWeeks,
+  courseResources,
+}: {
+  currentCourse: StudentCourse | null;
+  courseWeeks: Week[];
+  courseResources: CourseResource[];
+}) {
 
   if (!currentCourse) {
-    return null;
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        <StudentHeader />
+        <main className="flex flex-1 items-center justify-center p-8 text-center text-gray-500">
+          수강 중인 강좌 정보가 없습니다.
+        </main>
+      </div>
+    );
   }
 
   return (

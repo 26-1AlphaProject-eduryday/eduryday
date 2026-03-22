@@ -4,6 +4,7 @@ import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase
 interface CourseRow {
   id: string;
   title: string;
+   description: string | null;
   professor_name: string;
   semester: string;
   section: string | null;
@@ -38,11 +39,30 @@ export async function GET(req: Request) {
 
   let dbQuery = client
     .from('courses')
-    .select('id, title, professor_name, semester, section, student_count, current_week, total_weeks, status, created_at', {
+    .select('id, title, description, professor_name, semester, section, student_count, current_week, total_weeks, status, created_at', {
       count: 'exact',
     })
     .order('created_at', { ascending: false })
     .range(from, to);
+
+  if (auth.role === 'student') {
+    const { data: enrollments, error: enrollmentError } = await client
+      .from('enrollments')
+      .select('course_id')
+      .eq('student_id', auth.userId);
+
+    if (enrollmentError) {
+      return fail('DB_ERROR', enrollmentError.message, 500);
+    }
+
+    const courseIds = (enrollments ?? []).map((row) => row.course_id).filter(Boolean);
+
+    if (courseIds.length === 0) {
+      return ok({ courses: [], total: 0, page, pageSize });
+    }
+
+    dbQuery = dbQuery.in('id', courseIds);
+  }
 
   if (status !== 'all') {
     dbQuery = dbQuery.eq('status', status);
@@ -68,6 +88,7 @@ export async function GET(req: Request) {
     id: row.id,
     name: row.title,
     title: row.title,
+    description: row.description,
     professor: row.professor_name,
     semester: row.semester,
     section: row.section,
@@ -114,10 +135,12 @@ export async function POST(req: Request) {
 
   const { data, error } = await client
     .from('courses')
-    .insert({
-      title: String(body.title),
-      professor_name: String(body.professorName ?? auth.email.split('@')[0]),
-      semester: String(body.semester),
+      .insert({
+        title: String(body.title),
+        description: body.description ? String(body.description) : null,
+        professor_name: String(body.professorName ?? auth.email.split('@')[0]),
+        professor_id: auth.role === 'professor' ? auth.userId : null,
+        semester: String(body.semester),
       section: body.section ? String(body.section) : null,
       student_count: Number(body.studentCount ?? 0),
       current_week: Number(body.currentWeek ?? 1),

@@ -4,6 +4,8 @@ import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase
 interface AnnouncementRow {
   id: string;
   title: string;
+  content: string;
+  course_id: string;
   pinned: boolean;
   views: number;
   created_at: string;
@@ -28,7 +30,7 @@ export async function GET(req: Request) {
 
   let dbQuery = client
     .from('announcements')
-    .select('id, title, pinned, views, created_at, courses(title)')
+    .select('id, title, content, course_id, pinned, views, created_at, courses(title)')
     .order('created_at', { ascending: false });
 
   if (courseId) {
@@ -45,6 +47,8 @@ export async function GET(req: Request) {
   const announcements = rows.map((row) => ({
     id: row.id,
     title: row.title,
+    content: row.content,
+    courseId: row.course_id,
     course: Array.isArray(row.courses) ? row.courses[0]?.title ?? '-' : row.courses?.title ?? '-',
     createdAt: row.created_at.slice(0, 10),
     views: row.views,

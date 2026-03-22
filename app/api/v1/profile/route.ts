@@ -1,6 +1,10 @@
 import { fail, ok } from '@/shared/lib/api/response';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
+function isValidRole(value: unknown): value is 'student' | 'professor' {
+  return value === 'student' || value === 'professor';
+}
+
 export async function GET() {
   const auth = await getRouteAuthContext();
 
@@ -16,7 +20,7 @@ export async function GET() {
 
   const { data, error } = await client
     .from('profiles')
-    .select('id, name, email, role, status')
+    .select('id, name, email, role, status, student_id, department')
     .eq('id', auth.userId)
     .maybeSingle();
 
@@ -46,18 +50,58 @@ export async function PATCH(req: Request) {
 
   const body = await req.json().catch(() => null);
 
-  if (typeof body?.name !== 'string' || body.name.trim().length < 1) {
+  const trimmedName = typeof body?.name === 'string' ? body.name.trim() : '';
+  const trimmedDepartment = typeof body?.department === 'string' ? body.department.trim() : '';
+  const trimmedStudentId = typeof body?.studentId === 'string' ? body.studentId.trim() : '';
+  const role = body?.role;
+
+  if (trimmedName.length < 1) {
     return fail('VALIDATION_ERROR', 'name은 필수입니다.');
+  }
+
+  if (role !== undefined && !isValidRole(role)) {
+    return fail('VALIDATION_ERROR', 'role은 student 또는 professor만 가능합니다.');
+  }
+
+  if (role !== undefined && trimmedDepartment.length < 1) {
+    return fail('VALIDATION_ERROR', 'department는 필수입니다.');
+  }
+
+  if (role === 'student' && trimmedStudentId.length < 1) {
+    return fail('VALIDATION_ERROR', 'studentId는 학생 신청 시 필수입니다.');
+  }
+
+  const updates: {
+    name: string;
+    department?: string;
+    student_id?: string | null;
+    role?: 'student' | 'professor';
+    status?: 'pending' | 'active';
+  } = {
+    name: trimmedName,
+  };
+
+  if (role !== undefined) {
+    updates.role = role;
+    updates.department = trimmedDepartment;
+    updates.student_id = role === 'student' ? trimmedStudentId : null;
+    updates.status = auth.email.toLowerCase() === 'eduryday@gmail.com' ? 'active' : 'pending';
   }
 
   const { error } = await client
     .from('profiles')
-    .update({ name: body.name.trim() })
+    .update(updates)
     .eq('id', auth.userId);
 
   if (error) {
     return fail('DB_ERROR', error.message, 500);
   }
 
-  return ok({ name: body.name.trim() });
+  return ok({
+    name: trimmedName,
+    role: updates.role ?? auth.role,
+    studentId: updates.student_id ?? null,
+    department: updates.department ?? null,
+    status: updates.status ?? auth.status,
+  });
 }

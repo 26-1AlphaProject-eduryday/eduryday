@@ -2,20 +2,43 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { ProgressBar } from '@/shared/ui';
-import {
-  getCurrentStudent,
-  getDeadlines,
-  getStudentCourses,
-  getStudentDashboardStats,
-} from '@/shared/lib/supabase/ui-seed';
 
-export async function StudentDashboardPage() {
-  const [student, courses, deadlines, stats] = await Promise.all([
-    getCurrentStudent(),
-    getStudentCourses(),
-    getDeadlines(),
-    getStudentDashboardStats(),
-  ]);
+interface DashboardStudent {
+  name: string;
+}
+
+interface DashboardCourse {
+  id: string;
+  title: string;
+  professor: string;
+  progress: number;
+}
+
+interface DashboardDeadline {
+  id: string;
+  title: string;
+  course: string;
+  dday: string;
+  ddayUrgent: boolean;
+  date: string;
+}
+
+interface DashboardStat {
+  label: string;
+  value: string;
+}
+
+export async function StudentDashboardPage({
+  student,
+  courses,
+  deadlines,
+  stats,
+}: {
+  student: DashboardStudent;
+  courses: DashboardCourse[];
+  deadlines: DashboardDeadline[];
+  stats: DashboardStat[];
+}) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

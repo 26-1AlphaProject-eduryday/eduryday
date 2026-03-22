@@ -1,13 +1,43 @@
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
-import {
-  getAdminActivityLogs,
-  getAdminAlerts,
-  getAdminDashboardStats,
-  getAdminServerResources,
-  getAdminUserDistribution,
-} from '@/shared/lib/supabase/ui-seed';
+
+interface AdminStat {
+  label: string;
+  value: string;
+  trend?: string | null;
+  trendClassName?: string;
+}
+
+interface AdminDistribution {
+  role: string;
+  count: string;
+  percent: number;
+  barClassName: string;
+}
+
+interface AdminResource {
+  label: string;
+  value: number;
+  displayValue?: string;
+  barClassName: string;
+}
+
+interface AdminAlert {
+  icon: string;
+  bgClassName: string;
+  message: string;
+  time: string;
+}
+
+interface AdminActivityLog {
+  time: string;
+  type: LogType;
+  user: string;
+  userRole: string;
+  content: string;
+  ip: string;
+}
 
 type LogType = 'login' | 'submit' | 'ai' | 'course';
 
@@ -18,14 +48,19 @@ const LOG_BADGE: Record<LogType, { label: string; variant: 'blue' | 'green' | 'p
   course: { label: '강좌생성', variant: 'yellow' },
 };
 
-export async function AdminDashboardPage() {
-  const [stats, userDistribution, serverResources, alerts, activityLogs] = await Promise.all([
-    getAdminDashboardStats(),
-    getAdminUserDistribution(),
-    getAdminServerResources(),
-    getAdminAlerts(),
-    getAdminActivityLogs(),
-  ]);
+export async function AdminDashboardPage({
+  stats,
+  userDistribution,
+  serverResources,
+  alerts,
+  activityLogs,
+}: {
+  stats: AdminStat[];
+  userDistribution: AdminDistribution[];
+  serverResources: AdminResource[];
+  alerts: AdminAlert[];
+  activityLogs: AdminActivityLog[];
+}) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

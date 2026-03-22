@@ -1,5 +1,5 @@
-import { AuthRolePage } from '@/_pages/auth-role/ui/AuthRolePage';
+import { redirect } from 'next/navigation';
 
 export default function AuthRoleRoute() {
-  return <AuthRolePage />;
+  redirect('/signup');
 }
