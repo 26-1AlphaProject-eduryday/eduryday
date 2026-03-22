@@ -167,11 +167,11 @@ export function AiTutorPage() {
             ) : (
               <ul className="space-y-1">
                 {conversations.map((conv) => (
-                  <li key={conv.id}>
+                  <li key={conv.id} className="group relative">
                     <button
                       type="button"
                       onClick={() => handleSelectConversation(conv.id)}
-                      className={`group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                      className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                         activeConversationId === conv.id
                           ? 'border border-blue-200 bg-blue-50 text-blue-900'
                           : 'text-gray-700 hover:bg-gray-50'
@@ -181,17 +181,14 @@ export function AiTutorPage() {
                         <p className="truncate font-medium">{conv.title}</p>
                         <p className="text-xs text-gray-400">{conv.messageCount}개 메시지</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteConversation(conv.id);
-                        }}
-                        className="ml-1 hidden shrink-0 rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-red-500 group-hover:block"
-                        aria-label="대화 삭제"
-                      >
-                        ✕
-                      </button>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteConversation(conv.id)}
+                      className="absolute right-2 top-1/2 hidden -translate-y-1/2 rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-red-500 group-hover:block"
+                      aria-label="대화 삭제"
+                    >
+                      ✕
                     </button>
                   </li>
                 ))}
