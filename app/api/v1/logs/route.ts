@@ -5,6 +5,8 @@ interface ActivityLogRow {
   id: number;
   type: 'login' | 'submit' | 'ai' | 'course' | 'error' | 'grading' | 'access';
   user_name: string;
+  user_role: string | null;
+  ip: string | null;
   message: string;
   created_at: string;
 }
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
 
   let dbQuery = client
     .from('activity_logs')
-    .select('id, type, user_name, message, created_at', { count: 'exact' })
+    .select('id, type, user_name, user_role, ip, message, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, to);
 
@@ -51,6 +53,8 @@ export async function GET(req: Request) {
     timestamp: row.created_at.replace('T', ' ').slice(0, 19),
     type: row.type,
     user: row.user_name,
+    userRole: row.user_role,
+    ip: row.ip,
     message: row.message,
   }));
 

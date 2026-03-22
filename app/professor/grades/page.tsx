@@ -1,5 +1,6 @@
+import { redirect } from 'next/navigation';
 import { ProfessorGradesPage } from '@/_pages/professor-grades/ui/ProfessorGradesPage';
-import { getServiceRoleClient } from '@/shared/lib/supabase/route';
+import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface CourseRow {
   id: string;
@@ -30,19 +31,38 @@ interface SubmissionJoinRow {
 }
 
 export default async function ProfessorGradesRoute() {
+  const auth = await getRouteAuthContext();
+
+  if (!auth || (auth.role !== 'professor' && auth.role !== 'admin')) {
+    redirect('/login');
+  }
+
   const client = getServiceRoleClient();
 
   if (!client) {
     return <ProfessorGradesPage rows={[]} courses={[]} />;
   }
 
-  const [courseRows, submissionRows] = await Promise.all([
-    client.from('courses').select('id, title, semester').order('created_at', { ascending: false }),
-    client
-      .from('submissions')
-      .select('id, student_name, student_number, submitted_at, auto_score, final_score, status, assignments(title, course_id, courses(title))')
-      .order('submitted_at', { ascending: false }),
-  ]);
+  // Scope courses to professor's own (admin sees all)
+  let coursesQuery = client.from('courses').select('id, title, semester').order('created_at', { ascending: false });
+  if (auth.role === 'professor') {
+    coursesQuery = coursesQuery.eq('created_by', auth.userId);
+  }
+  const courseRows = await coursesQuery;
+  const courseIds = ((courseRows.data ?? []) as CourseRow[]).map((c) => c.id);
+
+  // Get submissions only for those courses' assignments
+  let submissionsQuery = client
+    .from('submissions')
+    .select('id, student_name, student_number, submitted_at, auto_score, final_score, status, assignments(title, course_id, courses(title))')
+    .order('submitted_at', { ascending: false });
+
+  if (auth.role === 'professor' && courseIds.length > 0) {
+    // Filter by assignment's course_id being in professor's courses
+    submissionsQuery = submissionsQuery.in('assignments.course_id', courseIds);
+  }
+
+  const submissionRows = await submissionsQuery;
 
   const courses = ((courseRows.data ?? []) as CourseRow[]).map((row) => ({
     id: row.id,

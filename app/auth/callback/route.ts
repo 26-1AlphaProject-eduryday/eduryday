@@ -51,24 +51,33 @@ export async function GET(request: NextRequest) {
     .eq('id', user.id)
     .maybeSingle<ProfileRow>();
 
-  await supabase.from('profiles').upsert(
-    {
-      id: user.id,
-      email,
-      name: generatedName,
-      role: isAdminEmail(email) ? 'admin' : existingProfile?.role ?? null,
-      status: isAdminEmail(email) ? 'active' : existingProfile?.status ?? status,
-    },
-    {
-      onConflict: 'id',
-    },
-  );
+  // Only upsert for new users or admin email updates
+  if (!existingProfile || isAdminEmail(email)) {
+    const { error: upsertError } = await supabase.from('profiles').upsert(
+      {
+        id: user.id,
+        email,
+        name: generatedName,
+        role: isAdminEmail(email) ? 'admin' : existingProfile?.role ?? null,
+        status: isAdminEmail(email) ? 'active' : existingProfile?.status ?? status,
+      },
+      { onConflict: 'id' },
+    );
 
-  const { data: profile } = await supabase
+    if (upsertError) {
+      return NextResponse.redirect(new URL('/login?error=profile', request.url));
+    }
+  }
+
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id, role, status')
     .eq('id', user.id)
     .maybeSingle<ProfileRow>();
+
+  if (profileError) {
+    return NextResponse.redirect(new URL('/login?error=profile', request.url));
+  }
 
   const finalRole = isAdminEmail(email) ? 'admin' : normalizeRole(profile?.role);
   const finalStatus = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
