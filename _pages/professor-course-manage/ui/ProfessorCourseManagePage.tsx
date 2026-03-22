@@ -19,23 +19,19 @@ interface CourseDetail {
   total_weeks: number;
 }
 
-interface EnrolledStudent {
-  enrollmentId: string;
-  studentUserId: string;
-  name: string;
-  email: string;
-  studentNumber: string | null;
-  department: string | null;
-  enrolledAt: string;
+interface CourseWeek {
+  id: string;
+  number: number;
+  title: string;
+  status: 'locked' | 'in-progress' | 'done';
 }
 
-interface SearchResult {
+interface Lesson {
   id: string;
-  name: string;
-  email: string;
-  studentId: string | null;
-  department: string | null;
-  enrolled: boolean;
+  weekId: string;
+  title: string;
+  type: 'video' | 'practice' | 'quiz' | 'document';
+  orderNum: number;
 }
 
 export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePageProps) {
@@ -44,16 +40,13 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
-  // Enrollment state
-  const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
-  const [enrollLoading, setEnrollLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [enrollMessage, setEnrollMessage] = useState('');
-  const [enrollMessageType, setEnrollMessageType] = useState<'success' | 'error'>('success');
-  const [removingId, setRemovingId] = useState<string | null>(null);
-  const [addingId, setAddingId] = useState<string | null>(null);
+  const [weeks, setWeeks] = useState<CourseWeek[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [weeksLoading, setWeeksLoading] = useState(false);
+  const [newWeekTitle, setNewWeekTitle] = useState('');
+  const [addingLessonWeekId, setAddingLessonWeekId] = useState<string | null>(null);
+  const [newLessonTitle, setNewLessonTitle] = useState('');
+  const [newLessonType, setNewLessonType] = useState<Lesson['type']>('video');
 
   async function loadCourse() {
     setLoading(true);
@@ -67,36 +60,38 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
     setLoading(false);
   }
 
-  async function loadEnrolledStudents() {
-    setEnrollLoading(true);
-    const res = await fetch(`/api/v1/enrollments?courseId=${courseId}`, { cache: 'no-store' });
-    const json = await res.json();
+  async function loadWeeksAndLessons() {
+    setWeeksLoading(true);
+    const weeksRes = await fetch(`/api/v1/course-weeks?courseId=${courseId}`, { cache: 'no-store' });
+    const weeksJson = await weeksRes.json();
 
-    if (json.ok) {
-      type EnrollmentRow = {
-        id: string;
-        student_id: string;
-        enrolled_at: string;
-        profiles: { name: string; email: string; student_id: string | null; department: string | null } | null;
-      };
-      const rows: EnrolledStudent[] = (json.data.enrollments as EnrollmentRow[]).map((e) => ({
-        enrollmentId: e.id,
-        studentUserId: e.student_id,
-        name: e.profiles?.name ?? '알 수 없음',
-        email: e.profiles?.email ?? '-',
-        studentNumber: e.profiles?.student_id ?? null,
-        department: e.profiles?.department ?? null,
-        enrolledAt: e.enrolled_at,
-      }));
-      setEnrolledStudents(rows);
+    if (!weeksJson.ok) {
+      setWeeksLoading(false);
+      return;
     }
 
-    setEnrollLoading(false);
+    const fetchedWeeks: CourseWeek[] = weeksJson.data ?? [];
+    setWeeks(fetchedWeeks);
+
+    const allLessons: Lesson[] = [];
+    await Promise.all(
+      fetchedWeeks.map(async (week) => {
+        const lessonsRes = await fetch(`/api/v1/lessons?weekId=${week.id}`, { cache: 'no-store' });
+        const lessonsJson = await lessonsRes.json();
+        if (lessonsJson.ok && Array.isArray(lessonsJson.data)) {
+          allLessons.push(...(lessonsJson.data as Lesson[]));
+        }
+      })
+    );
+
+    setLessons(allLessons);
+    setWeeksLoading(false);
   }
 
   useEffect(() => {
     loadCourse();
-    loadEnrolledStudents();
+    loadWeeksAndLessons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
   async function saveChanges() {
@@ -128,69 +123,81 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
     }
   }
 
-  async function handleSearch() {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-    setSearchLoading(true);
-    const res = await fetch(
-      `/api/v1/enrollments/search?q=${encodeURIComponent(searchQuery)}&courseId=${courseId}`,
-      { cache: 'no-store' },
-    );
-    const json = await res.json();
-    if (json.ok) {
-      setSearchResults(json.data.students as SearchResult[]);
-    }
-    setSearchLoading(false);
-  }
+  async function handleAddWeek() {
+    if (!newWeekTitle.trim()) return;
 
-  async function handleEnroll(studentId: string) {
-    setAddingId(studentId);
-    const res = await fetch('/api/v1/enrollments', {
+    const res = await fetch('/api/v1/course-weeks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ courseId, studentId }),
+      body: JSON.stringify({
+        courseId,
+        number: weeks.length + 1,
+        title: newWeekTitle.trim(),
+      }),
     });
     const json = await res.json();
+
     if (json.ok) {
-      setEnrollMessage('수강생이 추가되었습니다.');
-      setEnrollMessageType('success');
-      await loadEnrolledStudents();
-      // Mark as enrolled in search results
-      setSearchResults((prev) =>
-        prev.map((s) => (s.id === studentId ? { ...s, enrolled: true } : s)),
-      );
-    } else {
-      setEnrollMessage(json.message ?? '추가에 실패했습니다.');
-      setEnrollMessageType('error');
+      setNewWeekTitle('');
+      await loadWeeksAndLessons();
     }
-    setAddingId(null);
   }
 
-  async function handleRemove(enrollmentId: string) {
-    setRemovingId(enrollmentId);
-    const res = await fetch(`/api/v1/enrollments/${enrollmentId}`, { method: 'DELETE' });
+  async function handleAddLesson(weekId: string) {
+    if (!newLessonTitle.trim()) return;
+
+    const weekLessons = lessons.filter((l) => l.weekId === weekId);
+    const res = await fetch('/api/v1/lessons', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        weekId,
+        title: newLessonTitle.trim(),
+        type: newLessonType,
+        orderNum: weekLessons.length + 1,
+      }),
+    });
     const json = await res.json();
+
     if (json.ok) {
-      setEnrollMessage('수강생이 삭제되었습니다.');
-      setEnrollMessageType('success');
-      setEnrolledStudents((prev) => prev.filter((s) => s.enrollmentId !== enrollmentId));
-      // Refresh search results to unmark enrolled state
-      if (searchResults.length > 0) {
-        const removed = enrolledStudents.find((s) => s.enrollmentId === enrollmentId);
-        if (removed) {
-          setSearchResults((prev) =>
-            prev.map((s) => (s.id === removed.studentUserId ? { ...s, enrolled: false } : s)),
-          );
-        }
-      }
-    } else {
-      setEnrollMessage(json.message ?? '삭제에 실패했습니다.');
-      setEnrollMessageType('error');
+      setNewLessonTitle('');
+      setNewLessonType('video');
+      setAddingLessonWeekId(null);
+      await loadWeeksAndLessons();
     }
-    setRemovingId(null);
   }
+
+  async function handleUpdateWeekStatus(weekId: string, status: CourseWeek['status']) {
+    const res = await fetch(`/api/v1/course-weeks/${weekId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    const json = await res.json();
+
+    if (json.ok) {
+      setWeeks((prev) => prev.map((w) => (w.id === weekId ? { ...w, status } : w)));
+    }
+  }
+
+  const statusLabel: Record<CourseWeek['status'], string> = {
+    locked: '잠김',
+    'in-progress': '진행 중',
+    done: '완료',
+  };
+
+  const statusBadgeClass: Record<CourseWeek['status'], string> = {
+    locked: 'bg-gray-100 text-gray-600',
+    'in-progress': 'bg-blue-100 text-blue-700',
+    done: 'bg-green-100 text-green-700',
+  };
+
+  const typeLabel: Record<Lesson['type'], string> = {
+    video: '영상',
+    practice: '실습',
+    quiz: '퀴즈',
+    document: '문서',
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -253,137 +260,130 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
             </div>
           )}
 
-          {/* 수강생 관리 섹션 */}
-          <div className="mt-8 max-w-3xl rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">수강생 관리</h2>
+          {/* Week & Lesson Management */}
+          <div className="mt-8 max-w-2xl rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">주차 및 강의 관리</h2>
 
-            {/* 현재 수강생 목록 */}
-            <div className="mb-6">
-              <p className="mb-3 text-sm font-medium text-gray-700">
-                현재 수강생{' '}
-                <span className="text-gray-500">({enrollLoading ? '...' : `${enrolledStudents.length}명`})</span>
-              </p>
+            {/* Add week input */}
+            <div className="mb-6 flex gap-2">
+              <input
+                value={newWeekTitle}
+                onChange={(e) => setNewWeekTitle(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddWeek(); }}
+                placeholder="새 주차 제목 입력"
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleAddWeek}
+                className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white whitespace-nowrap"
+              >
+                + 새 주차 추가
+              </button>
+            </div>
 
-              {enrollLoading ? (
-                <p className="text-sm text-gray-400">불러오는 중...</p>
-              ) : enrolledStudents.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-gray-200 py-6 text-center text-sm text-gray-400">
-                  등록된 수강생이 없습니다.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
-                        <th className="pb-2 pr-4 font-medium">이름</th>
-                        <th className="pb-2 pr-4 font-medium">이메일</th>
-                        <th className="pb-2 pr-4 font-medium">학번</th>
-                        <th className="pb-2 pr-4 font-medium">소속</th>
-                        <th className="pb-2 pr-4 font-medium">등록일</th>
-                        <th className="pb-2 font-medium"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {enrolledStudents.map((s) => (
-                        <tr key={s.enrollmentId} className="border-b border-gray-50 last:border-0">
-                          <td className="py-2 pr-4 font-medium text-gray-900">{s.name}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.email}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.studentNumber ?? '-'}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.department ?? '-'}</td>
-                          <td className="py-2 pr-4 text-gray-500">{new Date(s.enrolledAt).toLocaleDateString('ko-KR')}</td>
-                          <td className="py-2">
+            {weeksLoading ? (
+              <p className="text-sm text-gray-400">주차 정보를 불러오는 중...</p>
+            ) : weeks.length === 0 ? (
+              <p className="text-sm text-gray-400">등록된 주차가 없습니다.</p>
+            ) : (
+              <ul className="space-y-4">
+                {weeks
+                  .slice()
+                  .sort((a, b) => a.number - b.number)
+                  .map((week) => {
+                    const weekLessons = lessons
+                      .filter((l) => l.weekId === week.id)
+                      .sort((a, b) => a.orderNum - b.orderNum);
+                    const isAddingLesson = addingLessonWeekId === week.id;
+
+                    return (
+                      <li key={week.id} className="rounded-lg border border-gray-200 p-4">
+                        {/* Week header */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-gray-900 text-sm">
+                            {week.number}주차: {week.title}
+                          </span>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass[week.status]}`}>
+                            {statusLabel[week.status]}
+                          </span>
+                          <div className="ml-auto flex items-center gap-2">
+                            <select
+                              value={week.status}
+                              onChange={(e) => handleUpdateWeekStatus(week.id, e.target.value as CourseWeek['status'])}
+                              className="rounded border border-gray-300 px-2 py-1 text-xs"
+                            >
+                              <option value="locked">잠김</option>
+                              <option value="in-progress">진행 중</option>
+                              <option value="done">완료</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Lessons list */}
+                        {weekLessons.length > 0 && (
+                          <ul className="mt-3 space-y-1 border-l-2 border-gray-200 pl-4">
+                            {weekLessons.map((lesson, idx) => (
+                              <li key={lesson.id} className="flex items-center gap-2 text-sm text-gray-700">
+                                <span className="text-gray-400">강의 {idx + 1}:</span>
+                                <span>{lesson.title}</span>
+                                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                                  {typeLabel[lesson.type]}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {/* Add lesson form */}
+                        {isAddingLesson ? (
+                          <div className="mt-3 flex gap-2 border-l-2 border-gray-200 pl-4 flex-wrap">
+                            <input
+                              value={newLessonTitle}
+                              onChange={(e) => setNewLessonTitle(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleAddLesson(week.id); }}
+                              placeholder="강의 제목"
+                              className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
+                            />
+                            <select
+                              value={newLessonType}
+                              onChange={(e) => setNewLessonType(e.target.value as Lesson['type'])}
+                              className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
+                            >
+                              <option value="video">영상</option>
+                              <option value="practice">실습</option>
+                              <option value="quiz">퀴즈</option>
+                              <option value="document">문서</option>
+                            </select>
                             <button
                               type="button"
-                              disabled={removingId === s.enrollmentId}
-                              onClick={() => handleRemove(s.enrollmentId)}
-                              className="rounded-md border border-red-200 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                              onClick={() => handleAddLesson(week.id)}
+                              className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white"
                             >
-                              {removingId === s.enrollmentId ? '삭제 중...' : '삭제'}
+                              추가
                             </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            {/* 구분선 */}
-            <hr className="mb-6 border-gray-100" />
-
-            {/* 학생 검색 및 추가 */}
-            <div>
-              <p className="mb-3 text-sm font-medium text-gray-700">학생 검색 및 추가</p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                  placeholder="학생 이름, 이메일 또는 학번으로 검색"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={handleSearch}
-                  disabled={searchLoading}
-                  className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-                >
-                  {searchLoading ? '검색 중...' : '검색'}
-                </button>
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
-                        <th className="pb-2 pr-4 font-medium">이름</th>
-                        <th className="pb-2 pr-4 font-medium">이메일</th>
-                        <th className="pb-2 pr-4 font-medium">학번</th>
-                        <th className="pb-2 pr-4 font-medium">소속</th>
-                        <th className="pb-2 font-medium">상태</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {searchResults.map((s) => (
-                        <tr key={s.id} className="border-b border-gray-50 last:border-0">
-                          <td className="py-2 pr-4 font-medium text-gray-900">{s.name}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.email}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.studentId ?? '-'}</td>
-                          <td className="py-2 pr-4 text-gray-600">{s.department ?? '-'}</td>
-                          <td className="py-2">
-                            {s.enrolled ? (
-                              <span className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-500">이미 등록</span>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={addingId === s.id}
-                                onClick={() => handleEnroll(s.id)}
-                                className="rounded-md border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50"
-                              >
-                                {addingId === s.id ? '추가 중...' : '추가'}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {!searchLoading && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-                <p className="mt-3 text-sm text-gray-400">검색 결과가 없습니다.</p>
-              )}
-            </div>
-
-            {enrollMessage ? (
-              <p className={`mt-4 text-sm ${enrollMessageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                {enrollMessage}
-              </p>
-            ) : null}
+                            <button
+                              type="button"
+                              onClick={() => { setAddingLessonWeekId(null); setNewLessonTitle(''); setNewLessonType('video'); }}
+                              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600"
+                            >
+                              취소
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => { setAddingLessonWeekId(week.id); setNewLessonTitle(''); setNewLessonType('video'); }}
+                            className="mt-3 border-l-2 border-gray-200 pl-4 text-sm text-blue-600 hover:text-blue-700"
+                          >
+                            + 강의 추가
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+              </ul>
+            )}
           </div>
         </main>
       </div>

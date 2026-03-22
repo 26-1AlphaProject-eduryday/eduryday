@@ -5,6 +5,8 @@ import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Button, Input } from '@/shared/ui';
 
+const STORAGE_KEY = 'eduryday-admin-settings';
+
 type TabId = 'ai' | 'security' | 'notifications' | 'storage';
 
 interface Tab {
@@ -345,6 +347,17 @@ const TAB_CONTENT: Record<TabId, React.ReactNode> = {
 
 export function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('ai');
+  const [saveMessage, setSaveMessage] = useState('');
+
+  function handleSave() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ savedAt: new Date().toISOString() }));
+      setSaveMessage('설정이 저장되었습니다.');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch {
+      setSaveMessage('저장에 실패했습니다.');
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -394,8 +407,13 @@ export function AdminSettingsPage() {
           </div>
 
           {/* Save button */}
-          <div className="mt-8 flex justify-end">
-            <Button size="md">설정 저장</Button>
+          <div className="mt-8 flex items-center justify-end gap-4">
+            {saveMessage ? (
+              <p className={`text-sm ${saveMessage.includes('실패') ? 'text-red-600' : 'text-green-600'}`}>
+                {saveMessage}
+              </p>
+            ) : null}
+            <Button size="md" onClick={handleSave}>설정 저장</Button>
           </div>
         </main>
       </div>

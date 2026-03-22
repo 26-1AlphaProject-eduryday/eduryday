@@ -8,6 +8,12 @@ interface CourseItem {
   title: string;
 }
 
+interface RubricCriterion {
+  id: string;
+  description: string;
+  weight: number;
+}
+
 export function CreateAssignmentPage() {
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [courseId, setCourseId] = useState('');
@@ -17,6 +23,9 @@ export function CreateAssignmentPage() {
   const [type, setType] = useState<'coding' | 'essay' | 'multiple-choice' | 'file'>('coding');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [rubric, setRubric] = useState<RubricCriterion[]>([
+    { id: '1', description: '', weight: 30 },
+  ]);
 
   useEffect(() => {
     async function loadCourses() {
@@ -53,6 +62,10 @@ export function CreateAssignmentPage() {
         type,
         courseId,
         status,
+        rubric: rubric.filter(r => r.description.trim()).map(r => ({
+          description: r.description.trim(),
+          weight: r.weight,
+        })),
       }),
     });
 
@@ -173,6 +186,78 @@ export function CreateAssignmentPage() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               placeholder="과제 설명과 요구사항을 입력하세요."
             />
+          </div>
+
+          {/* Rubric section */}
+          <div className="mt-6">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">채점 기준 (루브릭)</h2>
+                <p className="mt-0.5 text-xs text-gray-500">각 기준의 설명과 가중치를 입력하세요.</p>
+              </div>
+              <span className={`text-sm font-medium ${rubric.reduce((sum, r) => sum + r.weight, 0) === 100 ? 'text-green-600' : 'text-amber-600'}`}>
+                총 가중치: {rubric.reduce((sum, r) => sum + r.weight, 0)}%
+                {rubric.reduce((sum, r) => sum + r.weight, 0) !== 100 && ' (100%가 되어야 합니다)'}
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {rubric.map((criterion, index) => (
+                <div key={criterion.id} className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex-1">
+                    <label htmlFor={`rubric-desc-${criterion.id}`} className="mb-1 block text-xs font-medium text-gray-600">
+                      기준 {index + 1}
+                    </label>
+                    <textarea
+                      id={`rubric-desc-${criterion.id}`}
+                      value={criterion.description}
+                      onChange={(e) => {
+                        const updated = rubric.map(r => r.id === criterion.id ? { ...r, description: e.target.value } : r);
+                        setRubric(updated);
+                      }}
+                      rows={2}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                      placeholder="채점 기준 설명을 입력하세요."
+                    />
+                  </div>
+                  <div className="flex flex-col items-center gap-1 pt-5">
+                    <label htmlFor={`rubric-weight-${criterion.id}`} className="text-xs font-medium text-gray-600">가중치</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        id={`rubric-weight-${criterion.id}`}
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={criterion.weight}
+                        onChange={(e) => {
+                          const updated = rubric.map(r => r.id === criterion.id ? { ...r, weight: Number(e.target.value) } : r);
+                          setRubric(updated);
+                        }}
+                        className="w-16 rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-center"
+                      />
+                      <span className="text-sm text-gray-500">%</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setRubric(rubric.filter(r => r.id !== criterion.id))}
+                    disabled={rubric.length <= 1}
+                    className="mt-5 rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label={`기준 ${index + 1} 삭제`}
+                  >
+                    삭제
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setRubric([...rubric, { id: String(Date.now()), description: '', weight: 0 }])}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800"
+            >
+              + 채점 기준 추가
+            </button>
           </div>
 
           {message ? (

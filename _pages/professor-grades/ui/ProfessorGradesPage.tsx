@@ -45,6 +45,31 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
     [rows, selectedCourse],
   );
 
+  function handleExport() {
+    const headers = ['학생명', '학번', '강좌', '과제', '자동점수', '최종점수', '상태'];
+    const csvRows = [headers.join(',')];
+
+    for (const row of filteredRows) {
+      csvRows.push([
+        row.name,
+        row.studentId,
+        row.courseTitle,
+        row.assignmentTitle,
+        row.autoScore ?? '',
+        row.finalScore ?? '',
+        row.status,
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    }
+
+    const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `grades-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const scoredRows = filteredRows.filter((row) => row.finalScore !== null && row.status !== 'unsubmitted');
   const scores = scoredRows.map((row) => row.finalScore ?? 0);
   const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
@@ -62,9 +87,18 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
         <ProfessorSidebar />
 
         <main className="flex-1 p-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">학생 성적 관리</h1>
-            <p className="mt-1 text-sm text-gray-500">실제 제출 데이터 기준으로 학생별 성적을 확인합니다.</p>
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">학생 성적 관리</h1>
+              <p className="mt-1 text-sm text-gray-500">실제 제출 데이터 기준으로 학생별 성적을 확인합니다.</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+            >
+              CSV 내보내기
+            </button>
           </div>
 
           <div className="mb-6">
