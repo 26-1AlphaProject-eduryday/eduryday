@@ -1,20 +1,43 @@
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge, ProgressBar } from '@/shared/ui';
-import {
-  getCurrentProfessor,
-  getProfessorActivities,
-  getProfessorCourses,
-  getProfessorDashboardStats,
-} from '@/shared/lib/supabase/ui-seed';
 
-export async function ProfessorDashboardPage() {
-  const [professor, courses, stats, activities] = await Promise.all([
-    getCurrentProfessor(),
-    getProfessorCourses(),
-    getProfessorDashboardStats(),
-    getProfessorActivities(),
-  ]);
+interface ProfessorSummary {
+  name: string;
+  title: string;
+}
+
+interface ProfessorCourseCard {
+  id: string;
+  title: string;
+  semester: string;
+  students: number;
+  currentWeek: number;
+  totalWeeks: number;
+}
+
+interface ProfessorStat {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}
+
+interface ProfessorActivity {
+  color: string;
+  text: string;
+}
+
+export async function ProfessorDashboardPage({
+  professor,
+  courses,
+  stats,
+  activities,
+}: {
+  professor: ProfessorSummary;
+  courses: ProfessorCourseCard[];
+  stats: ProfessorStat[];
+  activities: ProfessorActivity[];
+}) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

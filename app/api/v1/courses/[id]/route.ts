@@ -15,6 +15,24 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   }
 
   const { id } = await params;
+
+  if (auth.role === 'student') {
+    const { data: enrollment, error: enrollmentError } = await client
+      .from('enrollments')
+      .select('id')
+      .eq('course_id', id)
+      .eq('student_id', auth.userId)
+      .maybeSingle();
+
+    if (enrollmentError) {
+      return fail('DB_ERROR', enrollmentError.message, 500);
+    }
+
+    if (!enrollment) {
+      return fail('FORBIDDEN', '수강 중인 강좌만 조회할 수 있습니다.', 403);
+    }
+  }
+
   const { data, error } = await client.from('courses').select('*').eq('id', id).maybeSingle();
 
   if (error) {
@@ -46,6 +64,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const updatePayload: {
     title?: string;
+    description?: string | null;
     professor_name?: string;
     semester?: string;
     section?: string | null;
@@ -57,6 +76,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   if (typeof body?.title === 'string') {
     updatePayload.title = body.title;
+  }
+  if (typeof body?.description === 'string' || body?.description === null) {
+    updatePayload.description = body.description;
   }
   if (typeof body?.professorName === 'string') {
     updatePayload.professor_name = body.professorName;

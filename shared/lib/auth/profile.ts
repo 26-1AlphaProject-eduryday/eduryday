@@ -7,6 +7,8 @@ export interface ProfileRecord {
   name: string;
   role: AppRole | null;
   status: ProfileStatus;
+  student_id?: string | null;
+  department?: string | null;
 }
 
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? 'eduryday@gmail.com').toLowerCase();

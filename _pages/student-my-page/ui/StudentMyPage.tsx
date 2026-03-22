@@ -4,11 +4,31 @@ import { useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { StatCard, Input, Button } from '@/shared/ui';
-import type { Student } from '@/entities/user';
-import type { CompletedCourseRecord, LearningStatRecord } from '@/shared/lib/supabase/ui-seed';
+
+interface StudentProfile {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
+  department: string;
+}
+
+interface LearningStatRecord {
+  label: string;
+  value: string;
+  trend: string;
+  trendColor: 'green' | 'red';
+}
+
+interface CompletedCourseRecord {
+  id: string;
+  title: string;
+  semester: string;
+  grade: string;
+}
 
 interface StudentMyPageProps {
-  student: Student;
+  student: StudentProfile;
   learningStats: LearningStatRecord[];
   completedCourses: CompletedCourseRecord[];
 }
@@ -19,6 +39,8 @@ export function StudentMyPage({
   completedCourses,
 }: StudentMyPageProps) {
   const [name, setName] = useState(student.name);
+  const [studentId, setStudentId] = useState(student.studentId);
+  const [department, setDepartment] = useState(student.department);
   const [message, setMessage] = useState('');
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -27,7 +49,7 @@ export function StudentMyPage({
     const res = await fetch('/api/v1/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, role: 'student', studentId, department }),
     });
     const json = await res.json();
 
@@ -88,15 +110,11 @@ export function StudentMyPage({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">학번</span>
-                    <span className="font-medium text-gray-700">2022XXXXXX</span>
+                    <span className="font-medium text-gray-700">{student.studentId || '-'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">소속</span>
-                    <span className="font-medium text-gray-700">컴퓨터공학부</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">학년</span>
-                    <span className="font-medium text-gray-700">3학년</span>
+                    <span className="font-medium text-gray-700">{student.department || '-'}</span>
                   </div>
                 </div>
               </section>
@@ -168,6 +186,17 @@ export function StudentMyPage({
                       placeholder="이름 입력"
                     />
                     <Input
+                      label="학번"
+                      id="student-id"
+                      name="studentId"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      placeholder="학번 입력"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
                       label="이메일"
                       id="email"
                       name="email"
@@ -176,28 +205,14 @@ export function StudentMyPage({
                       placeholder="이메일 입력"
                       disabled
                     />
-                  </div>
-
-                  <div className="border-t border-gray-100 pt-4">
-                    <h3 className="mb-4 text-sm font-medium text-gray-600">비밀번호 변경</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="현재 비밀번호"
-                        id="current-password"
-                        name="currentPassword"
-                        type="password"
-                        placeholder="현재 비밀번호"
-                        autoComplete="current-password"
-                      />
-                      <Input
-                        label="새 비밀번호"
-                        id="new-password"
-                        name="newPassword"
-                        type="password"
-                        placeholder="새 비밀번호 (8자 이상)"
-                        autoComplete="new-password"
-                      />
-                    </div>
+                    <Input
+                      label="소속"
+                      id="department"
+                      name="department"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      placeholder="소속 입력"
+                    />
                   </div>
 
                   <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
@@ -212,36 +227,6 @@ export function StudentMyPage({
                 </form>
               </section>
 
-              {/* Notification settings */}
-              <section
-                aria-label="알림 설정"
-                className="rounded-xl border border-gray-200 bg-white p-6"
-              >
-                <h2 className="mb-4 text-base font-semibold text-gray-700">알림 설정</h2>
-                <ul className="space-y-3">
-                  {[
-                    { id: 'notif-deadline', label: '과제 마감 알림 (D-2, D-1)' },
-                    { id: 'notif-grade', label: '채점 완료 알림' },
-                    { id: 'notif-notice', label: '강좌 공지사항 알림' },
-                  ].map((item) => (
-                    <li key={item.id} className="flex items-center justify-between">
-                      <label
-                        htmlFor={item.id}
-                        className="text-sm text-gray-700"
-                      >
-                        {item.label}
-                      </label>
-                      <input
-                        id={item.id}
-                        type="checkbox"
-                        defaultChecked
-                        className="h-4 w-4 rounded border-gray-300 accent-gray-700"
-                        aria-label={item.label}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
             </div>
           </div>
         </main>

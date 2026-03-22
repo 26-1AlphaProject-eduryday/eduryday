@@ -1,10 +1,11 @@
 import { ProfessorAnnouncementsPage } from '@/_pages/professor-announcements/ui/ProfessorAnnouncementsPage';
-import { getProfessorAnnouncements, getProfessorCourses } from '@/shared/lib/supabase/ui-seed';
 import { getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface AnnouncementJoinRow {
   id: string;
   title: string;
+  content: string;
+  course_id: string;
   pinned: boolean;
   views: number;
   created_at: string;
@@ -15,17 +16,7 @@ export default async function ProfessorAnnouncementsRoute() {
   const client = getServiceRoleClient();
 
   if (!client) {
-    const [courses, announcements] = await Promise.all([
-      getProfessorCourses(),
-      getProfessorAnnouncements(),
-    ]);
-
-    return (
-      <ProfessorAnnouncementsPage
-        courses={courses}
-        announcements={announcements}
-      />
-    );
+    return <ProfessorAnnouncementsPage courses={[]} announcements={[]} />;
   }
 
   const [courseRows, announcementRows] = await Promise.all([
@@ -35,7 +26,7 @@ export default async function ProfessorAnnouncementsRoute() {
       .order('created_at', { ascending: false }),
     client
       .from('announcements')
-      .select('id, title, pinned, views, created_at, courses(title)')
+      .select('id, title, content, course_id, pinned, views, created_at, courses(title)')
       .order('created_at', { ascending: false }),
   ]);
 
@@ -52,6 +43,8 @@ export default async function ProfessorAnnouncementsRoute() {
   const announcements = announcementData.map((row) => ({
     id: row.id,
     title: row.title,
+    content: row.content,
+    courseId: row.course_id,
     course: Array.isArray(row.courses) ? row.courses[0]?.title ?? '-' : row.courses?.title ?? '-',
     createdAt: row.created_at.slice(0, 10),
     views: row.views,

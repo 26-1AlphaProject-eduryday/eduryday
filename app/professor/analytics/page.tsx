@@ -1,5 +1,5 @@
-import { ProfessorAnalyticsPage } from '@/_pages/professor-analytics/ui/ProfessorAnalyticsPage';
+import { redirect } from 'next/navigation';
 
 export default function ProfessorAnalyticsRoute() {
-  return <ProfessorAnalyticsPage />;
+  redirect('/professor/dashboard');
 }
