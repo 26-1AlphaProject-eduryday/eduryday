@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
-import { Badge } from '@/shared/ui';
+import { Badge, TableSkeleton } from '@/shared/ui';
 
 type SubmissionStatus = 'complete' | 'reviewing' | 'unsubmitted';
 
@@ -68,7 +68,7 @@ export function GradingStatusPage() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="채점 현황" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8 flex items-start justify-between">
@@ -85,7 +85,7 @@ export function GradingStatusPage() {
             </button>
           </div>
 
-          <div className="mb-8 grid grid-cols-3 gap-4">
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">전체 학생</p>
               <p className="mt-1 text-3xl font-bold text-gray-900">{rows.length}</p>
@@ -100,7 +100,7 @@ export function GradingStatusPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -110,14 +110,13 @@ export function GradingStatusPage() {
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">AI 분석</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">최종 점수</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">상태</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700">액션</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">로딩 중...</td></tr>
+                  <TableSkeleton columns={6} rows={3} />
                 ) : rows.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
                 ) : (
                   rows.map((row) => (
                     <tr key={row.id} className={row.status === 'unsubmitted' ? 'bg-red-50' : ''}>
@@ -128,26 +127,28 @@ export function GradingStatusPage() {
                       <td className="px-4 py-3 text-gray-600">{row.submittedAt}</td>
                       <td className="px-4 py-3 text-gray-700">{row.autoScore}</td>
                       <td className="px-4 py-3 text-gray-700">{row.aiAnalysis}</td>
-                      <td className="px-4 py-3 text-gray-700">{row.finalScore}</td>
-                      <td className="px-4 py-3"><Badge variant={STATUS_BADGE[row.status].variant}>{STATUS_BADGE[row.status].label}</Badge></td>
                       <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextScore = window.prompt('최종 점수를 입력하세요', row.finalScore);
-                            if (nextScore === null) {
-                              return;
-                            }
-                            const value = Number(nextScore);
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          defaultValue={row.finalScore}
+                          disabled={row.status === 'unsubmitted'}
+                          onBlur={(e) => {
+                            const value = Number(e.target.value);
                             if (Number.isFinite(value)) {
                               updateScore(row.id, value);
                             }
                           }}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          점수저장
-                        </button>
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                        />
                       </td>
+                      <td className="px-4 py-3"><Badge variant={STATUS_BADGE[row.status].variant}>{STATUS_BADGE[row.status].label}</Badge></td>
                     </tr>
                   ))
                 )}

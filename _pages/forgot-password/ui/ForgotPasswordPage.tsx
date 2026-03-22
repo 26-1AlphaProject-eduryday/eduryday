@@ -9,10 +9,10 @@ function LogoMark() {
   return (
     <div className="mb-8 text-center">
       <div
-        className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200"
+        className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-800"
         aria-hidden="true"
       >
-        <div className="h-5 w-5 rounded-sm bg-gray-500" aria-hidden="true" />
+        <div className="h-5 w-5 rounded-sm bg-white" aria-hidden="true" />
       </div>
       <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
       <p className="mt-2 text-sm text-gray-500">AI 기반 통합 교육 플랫폼</p>

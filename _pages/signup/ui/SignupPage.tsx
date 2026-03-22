@@ -8,8 +8,8 @@ import { getSupabaseBrowserClient } from '@/shared/lib/supabase/auth-browser';
 function LogoMark() {
   return (
     <div className="mb-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200">
-        <div className="h-5 w-5 rounded-sm bg-gray-500" aria-hidden="true" />
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-800">
+        <div className="h-5 w-5 rounded-sm bg-white" aria-hidden="true" />
       </div>
       <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
       <p className="mt-2 text-sm text-gray-500">AI 기반 통합 교육 플랫폼</p>
@@ -195,7 +195,7 @@ function SignupCard() {
           disabled={isSubmitting}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          <div className="h-5 w-5 rounded-full border-2 border-dashed border-gray-300 bg-gray-200" />
+          <div className="h-5 w-5 rounded-full bg-gray-300" />
           Google로 로그인하고 신청하기
         </button>
       </div>
@@ -262,7 +262,7 @@ function SignupCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-3 w-full rounded-lg bg-gray-900 py-3 font-medium !text-white transition-colors hover:bg-gray-800 active:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+          className="mt-3 w-full rounded-lg bg-gray-900 py-3 font-medium text-white transition-colors hover:bg-gray-800 active:bg-black disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? '처리 중...' : '가입 신청 제출'}
         </button>

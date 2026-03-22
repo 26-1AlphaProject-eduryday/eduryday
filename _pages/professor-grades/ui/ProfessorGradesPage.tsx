@@ -59,11 +59,11 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="성적 관리" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">학생 성적 관리</h1>
+            <h1 className="text-2xl font-bold text-gray-900">학생 성적 관리</h1>
             <p className="mt-1 text-sm text-gray-500">실제 제출 데이터 기준으로 학생별 성적을 확인합니다.</p>
           </div>
 
@@ -86,7 +86,7 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
             </select>
           </div>
 
-          <div className="mb-6 grid grid-cols-4 gap-4">
+          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">행 수</p>
               <p className="mt-1 text-2xl font-bold text-gray-800">{filteredRows.length}건</p>
@@ -106,7 +106,7 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
           </div>
 
           <section aria-label="학생 성적 테이블">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-sm" role="table">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">

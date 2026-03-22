@@ -44,12 +44,12 @@ export async function ProfessorDashboardPage({
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="대시보드" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           {/* Welcome */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">
+            <h1 className="text-2xl font-bold text-gray-900">
               안녕하세요, {professor.name} {professor.title}!
             </h1>
             <p className="mt-1 text-sm text-gray-500">
@@ -59,7 +59,7 @@ export async function ProfessorDashboardPage({
 
           {/* Stats grid */}
           {stats.length > 0 ? (
-            <div className="mb-8 grid grid-cols-4 gap-6">
+            <div className="mb-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
@@ -83,7 +83,7 @@ export async function ProfessorDashboardPage({
           )}
 
           {/* 2-column layout (3:1) */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Left col: courses (col-span-2) */}
             <section className="col-span-2" aria-label="내 강좌">
               <div className="mb-4 flex items-center justify-between">
@@ -190,7 +190,7 @@ export async function ProfessorDashboardPage({
 
                 <div className="mt-6 border-t border-gray-100 pt-4">
                   <a
-                    href="/professor/activity"
+                    href="/professor/analytics"
                     className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
                   >
                     전체 활동 보기 &rarr;
@@ -205,11 +205,11 @@ export async function ProfessorDashboardPage({
             <h2 className="mb-4 text-lg font-semibold text-gray-700">
               제출 현황 요약
             </h2>
-            <div
-              className="flex h-48 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white"
-              aria-label="제출 현황 차트 영역"
-            >
-              <span className="text-sm text-gray-400">차트 영역</span>
+            <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-500">차트 데이터 준비 중</p>
+                <p className="mt-1 text-xs text-gray-400">추후 업데이트 예정입니다</p>
+              </div>
             </div>
           </section>
         </main>

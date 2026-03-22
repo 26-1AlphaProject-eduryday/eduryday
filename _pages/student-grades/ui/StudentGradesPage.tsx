@@ -32,19 +32,19 @@ export async function StudentGradesPage({ grades }: { grades: StudentGradeRecord
       <StudentHeader />
 
       <div className="flex flex-1">
-        <StudentSidebar activeItem="성적" />
+        <StudentSidebar />
 
         <main className="flex-1 p-8">
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">성적 확인</h1>
+            <h1 className="text-2xl font-bold text-gray-900">성적 확인</h1>
             <p className="mt-1 text-sm text-gray-500">
               강좌별 과제 점수와 AI 피드백을 확인하세요.
             </p>
           </div>
 
           {/* Stat cards */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
               label="평균 점수"
               value={`${avgScore}점`}
@@ -67,7 +67,7 @@ export async function StudentGradesPage({ grades }: { grades: StudentGradeRecord
 
           {/* Grades table */}
           <section aria-label="성적 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">

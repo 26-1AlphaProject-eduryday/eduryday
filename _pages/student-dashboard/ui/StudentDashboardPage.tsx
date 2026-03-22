@@ -45,18 +45,18 @@ export async function StudentDashboardPage({
       <StudentHeader />
 
       <div className="flex flex-1">
-        <StudentSidebar activeItem="대시보드" />
+        <StudentSidebar />
 
         <main className="flex-1 p-8">
           {/* Welcome */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">안녕하세요, {student.name}님!</h1>
+            <h1 className="text-2xl font-bold text-gray-900">안녕하세요, {student.name}님!</h1>
             <p className="mt-1 text-sm text-gray-500">오늘도 열심히 학습해봐요</p>
           </div>
 
           {/* Stats grid */}
           {stats.length > 0 ? (
-            <div className="mb-8 grid grid-cols-4 gap-6">
+            <div className="mb-8 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
               {stats.map((item) => (
                 <div
                   key={item.label}
@@ -86,7 +86,7 @@ export async function StudentDashboardPage({
             </div>
 
             {courses.length > 0 ? (
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {courses.map((course) => (
                   <Link
                     key={course.id}

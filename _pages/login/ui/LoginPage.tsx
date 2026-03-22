@@ -15,8 +15,8 @@ import { getSupabaseBrowserClient } from '@/shared/lib/supabase/auth-browser';
 function LogoMark() {
   return (
     <div className="mb-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-200">
-        <div className="h-5 w-5 rounded-sm bg-gray-500" aria-hidden="true" />
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gray-800">
+        <div className="h-5 w-5 rounded-sm bg-white" aria-hidden="true" />
       </div>
       <h1 className="text-2xl font-bold text-gray-900">EduRyday</h1>
       <p className="mt-2 text-sm text-gray-600">AI 기반 통합 교육 플랫폼</p>
@@ -124,7 +124,7 @@ function LoginCard() {
         onClick={handleGoogleLogin}
         className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        <div className="h-5 w-5 rounded border-2 border-dashed border-gray-300 bg-gray-200" />
+        <div className="h-5 w-5 rounded bg-gray-300" />
         Google로 계속하기
       </button>
 

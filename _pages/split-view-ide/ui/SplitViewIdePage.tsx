@@ -127,7 +127,8 @@ function IdeHeader({ student }: { student: Student }) {
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
-          className="rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+          disabled
+          className="cursor-not-allowed rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 opacity-50"
         >
           저장
         </button>
@@ -155,10 +156,11 @@ function ProblemTabs() {
           type="button"
           role="tab"
           aria-selected={i === 0}
+          disabled={i !== 0}
           className={
             i === 0
               ? 'border-b-2 border-gray-800 px-5 py-3 text-sm font-medium text-gray-900'
-              : 'px-5 py-3 text-sm text-gray-500 hover:text-gray-700'
+              : 'cursor-not-allowed px-5 py-3 text-sm text-gray-500 opacity-50'
           }
         >
           {tab}
@@ -266,13 +268,15 @@ function EditorHeader() {
       <div className="flex items-center gap-2">
         <button
           type="button"
-          className="rounded px-3 py-1.5 text-xs text-gray-500 transition-colors hover:bg-gray-200"
+          disabled
+          className="cursor-not-allowed rounded px-3 py-1.5 text-xs text-gray-500 opacity-50"
         >
           초기화
         </button>
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+          disabled
+          className="flex cursor-not-allowed items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -287,7 +291,7 @@ function EditorHeader() {
               clipRule="evenodd"
             />
           </svg>
-          실행
+          실행 (준비 중)
         </button>
       </div>
     </div>
@@ -377,9 +381,10 @@ function RightPanel({ testResults }: { testResults: TestResult[] }) {
       <div className="border-t border-gray-200 bg-gray-50 p-4">
         <button
           type="button"
-          className="w-full rounded-lg bg-gray-800 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-700"
+          disabled
+          className="w-full cursor-not-allowed rounded-lg bg-gray-800 py-2.5 text-sm font-medium text-white opacity-50"
         >
-          제출하기
+          제출하기 (준비 중)
         </button>
       </div>
     </div>

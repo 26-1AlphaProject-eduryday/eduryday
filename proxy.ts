@@ -14,11 +14,14 @@ interface ProfileRow {
   status: string | null;
 }
 
+const PUBLIC_API_ROUTES = new Set(['/api/v1/health']);
+
 function isPublicPath(pathname: string) {
   const publicRoutes = [
     '/',
     '/login',
     '/signup',
+    '/forgot-password',
     '/auth/callback',
     '/auth/role',
     '/pending',
@@ -56,10 +59,20 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const needRole = requiredRole(pathname);
+  const isProtectedApi = pathname.startsWith('/api/v1') && !PUBLIC_API_ROUTES.has(pathname);
 
   if (!user) {
+    if (isProtectedApi) {
+      return NextResponse.json(
+        { ok: false, code: 'UNAUTHORIZED', message: '인증이 필요합니다.' },
+        { status: 401 },
+      );
+    }
+
     if (needRole) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
     }
 
     return response;

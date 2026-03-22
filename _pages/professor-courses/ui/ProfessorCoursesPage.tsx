@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
-import { Badge, ProgressBar } from '@/shared/ui';
+import { Badge, ProgressBar, Skeleton } from '@/shared/ui';
 
 interface CourseItem {
   id: string;
@@ -68,12 +68,12 @@ export function ProfessorCoursesPage() {
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="내 강좌" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-700">내 강좌</h1>
+              <h1 className="text-2xl font-bold text-gray-900">내 강좌</h1>
               <p className="mt-1 text-sm text-gray-500">운영 중인 강좌를 관리하세요</p>
             </div>
             <a href="/professor/courses/create" className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
@@ -81,7 +81,7 @@ export function ProfessorCoursesPage() {
             </a>
           </div>
 
-          <div className="mb-6 grid grid-cols-3 gap-4">
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">운영 중인 강좌</p>
               <p className="mt-1 text-2xl font-bold text-gray-800">{courses.length}개</p>
@@ -99,7 +99,11 @@ export function ProfessorCoursesPage() {
           <section aria-label="강좌 목록">
             <div className="space-y-4">
               {loading ? (
-                <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">로딩 중...</div>
+                <div className="space-y-3 p-6">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-5 w-1/2" />
+                  <Skeleton className="h-5 w-2/3" />
+                </div>
               ) : courses.length === 0 ? (
                 <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">강좌가 없습니다.</div>
               ) : (

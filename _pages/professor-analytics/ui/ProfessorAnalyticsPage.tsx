@@ -33,19 +33,19 @@ export async function ProfessorAnalyticsPage() {
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="학습 분석" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">학습 분석</h1>
+            <h1 className="text-2xl font-bold text-gray-900">학습 분석</h1>
             <p className="mt-1 text-sm text-gray-500">
               수강생의 학습 패턴과 취약점을 분석합니다 &mdash; 2026-1학기 기준
             </p>
           </div>
 
           {/* Stat cards */}
-          <div className="mb-8 grid grid-cols-4 gap-5">
+          <div className="mb-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
             {statCards.map((stat) => (
               <StatCard
                 key={stat.label}
@@ -58,13 +58,13 @@ export async function ProfessorAnalyticsPage() {
           </div>
 
           {/* Top misconceptions + weekly chart */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Misconceptions list */}
             <section className="col-span-2" aria-label="자주 틀리는 개념 Top 5">
               <h2 className="mb-3 text-base font-semibold text-gray-700">
                 자주 틀리는 개념 Top 5
               </h2>
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                 <table className="w-full text-sm" role="table">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50">

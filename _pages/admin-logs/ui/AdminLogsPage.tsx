@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
-import { Badge, Button } from '@/shared/ui';
+import { Badge, Button, TableSkeleton } from '@/shared/ui';
 
 type LogType = 'error' | 'access' | 'grading' | 'ai' | 'login' | 'submit' | 'course';
 
@@ -72,7 +72,7 @@ export function AdminLogsPage() {
       <AdminHeader />
 
       <div className="flex flex-1">
-        <AdminSidebar activeItem="로그/모니터링" />
+        <AdminSidebar />
 
         <main className="flex-1 bg-gray-50 p-8">
           <div className="mb-6">
@@ -100,7 +100,7 @@ export function AdminLogsPage() {
           </div>
 
           <section aria-label="로그 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 bg-gray-50">
                   <tr>
@@ -112,8 +112,8 @@ export function AdminLogsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-500">로딩 중...</td></tr>
-                  ) : logs.length === 0 ? (
+                    <TableSkeleton columns={4} rows={3} />
+                  ) :logs.length === 0 ? (
                     <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-500">로그가 없습니다.</td></tr>
                   ) : (
                     logs.map((log) => (

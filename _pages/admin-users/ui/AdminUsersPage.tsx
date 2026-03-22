@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
-import { Badge, Button } from '@/shared/ui';
+import { Badge, Button, TableSkeleton } from '@/shared/ui';
 
 type UserRole = '학생' | '교수' | '관리자';
 type UserStatus = '활성' | '정지' | '승인대기';
@@ -115,7 +115,7 @@ export function AdminUsersPage() {
       <AdminHeader />
 
       <div className="flex flex-1">
-        <AdminSidebar activeItem="사용자 관리" />
+        <AdminSidebar />
 
         <main className="flex-1 bg-gray-50 p-8">
           <div className="mb-6">
@@ -123,7 +123,7 @@ export function AdminUsersPage() {
             <p className="mt-1 text-sm text-gray-500">전체 사용자 계정을 관리합니다</p>
           </div>
 
-          <div className="mb-8 grid grid-cols-4 gap-4">
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <p className="text-sm text-gray-500">전체 사용자</p>
               <p className="mt-1 text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
@@ -179,7 +179,7 @@ export function AdminUsersPage() {
           </form>
 
           <section aria-label="사용자 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 bg-gray-50">
                   <tr>
@@ -194,10 +194,8 @@ export function AdminUsersPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr>
-                      <td colSpan={7} className="px-5 py-8 text-center text-gray-500">로딩 중...</td>
-                    </tr>
-                  ) : users.length === 0 ? (
+                    <TableSkeleton columns={7} rows={3} />
+                  ) :users.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-5 py-8 text-center text-gray-500">사용자가 없습니다.</td>
                     </tr>

@@ -18,7 +18,7 @@ import {
 function HeroSection() {
   return (
     <section className="px-8 py-20">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 items-center gap-12">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
         {/* Left: copy */}
         <div>
           <h1 className="mb-6 text-5xl font-bold text-gray-900">
@@ -34,7 +34,7 @@ function HeroSection() {
           <div className="flex gap-4">
             <Link
               href="/signup"
-              className="rounded-lg bg-gray-900 px-8 py-4 text-lg font-medium !text-white transition-colors hover:bg-gray-800"
+              className="rounded-lg bg-gray-900 px-8 py-4 text-lg font-medium text-white transition-colors hover:bg-gray-800"
             >
               무료로 시작하기
             </Link>
@@ -72,7 +72,7 @@ function FeaturesSection({ features }: { features: LandingFeatureRecord[] }) {
         <p className="mb-12 text-center text-gray-600">분절된 학습 환경을 하나로 통합합니다</p>
 
         {features.length > 0 ? (
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
@@ -104,10 +104,10 @@ function TeamSection({ team }: { team: LandingTeamRecord[] }) {
         </p>
 
         {team.length > 0 ? (
-          <div className="mx-auto grid max-w-5xl grid-cols-5 gap-6">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
             {team.map((member) => (
               <div key={member.name} className="text-center">
-                <div className="mx-auto mb-3 h-16 w-16 rounded-full border-2 border-dashed border-gray-300 bg-gray-200" />
+                <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gray-300" />
                 <div className="font-bold text-gray-900">{member.name}</div>
                 <div className="mt-1 text-sm text-gray-500">{member.role}</div>
                 <div className="mt-1 text-xs text-gray-500">{member.description}</div>
@@ -126,7 +126,7 @@ function StatsSection({ stats }: { stats: LandingStatRecord[] }) {
   return (
     <section className="px-8 py-16">
       {stats.length > 0 ? (
-        <div className="mx-auto grid max-w-7xl grid-cols-4 gap-8 text-center">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 text-center sm:grid-cols-3 lg:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label}>
               <div className="text-4xl font-bold text-gray-900">{stat.value}</div>

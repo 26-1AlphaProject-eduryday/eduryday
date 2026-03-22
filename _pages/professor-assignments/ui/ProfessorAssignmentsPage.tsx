@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
-import { Badge } from '@/shared/ui';
+import { Badge, TableSkeleton } from '@/shared/ui';
 
 type AssignmentType = 'coding' | 'essay' | 'multiple-choice' | 'file';
 type AssignmentStatus = 'active' | 'closed' | 'draft';
@@ -75,18 +75,18 @@ export function ProfessorAssignmentsPage() {
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="과제 관리" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-700">과제 관리</h1>
+              <h1 className="text-2xl font-bold text-gray-900">과제 관리</h1>
               <p className="mt-1 text-sm text-gray-500">강좌별 과제를 출제하고 현황을 확인하세요</p>
             </div>
             <a href="/professor/courses/create" className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">과제 출제하기</a>
           </div>
 
-          <div className="mb-6 grid grid-cols-4 gap-4">
+          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             <div className="rounded-xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">전체 과제</p><p className="mt-1 text-2xl font-bold text-gray-800">{assignments.length}개</p></div>
             <div className="rounded-xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">진행 중</p><p className="mt-1 text-2xl font-bold text-blue-600">{activeCount}개</p></div>
             <div className="rounded-xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-500">총 제출 건수</p><p className="mt-1 text-2xl font-bold text-gray-800">{totalSubmitted}건</p></div>
@@ -94,7 +94,7 @@ export function ProfessorAssignmentsPage() {
           </div>
 
           <section aria-label="과제 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
@@ -110,8 +110,8 @@ export function ProfessorAssignmentsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr><td colSpan={8} className="px-6 py-8 text-center text-gray-500">로딩 중...</td></tr>
-                  ) : assignments.length === 0 ? (
+                    <TableSkeleton columns={8} rows={3} />
+                  ) :assignments.length === 0 ? (
                     <tr><td colSpan={8} className="px-6 py-8 text-center text-gray-500">과제가 없습니다.</td></tr>
                   ) : (
                     assignments.map((assignment) => (

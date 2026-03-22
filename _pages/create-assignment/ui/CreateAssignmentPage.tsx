@@ -35,6 +35,11 @@ export function CreateAssignmentPage() {
   }, []);
 
   async function saveAssignment(status: 'draft' | 'active') {
+    if (title.trim() === '') {
+      setMessage('제목을 입력해주세요.');
+      return;
+    }
+
     setSubmitting(true);
     setMessage('');
 
@@ -106,7 +111,7 @@ export function CreateAssignmentPage() {
           <h1 className="text-xl font-bold text-gray-900">과제 정보 작성</h1>
           <p className="mt-1.5 text-sm text-gray-500">강좌와 제출 마감 정보를 입력하고 과제를 생성하세요.</p>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="course-id" className="mb-1 block text-sm font-medium text-gray-700">강좌</label>
               <select
@@ -170,7 +175,9 @@ export function CreateAssignmentPage() {
             />
           </div>
 
-          {message ? <p className="mt-4 text-sm text-gray-700">{message}</p> : null}
+          {message ? (
+            <p className={`mt-4 text-sm ${message.includes('실패') || message.includes('오류') || message.includes('입력') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>
+          ) : null}
         </div>
       </div>
     </div>

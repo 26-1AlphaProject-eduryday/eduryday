@@ -45,7 +45,9 @@ function Sidebar({ conversations }: { conversations: Conversation[] }) {
       <div className="border-b border-gray-200 p-4">
         <button
           type="button"
-          className="w-full rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          disabled
+          title="준비 중"
+          className="w-full cursor-not-allowed rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 opacity-50"
         >
           + 새 대화 시작
         </button>
@@ -83,7 +85,8 @@ function ChatHeader() {
       <div className="flex items-center gap-2">
         <button
           type="button"
-          className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:bg-gray-50"
+          disabled
+          className="cursor-not-allowed rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 opacity-50"
         >
           대화 저장
         </button>
@@ -218,7 +221,9 @@ function InputArea() {
         <button
           type="button"
           aria-label="파일 첨부"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50"
+          disabled
+          title="준비 중"
+          className="flex h-9 w-9 shrink-0 cursor-not-allowed items-center justify-center rounded-lg border border-gray-200 text-gray-500 opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -240,8 +245,9 @@ function InputArea() {
         {/* Text input */}
         <input
           type="text"
-          placeholder="질문을 입력하세요..."
-          className="flex-1 rounded-lg border border-gray-200 py-2 pl-4 pr-12 text-sm text-gray-700 placeholder-gray-500 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
+          disabled
+          placeholder="AI 튜터 기능 준비 중입니다"
+          className="flex-1 cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 py-2 pl-4 pr-12 text-sm text-gray-400 placeholder-gray-400 outline-none"
           aria-label="질문 입력"
         />
 
@@ -249,7 +255,9 @@ function InputArea() {
         <button
           type="button"
           aria-label="전송"
-          className="absolute right-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-gray-800 text-white transition-colors hover:bg-gray-700"
+          disabled
+          title="준비 중"
+          className="absolute right-1.5 flex h-7 w-7 cursor-not-allowed items-center justify-center rounded-md bg-gray-800 text-white opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
