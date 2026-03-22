@@ -1,7 +1,8 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, UIMessage } from 'ai';
+import { DefaultChatTransport } from 'ai';
+import type { UIMessage } from '@ai-sdk/react';
 import { useEffect, useRef, useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
@@ -27,23 +28,18 @@ export function AiTutorPage() {
   const [aiAvailable, setAiAvailable] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const activeConversationIdRef = useRef<string | null>(null);
 
-  // Keep ref in sync so onFinish closure always has the latest value
-  useEffect(() => {
-    activeConversationIdRef.current = activeConversationId;
-  }, [activeConversationId]);
 
   const { messages, sendMessage, setMessages, status, error } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/v1/chat',
-      prepareSendMessagesRequest: ({ body, ...rest }) => ({
+      prepareSendMessagesRequest: ({ messages: msgs, body, ...rest }) => ({
         ...rest,
-        body: { ...body, conversationId: activeConversationIdRef.current },
+        body: { ...body, messages: msgs, conversationId: activeConversationId },
       }),
     }),
     onFinish: async ({ message, messages: allMessages }) => {
-      const convId = activeConversationIdRef.current;
+      const convId = activeConversationId;
       if (convId) {
         const firstUserMsg = allMessages.find((m) => m.role === 'user');
         await fetch(`/api/v1/conversations/${convId}`, {
