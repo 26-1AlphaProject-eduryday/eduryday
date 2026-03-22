@@ -65,7 +65,7 @@ interface SubmissionRow {
   } | null;
 }
 
-interface ProfesssorCourseRow {
+interface ProfessorCourseRow {
   id: string;
   title: string;
   semester: string;
@@ -318,14 +318,14 @@ export async function getDbProfessorCourses(): Promise<ProfessorCourse[]> {
     .select('id, title, semester, section, student_count, current_week, total_weeks')
     .eq('created_by', ctx.userId)
     .order('created_at', { ascending: false })
-    .returns<ProfesssorCourseRow[]>();
+    .returns<ProfessorCourseRow[]>();
 
   if (!data) return [];
 
   return data.map((row) => ({
     id: row.id,
     title: row.title,
-    semester: row.section ? `${row.semester} ${row.section}` : row.semester,
+    semester: row.section ? `${row.semester ?? ''} ${row.section}`.trim() : (row.semester ?? ''),
     students: row.student_count,
     currentWeek: row.current_week,
     totalWeeks: row.total_weeks,
