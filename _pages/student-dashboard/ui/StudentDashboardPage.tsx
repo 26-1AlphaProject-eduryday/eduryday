@@ -3,19 +3,19 @@ import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { ProgressBar } from '@/shared/ui';
 import {
-  getCurrentStudent,
-  getDeadlines,
-  getStudentCourses,
-  getStudentDashboardStats,
-} from '@/shared/lib/supabase/ui-seed';
+  getDbCurrentStudent,
+  getDbDeadlines,
+  getDbStudentCourses,
+  getDbStudentDashboardStats,
+} from '@/shared/lib/supabase/db-queries';
 
 export async function StudentDashboardPage() {
-  const [student, courses, deadlines, stats] = await Promise.all([
-    getCurrentStudent(),
-    getStudentCourses(),
-    getDeadlines(),
-    getStudentDashboardStats(),
+  const [student, courses, deadlines] = await Promise.all([
+    getDbCurrentStudent(),
+    getDbStudentCourses(),
+    getDbDeadlines(),
   ]);
+  const stats = await getDbStudentDashboardStats(courses.length, deadlines.length);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

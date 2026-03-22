@@ -10,7 +10,7 @@ interface MiddlewareClientResult {
 export function getSupabaseMiddlewareClient(request: NextRequest): MiddlewareClientResult {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   if (!url || !anonKey) {
     return { supabase: null, response };

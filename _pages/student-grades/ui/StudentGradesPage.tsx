@@ -1,7 +1,8 @@
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { StatCard, Badge } from '@/shared/ui';
-import { getStudentGrades, type StudentGradeRecord } from '@/shared/lib/supabase/ui-seed';
+import type { StudentGradeRecord } from '@/shared/lib/supabase/ui-seed';
+import { getDbStudentGrades } from '@/shared/lib/supabase/db-queries';
 
 function getScoreVariant(score: number, maxScore: number): 'green' | 'blue' | 'yellow' | 'red' {
   const pct = (score / maxScore) * 100;
@@ -12,7 +13,7 @@ function getScoreVariant(score: number, maxScore: number): 'green' | 'blue' | 'y
 }
 
 export async function StudentGradesPage() {
-  const grades = await getStudentGrades();
+  const grades = await getDbStudentGrades();
   const graded = grades.filter((g) => g.status === 'graded');
   const scores = graded.map((g) => g.score);
   const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;

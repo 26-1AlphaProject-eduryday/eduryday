@@ -1,12 +1,8 @@
 import { StudentMyPage } from '@/_pages/student-my-page/ui/StudentMyPage';
-import { getCompletedCourses, getCurrentStudent, getLearningStats } from '@/shared/lib/supabase/ui-seed';
+import { getDbStudentProfile } from '@/shared/lib/supabase/db-queries';
 
 export default async function StudentMyPageRoute() {
-  const [student, learningStats, completedCourses] = await Promise.all([
-    getCurrentStudent(),
-    getLearningStats(),
-    getCompletedCourses(),
-  ]);
+  const { student, learningStats, completedCourses } = await getDbStudentProfile();
 
   return (
     <StudentMyPage

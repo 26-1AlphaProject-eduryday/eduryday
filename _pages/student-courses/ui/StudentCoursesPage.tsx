@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 import { ProgressBar, Badge } from '@/shared/ui';
-import { getStudentCourses } from '@/shared/lib/supabase/ui-seed';
+import { getDbStudentCourses } from '@/shared/lib/supabase/db-queries';
 
 const COURSE_CATEGORIES: Record<string, { label: string; variant: 'blue' | 'green' | 'purple' | 'yellow' }> = {
   '1': { label: '알고리즘', variant: 'blue' },
@@ -17,7 +17,7 @@ function getCategoryColor(progress: number): 'blue' | 'green' | 'gray' {
 }
 
 export async function StudentCoursesPage() {
-  const courses = await getStudentCourses();
+  const courses = await getDbStudentCourses();
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">

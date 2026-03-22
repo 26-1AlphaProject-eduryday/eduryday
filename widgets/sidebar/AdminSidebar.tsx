@@ -6,9 +6,7 @@ const NAV_ITEMS = [
   { label: '대시보드', href: '/admin/dashboard' },
   { label: '사용자 관리', href: '/admin/users' },
   { label: '강좌 관리', href: '/admin/courses' },
-  { label: '시스템 설정', href: '/admin/settings' },
   { label: '로그/모니터링', href: '/admin/logs' },
-  { label: 'AI 설정', href: '/admin/settings' },
 ];
 
 export function AdminSidebar({ activeItem }: AdminSidebarProps) {

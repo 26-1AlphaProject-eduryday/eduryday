@@ -2,12 +2,9 @@ import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Badge } from '@/shared/ui';
 import {
-  getAdminActivityLogs,
-  getAdminAlerts,
-  getAdminDashboardStats,
-  getAdminServerResources,
-  getAdminUserDistribution,
-} from '@/shared/lib/supabase/ui-seed';
+  getDbAdminDashboardStats,
+  getDbAdminActivityLogs,
+} from '@/shared/lib/supabase/db-queries';
 
 type LogType = 'login' | 'submit' | 'ai' | 'course';
 
@@ -19,12 +16,9 @@ const LOG_BADGE: Record<LogType, { label: string; variant: 'blue' | 'green' | 'p
 };
 
 export async function AdminDashboardPage() {
-  const [stats, userDistribution, serverResources, alerts, activityLogs] = await Promise.all([
-    getAdminDashboardStats(),
-    getAdminUserDistribution(),
-    getAdminServerResources(),
-    getAdminAlerts(),
-    getAdminActivityLogs(),
+  const [stats, activityLogs] = await Promise.all([
+    getDbAdminDashboardStats(),
+    getDbAdminActivityLogs(),
   ]);
 
   return (
@@ -83,138 +77,6 @@ export async function AdminDashboardPage() {
               대시보드 통계 데이터가 없습니다.
             </div>
           )}
-
-          {/* 3-column section */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
-            {/* User distribution */}
-            <section
-              aria-label="사용자 분포"
-              className="rounded-xl border border-gray-200 bg-white p-6"
-            >
-              <h2 className="mb-5 text-base font-semibold text-gray-900">사용자 분포</h2>
-              {userDistribution.length > 0 ? (
-                <ul className="space-y-5">
-                  {userDistribution.map((item) => (
-                    <li key={item.role}>
-                      <div className="mb-1.5 flex items-center justify-between text-sm">
-                        <span className="font-medium text-gray-700">{item.role}</span>
-                        <span className="text-gray-500">{item.count}</span>
-                      </div>
-                      <div
-                        className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
-                        role="progressbar"
-                        aria-valuenow={item.percent}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={`${item.role} ${item.percent}%`}
-                      >
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
-                          style={{ width: `${item.percent}%` }}
-                        />
-                      </div>
-                      <p className="mt-1 text-right text-xs text-gray-400">{item.percent}%</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">사용자 분포 데이터가 없습니다.</p>
-              )}
-            </section>
-
-            {/* Server resources */}
-            <section
-              aria-label="서버 리소스"
-              className="rounded-xl border border-gray-200 bg-white p-6"
-            >
-              <h2 className="mb-5 text-base font-semibold text-gray-900">서버 리소스</h2>
-              {serverResources.length > 0 ? (
-                <ul className="space-y-5">
-                  {serverResources.map((item) => (
-                    <li key={item.label}>
-                      <div className="mb-1.5 flex items-center justify-between text-sm">
-                        <span className="font-medium text-gray-700">{item.label}</span>
-                        <span className="text-gray-500">
-                          {item.displayValue ?? `${item.value}%`}
-                        </span>
-                      </div>
-                      <div
-                        className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
-                        role="progressbar"
-                        aria-valuenow={item.value}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={`${item.label} ${item.value}%`}
-                      >
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${item.barClassName}`}
-                          style={{ width: `${item.value}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">서버 리소스 데이터가 없습니다.</p>
-              )}
-            </section>
-
-            {/* Recent alerts */}
-            <section
-              aria-label="최근 알림"
-              className="rounded-xl border border-gray-200 bg-white p-6"
-            >
-              <h2 className="mb-5 text-base font-semibold text-gray-900">최근 알림</h2>
-              {alerts.length > 0 ? (
-                <ul className="space-y-3">
-                  {alerts.map((alert) => (
-                    <li
-                      key={alert.message}
-                      className={`flex items-start gap-3 rounded-lg border p-3 ${alert.bgClassName}`}
-                    >
-                      <span
-                        className="mt-px flex-shrink-0 text-sm"
-                        aria-hidden="true"
-                      >
-                        {alert.icon}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-800">{alert.message}</p>
-                        <p className="text-xs text-gray-500">{alert.time}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">최근 알림이 없습니다.</p>
-              )}
-            </section>
-          </div>
-
-          {/* Daily activity chart placeholder */}
-          <section
-            aria-label="일별 활동 현황"
-            className="mb-8 rounded-xl border border-gray-200 bg-white p-6"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-gray-900">일별 활동 현황</h2>
-              <select
-                aria-label="기간 필터"
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                defaultValue="7d"
-              >
-                <option value="7d">최근 7일</option>
-                <option value="30d">최근 30일</option>
-                <option value="90d">최근 90일</option>
-              </select>
-            </div>
-            <div
-              className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50"
-              aria-label="일별 활동 차트 영역"
-            >
-              <span className="text-sm text-gray-400">차트 영역</span>
-            </div>
-          </section>
 
           {/* Activity log table */}
           <section aria-label="최근 활동 로그">

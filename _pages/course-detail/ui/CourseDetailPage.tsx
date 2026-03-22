@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { StudentHeader } from '@/widgets/header';
 import { ProgressBar, Badge, Button } from '@/shared/ui';
 import type { WeekStatus } from '@/entities/course';
-import { getCourseResources, getCourseWeeks, getStudentCourses } from '@/shared/lib/supabase/ui-seed';
+import { getDbCourseDetail } from '@/shared/lib/supabase/db-queries';
 
 const statusLabel: Record<WeekStatus, string> = {
   done: '완료',
@@ -16,16 +16,27 @@ const statusClass: Record<WeekStatus, string> = {
   locked: 'text-gray-500',
 };
 
-export async function CourseDetailPage() {
-  const [courses, courseWeeks, courseResources] = await Promise.all([
-    getStudentCourses(),
-    getCourseWeeks(),
-    getCourseResources(),
-  ]);
-  const currentCourse = courses[0];
+interface CourseDetailPageProps {
+  courseId: string;
+}
+
+export async function CourseDetailPage({ courseId }: CourseDetailPageProps) {
+  const { course: currentCourse, weeks: courseWeeks, resources: courseResources } = await getDbCourseDetail(courseId);
 
   if (!currentCourse) {
-    return null;
+    return (
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        <StudentHeader />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-500">강좌를 찾을 수 없습니다.</p>
+            <Link href="/student/courses" className="mt-4 inline-block text-sm text-blue-600 hover:underline">
+              강좌 목록으로 돌아가기
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
