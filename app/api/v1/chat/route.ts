@@ -29,6 +29,16 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'messages 배열이 필요합니다.' }), { status: 400 });
   }
 
+  // Convert UIMessage format (parts) to ModelMessage format (content) for streamText
+  const normalizedMessages = body.messages.map((msg: { role: string; content?: string; parts?: { type: string; text: string }[] }) => {
+    if (msg.content) return { role: msg.role, content: msg.content };
+    if (msg.parts) {
+      const textPart = msg.parts.find((p) => p.type === 'text');
+      return { role: msg.role, content: textPart?.text ?? '' };
+    }
+    return { role: msg.role, content: '' };
+  });
+
   const conversationId = body.conversationId as string | undefined;
 
   // Rate limiting: check monthly message count
@@ -57,7 +67,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: anthropic(model),
     system: SYSTEM_PROMPT,
-    messages: body.messages,
+    messages: normalizedMessages,
   });
 
   // Save conversation in background (don't block streaming)
