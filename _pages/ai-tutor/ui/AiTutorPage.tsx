@@ -1,6 +1,5 @@
 import { StudentHeader } from '@/widgets/header';
 import type { Conversation } from '@/entities/chat';
-import { getConversations } from '@/shared/lib/supabase/ui-seed';
 
 // ---------------------------------------------------------------------------
 // Sidebar
@@ -296,9 +295,11 @@ function ChatArea() {
 // Page
 // ---------------------------------------------------------------------------
 
-export async function AiTutorPage() {
-  const conversations = await getConversations();
+interface Props {
+  conversations: Conversation[];
+}
 
+export function AiTutorPage({ conversations }: Props) {
   return (
     <div className="flex h-screen flex-col bg-white">
       <StudentHeader />

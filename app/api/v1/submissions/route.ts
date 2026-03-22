@@ -52,6 +52,36 @@ export async function GET(req: Request) {
     dbQuery = dbQuery.eq('assignment_id', assignmentId);
   }
 
+  // Scope results by role
+  if (auth.role === 'student') {
+    // Students only see their own submissions
+    dbQuery = dbQuery.eq('student_id', auth.userId);
+  } else if (auth.role === 'professor') {
+    // Professors only see submissions for assignments in their own courses
+    const { data: profCourses } = await client
+      .from('courses')
+      .select('id')
+      .eq('created_by', auth.userId);
+    const profCourseIds = (profCourses ?? []).map((c: { id: string }) => c.id);
+
+    if (profCourseIds.length === 0) {
+      return ok({ submissions: [] });
+    }
+
+    const { data: profAssignments } = await client
+      .from('assignments')
+      .select('id')
+      .in('course_id', profCourseIds);
+    const profAssignmentIds = (profAssignments ?? []).map((a: { id: string }) => a.id);
+
+    if (profAssignmentIds.length === 0) {
+      return ok({ submissions: [] });
+    }
+
+    dbQuery = dbQuery.in('assignment_id', profAssignmentIds);
+  }
+  // admin: no additional filter
+
   const { data, error } = await dbQuery;
 
   if (error) {

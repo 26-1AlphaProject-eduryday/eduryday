@@ -1,6 +1,5 @@
 import type { TestResult } from '@/entities/assignment';
 import type { Student } from '@/entities/user';
-import { getCurrentStudent, getTestResults } from '@/shared/lib/supabase/ui-seed';
 
 // ---------------------------------------------------------------------------
 // Data
@@ -395,12 +394,12 @@ function RightPanel({ testResults }: { testResults: TestResult[] }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export async function SplitViewIdePage() {
-  const [student, testResults] = await Promise.all([
-    getCurrentStudent(),
-    getTestResults(),
-  ]);
+interface Props {
+  student: Student;
+  testResults: TestResult[];
+}
 
+export function SplitViewIdePage({ student, testResults }: Props) {
   return (
     <div className="flex h-screen flex-col bg-white">
       <IdeHeader student={student} />

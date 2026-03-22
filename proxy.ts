@@ -88,32 +88,45 @@ export async function proxy(request: NextRequest) {
   const role = isAdminEmail(email) ? 'admin' : normalizeRole(profile?.role);
   const status = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
 
+  // Legacy auth/role path → redirect to signup
   if (pathname === '/auth/role') {
     return NextResponse.redirect(new URL('/signup', request.url));
   }
 
-  if (!role && pathname !== '/signup') {
+  // API routes handle their own auth — skip all role/status redirects
+  if (pathname.startsWith('/api/')) {
+    return response;
+  }
+
+  // Public paths: only redirect active users away from login/signup/pending
+  if (isPublicPath(pathname)) {
+    if (role && status === 'active' && (pathname === '/login' || pathname === '/signup' || pathname === '/pending')) {
+      return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
+    }
+    return response;
+  }
+
+  // --- Protected page routes below ---
+
+  // No role → must complete signup
+  if (!role) {
     return NextResponse.redirect(new URL('/signup', request.url));
   }
 
-  if (status === 'pending' && role && pathname !== '/pending') {
-    return NextResponse.redirect(new URL('/pending', request.url));
-  }
-
+  // Suspended → sign out and redirect (no loop since /login is public and handled above)
   if (status === 'suspended') {
+    await supabase.auth.signOut();
     return NextResponse.redirect(new URL('/login?error=suspended', request.url));
   }
 
-  if (needRole && role && needRole !== role) {
-    return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
+  // Pending → waiting for approval
+  if (status === 'pending') {
+    return NextResponse.redirect(new URL('/pending', request.url));
   }
 
-  if ((pathname === '/login' || pathname === '/signup' || pathname === '/pending') && role && status === 'active') {
+  // Role mismatch → redirect to correct dashboard
+  if (needRole && needRole !== role) {
     return NextResponse.redirect(new URL(getDashboardPath(role), request.url));
-  }
-
-  if (!isPublicPath(pathname) && !needRole) {
-    return response;
   }
 
   return response;

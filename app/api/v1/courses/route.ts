@@ -64,6 +64,10 @@ export async function GET(req: Request) {
     dbQuery = dbQuery.in('id', courseIds);
   }
 
+  if (auth.role === 'professor') {
+    dbQuery = dbQuery.eq('created_by', auth.userId);
+  }
+
   if (status !== 'all') {
     dbQuery = dbQuery.eq('status', status);
   }
