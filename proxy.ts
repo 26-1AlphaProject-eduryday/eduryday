@@ -92,12 +92,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/signup', request.url));
   }
 
-  if (!role && pathname !== '/signup') {
-    return NextResponse.redirect(new URL('/signup', request.url));
-  }
+  // API routes handle their own auth — don't redirect them based on role/status
+  if (!pathname.startsWith('/api/')) {
+    if (!role && pathname !== '/signup') {
+      return NextResponse.redirect(new URL('/signup', request.url));
+    }
 
-  if (status === 'pending' && role && pathname !== '/pending') {
-    return NextResponse.redirect(new URL('/pending', request.url));
+    if (status === 'pending' && role && pathname !== '/pending') {
+      return NextResponse.redirect(new URL('/pending', request.url));
+    }
   }
 
   if (status === 'suspended') {
