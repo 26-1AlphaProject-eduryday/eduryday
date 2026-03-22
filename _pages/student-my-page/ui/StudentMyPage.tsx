@@ -43,6 +43,13 @@ export function StudentMyPage({
   const [department, setDepartment] = useState(student.department);
   const [message, setMessage] = useState('');
 
+  function handleCancel() {
+    setName(student.name);
+    setStudentId(student.studentId);
+    setDepartment(student.department);
+    setMessage('');
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -66,18 +73,18 @@ export function StudentMyPage({
       <StudentHeader />
 
       <div className="flex flex-1">
-        <StudentSidebar activeItem="마이페이지" />
+        <StudentSidebar />
 
         <main className="flex-1 p-8">
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">마이페이지</h1>
+            <h1 className="text-2xl font-bold text-gray-900">마이페이지</h1>
             <p className="mt-1 text-sm text-gray-500">
               프로필 정보와 학습 통계를 확인하세요.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {/* Left column: profile card + account settings */}
             <div className="col-span-1 flex flex-col gap-6">
               {/* Profile card */}
@@ -151,7 +158,7 @@ export function StudentMyPage({
               {/* Learning stats */}
               <section aria-label="학습 통계">
                 <h2 className="mb-4 text-base font-semibold text-gray-700">학습 통계</h2>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {learningStats.map((stat) => (
                     <StatCard
                       key={stat.label}
@@ -176,7 +183,7 @@ export function StudentMyPage({
                   className="space-y-5"
                   aria-label="프로필 편집 양식"
                 >
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Input
                       label="이름"
                       id="name"
@@ -195,7 +202,7 @@ export function StudentMyPage({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Input
                       label="이메일"
                       id="email"
@@ -216,7 +223,7 @@ export function StudentMyPage({
                   </div>
 
                   <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
-                    <Button type="button" variant="secondary">
+                    <Button type="button" variant="secondary" onClick={handleCancel}>
                       취소
                     </Button>
                     <Button type="submit" variant="primary">

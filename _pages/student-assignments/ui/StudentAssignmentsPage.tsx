@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
-import { Badge } from '@/shared/ui';
+import { Badge, TableSkeleton } from '@/shared/ui';
 
 type AssignmentStatus = 'pending' | 'submitted' | 'graded';
 
@@ -97,11 +97,11 @@ export function StudentAssignmentsPage() {
       <StudentHeader />
 
       <div className="flex flex-1">
-        <StudentSidebar activeItem="과제" />
+        <StudentSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">과제</h1>
+            <h1 className="text-2xl font-bold text-gray-900">과제</h1>
             <p className="mt-1 text-sm text-gray-500">실제 데이터 기반 과제 목록입니다.</p>
           </div>
 
@@ -114,7 +114,7 @@ export function StudentAssignmentsPage() {
           </div>
 
           <section aria-label="과제 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
@@ -129,8 +129,8 @@ export function StudentAssignmentsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500">로딩 중...</td></tr>
-                  ) : assignments.length === 0 ? (
+                    <TableSkeleton columns={7} rows={3} />
+                  ) :assignments.length === 0 ? (
                     <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500">과제가 없습니다.</td></tr>
                   ) : (
                     assignments.map((assignment) => {

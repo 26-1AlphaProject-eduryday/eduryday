@@ -1,26 +1,30 @@
-interface ProfessorSidebarProps {
-  activeItem?: string;
-}
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
   { label: '대시보드', href: '/professor/dashboard' },
   { label: '내 강좌', href: '/professor/courses' },
   { label: '과제 관리', href: '/professor/assignments' },
-  { label: '채점 현황', href: '/professor/courses/1/grading' },
-  { label: '성적 관리', href: '/professor/grades' },
+  { label: '채점 현황', href: '/professor/grades' },
+  { label: '성적 관리', href: '/professor/grades/manage' },
+  { label: '학습 분석', href: '/professor/analytics' },
   { label: '공지사항', href: '/professor/announcements' },
 ];
 
-export function ProfessorSidebar({ activeItem }: ProfessorSidebarProps) {
+export function ProfessorSidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside className="min-h-screen w-64 border-r border-gray-200 bg-white p-4">
+    <aside className="hidden lg:flex min-h-screen w-64 border-r border-gray-200 bg-white p-4 flex-col">
       <nav aria-label="교수 메뉴">
         <ul className="space-y-1">
           {NAV_ITEMS.map((item) => {
-            const isActive = activeItem === item.label;
+            const isActive = pathname.startsWith(item.href);
             return (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   className={`flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors ${
                     isActive
@@ -30,7 +34,7 @@ export function ProfessorSidebar({ activeItem }: ProfessorSidebarProps) {
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             );
           })}

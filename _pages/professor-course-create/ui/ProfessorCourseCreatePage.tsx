@@ -40,7 +40,7 @@ export function ProfessorCourseCreatePage() {
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="내 강좌" />
+        <ProfessorSidebar />
         <main className="flex-1 p-8">
           <h1 className="mb-2 text-2xl font-bold text-gray-900">새 강좌 만들기</h1>
           <p className="mb-6 text-sm text-gray-500">강좌 기본 정보를 입력해 개설하세요.</p>
@@ -56,7 +56,7 @@ export function ProfessorCourseCreatePage() {
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="semester" className="mb-1 block text-sm font-medium text-gray-700">학기</label>
                 <input

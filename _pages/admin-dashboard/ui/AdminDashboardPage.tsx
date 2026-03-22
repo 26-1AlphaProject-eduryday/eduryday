@@ -67,7 +67,7 @@ export async function AdminDashboardPage({
       <AdminHeader />
 
       <div className="flex flex-1">
-        <AdminSidebar activeItem="대시보드" />
+        <AdminSidebar />
 
         <main className="flex-1 bg-gray-50 p-8">
           {/* Page title */}
@@ -97,7 +97,7 @@ export async function AdminDashboardPage({
 
           {/* Stats grid */}
           {stats.length > 0 ? (
-            <div className="mb-8 grid grid-cols-5 gap-4">
+            <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
@@ -120,7 +120,7 @@ export async function AdminDashboardPage({
           )}
 
           {/* 3-column section */}
-          <div className="mb-8 grid grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* User distribution */}
             <section
               aria-label="사용자 분포"
@@ -243,18 +243,18 @@ export async function AdminDashboardPage({
                 <option value="90d">최근 90일</option>
               </select>
             </div>
-            <div
-              className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50"
-              aria-label="일별 활동 차트 영역"
-            >
-              <span className="text-sm text-gray-400">차트 영역</span>
+            <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-500">차트 데이터 준비 중</p>
+                <p className="mt-1 text-xs text-gray-400">추후 업데이트 예정입니다</p>
+              </div>
             </div>
           </section>
 
           {/* Activity log table */}
           <section aria-label="최근 활동 로그">
             <h2 className="mb-4 text-base font-semibold text-gray-900">최근 활동 로그</h2>
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 bg-gray-50">
                   <tr>

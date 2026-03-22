@@ -93,12 +93,12 @@ export function ProfessorAnnouncementsPage({ courses, announcements }: Professor
       <ProfessorHeader />
 
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="공지사항" />
+        <ProfessorSidebar />
 
         <main className="flex-1 p-8">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-700">공지사항 관리</h1>
+              <h1 className="text-2xl font-bold text-gray-900">공지사항 관리</h1>
               <p className="mt-1 text-sm text-gray-500">강좌별 공지사항을 작성하고 관리하세요</p>
             </div>
             <button
@@ -180,7 +180,7 @@ export function ProfessorAnnouncementsPage({ courses, announcements }: Professor
           </div>
 
           <section aria-label="공지사항 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
@@ -193,7 +193,14 @@ export function ProfessorAnnouncementsPage({ courses, announcements }: Professor
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {items.map((announcement) => (
+                  {items.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                        공지사항이 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                  items.map((announcement) => (
                     <tr key={announcement.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -213,7 +220,8 @@ export function ProfessorAnnouncementsPage({ courses, announcements }: Professor
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                  )}
                 </tbody>
               </table>
             </div>

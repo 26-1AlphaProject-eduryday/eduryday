@@ -29,12 +29,12 @@ export async function StudentCoursesPage({ courses }: { courses: StudentCourseIt
       <StudentHeader />
 
       <div className="flex flex-1">
-        <StudentSidebar activeItem="내 강좌" />
+        <StudentSidebar />
 
         <main className="flex-1 p-8">
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-700">내 강좌</h1>
+            <h1 className="text-2xl font-bold text-gray-900">내 강좌</h1>
             <p className="mt-1 text-sm text-gray-500">
               현재 수강 중인 강좌 목록입니다.
             </p>
@@ -64,7 +64,7 @@ export async function StudentCoursesPage({ courses }: { courses: StudentCourseIt
 
           {/* Course grid */}
           <section aria-label="강좌 목록">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courses.map((course) => {
                 const category = COURSE_CATEGORIES[course.id];
                 const barColor = getCategoryColor(course.progress);

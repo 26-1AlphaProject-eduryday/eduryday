@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
-import { Badge, Button } from '@/shared/ui';
+import { Badge, Button, TableSkeleton } from '@/shared/ui';
 
 type CourseStatus = '진행중' | '종료' | '대기';
 
@@ -90,7 +90,7 @@ export function AdminCoursesPage() {
       <AdminHeader />
 
       <div className="flex flex-1">
-        <AdminSidebar activeItem="강좌 관리" />
+        <AdminSidebar />
 
         <main className="flex-1 bg-gray-50 p-8">
           <div className="mb-6">
@@ -131,7 +131,7 @@ export function AdminCoursesPage() {
           </form>
 
           <section aria-label="강좌 목록">
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200 bg-gray-50">
                   <tr>
@@ -146,8 +146,8 @@ export function AdminCoursesPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {loading ? (
-                    <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-500">로딩 중...</td></tr>
-                  ) : courses.length === 0 ? (
+                    <TableSkeleton columns={7} rows={3} />
+                  ) :courses.length === 0 ? (
                     <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-500">강좌가 없습니다.</td></tr>
                   ) : (
                     courses.map((course) => (

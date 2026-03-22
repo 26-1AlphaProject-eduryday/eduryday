@@ -22,6 +22,8 @@ interface CourseDetail {
 export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePageProps) {
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
   async function loadCourse() {
     setLoading(true);
@@ -44,7 +46,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
       return;
     }
 
-    await fetch(`/api/v1/courses/${courseId}`, {
+    const res = await fetch(`/api/v1/courses/${courseId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -57,13 +59,22 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
         totalWeeks: course.total_weeks,
       }),
     });
+    const json = await res.json();
+
+    if (json.ok) {
+      setMessage('저장되었습니다.');
+      setMessageType('success');
+    } else {
+      setMessage('저장에 실패했습니다.');
+      setMessageType('error');
+    }
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <ProfessorHeader />
       <div className="flex flex-1">
-        <ProfessorSidebar activeItem="내 강좌" />
+        <ProfessorSidebar />
         <main className="flex-1 p-8">
           <h1 className="mb-2 text-2xl font-bold text-gray-900">강좌 관리</h1>
           <p className="mb-6 text-sm text-gray-500">강좌 정보와 운영 상태를 수정합니다.</p>
@@ -81,7 +92,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="course-semester" className="mb-1 block text-sm font-medium text-gray-700">학기</label>
                   <input
@@ -114,6 +125,9 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
               <button type="button" onClick={saveChanges} className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">
                 변경 저장
               </button>
+              {message ? (
+                <p className={`text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>{message}</p>
+              ) : null}
             </div>
           )}
         </main>
