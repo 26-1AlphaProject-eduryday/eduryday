@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main|refs/heads/master)
+      echo ""
+      echo "❌ Direct pushes to ${remote_ref#refs/heads/} are blocked in this repo."
+      echo "   Create a feature/fix branch and open a PR instead."
+      echo ""
+      exit 1
+      ;;
+  esac
+done
+
 echo ""
 echo "✅ push 전 DONE 체크리스트 확인: docs/DONE_CHECKLIST.md"
 echo "✅ PR에 PDF 대비 스크린샷 첨부 권장"

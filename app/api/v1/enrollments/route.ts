@@ -12,7 +12,9 @@ export async function GET(req: Request) {
   const courseId = url.searchParams.get('courseId');
   const studentId = url.searchParams.get('studentId');
 
-  let query = client.from('enrollments').select('id, course_id, student_id, enrolled_at');
+  let query = client
+    .from('enrollments')
+    .select('id, course_id, student_id, enrolled_at, courses(title), profiles!enrollments_student_id_fkey(name, email, student_id, department)');
 
   if (courseId) query = query.eq('course_id', courseId);
   if (studentId) query = query.eq('student_id', studentId);

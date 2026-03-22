@@ -5,48 +5,89 @@ function isValidRole(value: unknown): value is 'student' | 'professor' {
   return value === 'student' || value === 'professor';
 }
 
-export async function GET() {
+interface ProfileRow {
+  id: string;
+  email: string;
+  name: string;
+  role: 'student' | 'professor' | 'admin' | null;
+  status: 'pending' | 'active' | 'suspended';
+  student_id: string | null;
+  department: string | null;
+}
+
+async function getOrCreateProfile() {
   const auth = await getRouteAuthContext();
 
   if (!auth) {
-    return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+    return { auth: null, client: null, profile: null as ProfileRow | null, errorResponse: fail('UNAUTHORIZED', '로그인이 필요합니다.', 401) };
   }
 
   const client = getServiceRoleClient();
 
   if (!client) {
-    return fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500);
+    return {
+      auth,
+      client: null,
+      profile: null as ProfileRow | null,
+      errorResponse: fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500),
+    };
   }
 
   const { data, error } = await client
     .from('profiles')
     .select('id, name, email, role, status, student_id, department')
     .eq('id', auth.userId)
-    .maybeSingle();
+    .maybeSingle<ProfileRow>();
 
   if (error) {
-    return fail('DB_ERROR', error.message, 500);
+    return { auth, client, profile: null as ProfileRow | null, errorResponse: fail('DB_ERROR', error.message, 500) };
   }
 
-  if (!data) {
-    return fail('NOT_FOUND', '프로필을 찾을 수 없습니다.', 404);
+  if (data) {
+    return { auth, client, profile: data, errorResponse: null };
   }
 
-  return ok({ profile: data });
+  const fallbackProfile: ProfileRow = {
+    id: auth.userId,
+    email: auth.email,
+    name: auth.email.split('@')[0] || '이름없음',
+    role: auth.role,
+    status: auth.status,
+    student_id: null,
+    department: null,
+  };
+
+  const { data: inserted, error: insertError } = await client
+    .from('profiles')
+    .upsert(fallbackProfile, { onConflict: 'id' })
+    .select('id, name, email, role, status, student_id, department')
+    .single<ProfileRow>();
+
+  if (insertError) {
+    return { auth, client, profile: null as ProfileRow | null, errorResponse: fail('DB_ERROR', insertError.message, 500) };
+  }
+
+  return { auth, client, profile: inserted, errorResponse: null };
+}
+
+export async function GET() {
+  const result = await getOrCreateProfile();
+
+  if (result.errorResponse) {
+    return result.errorResponse;
+  }
+
+  return ok({ profile: result.profile });
 }
 
 export async function PATCH(req: Request) {
-  const auth = await getRouteAuthContext();
+  const result = await getOrCreateProfile();
 
-  if (!auth) {
-    return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (result.errorResponse || !result.auth || !result.client) {
+    return result.errorResponse;
   }
 
-  const client = getServiceRoleClient();
-
-  if (!client) {
-    return fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500);
-  }
+  const { auth, client, profile } = result;
 
   const body = await req.json().catch(() => null);
 
@@ -90,8 +131,18 @@ export async function PATCH(req: Request) {
 
   const { error } = await client
     .from('profiles')
-    .update(updates)
-    .eq('id', auth.userId);
+    .upsert(
+      {
+        id: auth.userId,
+        email: profile?.email ?? auth.email,
+        name: updates.name,
+        role: updates.role ?? profile?.role ?? auth.role,
+        status: updates.status ?? profile?.status ?? auth.status,
+        student_id: updates.student_id ?? profile?.student_id ?? null,
+        department: updates.department ?? profile?.department ?? null,
+      },
+      { onConflict: 'id' },
+    );
 
   if (error) {
     return fail('DB_ERROR', error.message, 500);

@@ -72,6 +72,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     student_count?: number;
     current_week?: number;
     total_weeks?: number;
+    enrollment_code?: string | null;
   } = {};
 
   if (typeof body?.title === 'string') {
@@ -100,6 +101,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (typeof body?.totalWeeks === 'number') {
     updatePayload.total_weeks = body.totalWeeks;
+  }
+  if (typeof body?.enrollmentCode === 'string' || body?.enrollmentCode === null) {
+    updatePayload.enrollment_code = body.enrollmentCode;
   }
 
   const { error } = await client.from('courses').update(updatePayload).eq('id', id);
