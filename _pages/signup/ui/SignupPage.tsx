@@ -68,26 +68,33 @@ function SignupCard() {
         return;
       }
 
+      if (!cancelled) {
+        setIsAuthenticated(true);
+        setEmail(user.email ?? '');
+      }
+
+      // Try to load existing profile — not required for new users
       const res = await fetch('/api/v1/profile', { cache: 'no-store' });
       const json = await res.json().catch(() => null);
 
-      if (!res.ok || !json?.ok) {
+      if (res.ok && json?.ok) {
+        const profile = json.data.profile as ProfileResponse;
         if (!cancelled) {
-          setErrorMessage(json?.message ?? '프로필 정보를 불러오지 못했습니다.');
-          setIsLoading(false);
+          setName(profile.name ?? '');
+          setEmail(profile.email ?? user.email ?? '');
+          setRequestedRole(profile.role === 'professor' ? 'professor' : 'student');
+          setStudentId(profile.student_id ?? '');
+          setDepartment(profile.department ?? '');
         }
-        return;
+      } else {
+        // New user without profile — pre-fill from auth metadata
+        const metaName = typeof user.user_metadata?.name === 'string' ? user.user_metadata.name : '';
+        if (!cancelled) {
+          setName(metaName || user.email?.split('@')[0] || '');
+        }
       }
 
-      const profile = json.data.profile as ProfileResponse;
-
       if (!cancelled) {
-        setIsAuthenticated(true);
-        setName(profile.name ?? '');
-        setEmail(profile.email ?? user.email ?? '');
-        setRequestedRole(profile.role === 'professor' ? 'professor' : 'student');
-        setStudentId(profile.student_id ?? '');
-        setDepartment(profile.department ?? '');
         setIsLoading(false);
       }
     }
