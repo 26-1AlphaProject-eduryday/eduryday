@@ -76,5 +76,5 @@ export async function POST(req: Request) {
     void conversationId;
   }
 
-  return result.toTextStreamResponse();
+  return result.toUIMessageStreamResponse();
 }
