@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { AdminSettingsPage } from '@/_pages/admin-settings/ui/AdminSettingsPage';
 
 export default function AdminSettingsRoute() {
-  redirect('/admin/dashboard');
+  return <AdminSettingsPage />;
 }

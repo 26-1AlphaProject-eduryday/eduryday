@@ -17,24 +17,30 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const body = await req.json().catch(() => null);
   const { id } = await params;
 
-  if (typeof body?.finalScore !== 'number') {
-    return fail('VALIDATION_ERROR', 'finalScore(number)는 필수입니다.');
+  if (body?.finalScore === undefined && body?.feedback === undefined) {
+    return fail('VALIDATION_ERROR', 'finalScore 또는 feedback 중 하나는 필수입니다.');
   }
 
-  const status = body.finalScore > 0 ? 'complete' : 'reviewing';
+  const updatePayload: Record<string, unknown> = {};
+
+  if (typeof body?.finalScore === 'number') {
+    updatePayload.final_score = body.finalScore;
+    updatePayload.status = body.finalScore > 0 ? 'complete' : 'reviewing';
+    updatePayload.graded_at = new Date().toISOString();
+  }
+
+  if (typeof body?.feedback === 'string') {
+    updatePayload.feedback = body.feedback;
+  }
 
   const { error } = await client
     .from('submissions')
-    .update({
-      final_score: body.finalScore,
-      status,
-      graded_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq('id', id);
 
   if (error) {
     return fail('DB_ERROR', error.message, 500);
   }
 
-  return ok({ id, finalScore: body.finalScore, status });
+  return ok({ id, ...('finalScore' in updatePayload ? { finalScore: body.finalScore, status: updatePayload.status } : {}), ...('feedback' in updatePayload ? { feedback: body.feedback } : {}) });
 }

@@ -122,6 +122,14 @@ export async function PATCH(req: Request) {
     name: trimmedName,
   };
 
+  if (trimmedDepartment.length > 0) {
+    updates.department = trimmedDepartment;
+  }
+
+  if (trimmedStudentId.length > 0) {
+    updates.student_id = trimmedStudentId;
+  }
+
   if (role !== undefined) {
     updates.role = role;
     updates.department = trimmedDepartment;

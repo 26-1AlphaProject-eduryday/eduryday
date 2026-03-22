@@ -18,6 +18,7 @@ interface SubmissionRow {
   aiAnalysisVariant: 'green' | 'yellow' | 'red';
   aiSubNote?: string;
   finalScore: string;
+  feedback?: string;
   status: SubmissionStatus;
 }
 
@@ -59,6 +60,14 @@ export function GradingStatusPage() {
     if (json.ok) {
       await loadSubmissions();
     }
+  }
+
+  async function updateFeedback(id: string, feedback: string) {
+    await fetch(`/api/v1/submissions/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feedback }),
+    });
   }
 
   const submittedCount = useMemo(() => rows.filter((row) => row.status !== 'unsubmitted').length, [rows]);
@@ -109,14 +118,15 @@ export function GradingStatusPage() {
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">자동 채점</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">AI 분석</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">최종 점수</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">피드백</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <TableSkeleton columns={6} rows={3} />
+                  <TableSkeleton columns={7} rows={3} />
                 ) : rows.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
                 ) : (
                   rows.map((row) => (
                     <tr key={row.id} className={row.status === 'unsubmitted' ? 'bg-red-50' : ''}>
@@ -146,6 +156,17 @@ export function GradingStatusPage() {
                             }
                           }}
                           className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="text"
+                          defaultValue={row.feedback ?? ''}
+                          placeholder="피드백 입력"
+                          disabled={row.status === 'unsubmitted'}
+                          onBlur={(e) => updateFeedback(row.id, e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                          className="w-40 rounded border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
                         />
                       </td>
                       <td className="px-4 py-3"><Badge variant={STATUS_BADGE[row.status].variant}>{STATUS_BADGE[row.status].label}</Badge></td>

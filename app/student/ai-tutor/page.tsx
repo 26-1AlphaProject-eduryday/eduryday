@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { AiTutorPage } from '@/_pages/ai-tutor';
 
-export default function AiTutorRoute() {
-  redirect('/student/dashboard');
+export default function StudentAiTutorRoute() {
+  return <AiTutorPage />;
 }

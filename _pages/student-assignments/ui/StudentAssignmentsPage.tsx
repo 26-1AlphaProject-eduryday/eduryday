@@ -26,6 +26,9 @@ const STATUS_CONFIG: Record<AssignmentStatus, { label: string; variant: 'yellow'
 export function StudentAssignmentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitModalId, setSubmitModalId] = useState<string | null>(null);
+  const [submitAnswer, setSubmitAnswer] = useState('');
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   async function loadAssignments() {
     setLoading(true);
@@ -72,18 +75,19 @@ export function StudentAssignmentsPage() {
     loadAssignments();
   }, []);
 
-  async function submitAssignment(assignmentId: string) {
+  async function handleSubmit() {
+    if (!submitModalId || !submitAnswer.trim()) return;
+    setSubmitLoading(true);
     const res = await fetch('/api/v1/submissions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        assignmentId,
-        answer: '학생 제출 답안',
-      }),
+      body: JSON.stringify({ assignmentId: submitModalId, answer: submitAnswer.trim() }),
     });
     const json = await res.json();
-
+    setSubmitLoading(false);
     if (json.ok) {
+      setSubmitModalId(null);
+      setSubmitAnswer('');
       await loadAssignments();
     }
   }
@@ -145,7 +149,7 @@ export function StudentAssignmentsPage() {
                           <td className="px-6 py-4">{assignment.score !== undefined ? <span className="font-semibold text-gray-700">{assignment.score}점</span> : <span className="text-gray-300">—</span>}</td>
                           <td className="px-6 py-4">
                             {assignment.status === 'pending' ? (
-                              <button type="button" onClick={() => submitAssignment(assignment.id)} className="text-sm font-medium text-blue-600 hover:text-blue-800">제출</button>
+                              <button type="button" onClick={() => setSubmitModalId(assignment.id)} className="text-sm font-medium text-blue-600 hover:text-blue-800">제출</button>
                             ) : (
                               <span className="text-xs text-gray-400">완료</span>
                             )}
@@ -160,6 +164,29 @@ export function StudentAssignmentsPage() {
           </section>
         </main>
       </div>
+
+      {submitModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-gray-900">
+              {assignments.find(a => a.id === submitModalId)?.title}
+            </h3>
+            <textarea
+              value={submitAnswer}
+              onChange={(e) => setSubmitAnswer(e.target.value)}
+              placeholder="답안을 입력하세요"
+              rows={8}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+            <div className="mt-4 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => { setSubmitModalId(null); setSubmitAnswer(''); }} className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">취소</button>
+              <button type="button" disabled={submitLoading || !submitAnswer.trim()} onClick={handleSubmit} className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
+                {submitLoading ? '제출 중...' : '제출'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
