@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const NAV_ITEMS = [
   { label: '대시보드', href: '/student/dashboard' },
   { label: '내 강좌', href: '/student/courses' },
+  { label: '수강신청', href: '/student/enroll' },
   { label: '과제', href: '/student/assignments' },
   { label: '성적', href: '/student/grades' },
   { label: '마이페이지', href: '/student/my-page' },
