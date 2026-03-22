@@ -50,14 +50,37 @@ export async function PATCH(req: Request) {
     return fail('VALIDATION_ERROR', 'name은 필수입니다.');
   }
 
+  const updatePayload: {
+    name: string;
+    role?: string;
+    student_id?: string | null;
+    department?: string | null;
+    status?: string;
+  } = {
+    name: body.name.trim(),
+  };
+
+  if (body.role === 'student' || body.role === 'professor') {
+    updatePayload.role = body.role;
+    updatePayload.status = 'pending';
+  }
+
+  if ('student_id' in body) {
+    updatePayload.student_id = typeof body.student_id === 'string' ? body.student_id.trim() || null : null;
+  }
+
+  if ('department' in body) {
+    updatePayload.department = typeof body.department === 'string' ? body.department.trim() || null : null;
+  }
+
   const { error } = await client
     .from('profiles')
-    .update({ name: body.name.trim() })
+    .update(updatePayload)
     .eq('id', auth.userId);
 
   if (error) {
     return fail('DB_ERROR', error.message, 500);
   }
 
-  return ok({ name: body.name.trim() });
+  return ok({ name: updatePayload.name });
 }

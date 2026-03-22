@@ -14,6 +14,28 @@ interface CourseRow {
   created_at: string;
 }
 
+function mapCourseRow(row: CourseRow) {
+  return {
+    id: row.id,
+    name: row.title,
+    title: row.title,
+    professor: row.professor_name,
+    semester: row.semester,
+    section: row.section,
+    studentCount: row.student_count,
+    students: row.student_count,
+    currentWeek: row.current_week,
+    totalWeeks: row.total_weeks,
+    status:
+      row.status === 'active'
+        ? '진행중'
+        : row.status === 'closed'
+          ? '종료'
+          : '대기',
+    createdAt: row.created_at.slice(0, 10),
+  };
+}
+
 export async function GET(req: Request) {
   const auth = await getRouteAuthContext();
 
@@ -35,6 +57,56 @@ export async function GET(req: Request) {
   const pageSize = Number(url.searchParams.get('pageSize') ?? '10');
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+
+  // Students can only see courses they are enrolled in
+  if (auth.role === 'student') {
+    const { data: enrollments, error: enrollErr } = await client
+      .from('enrollments')
+      .select('course_id')
+      .eq('student_id', auth.userId);
+
+    if (enrollErr) {
+      return fail('DB_ERROR', enrollErr.message, 500);
+    }
+
+    const enrolledIds = (enrollments ?? []).map((e: { course_id: string }) => e.course_id);
+
+    if (enrolledIds.length === 0) {
+      return ok({ courses: [], total: 0, page, pageSize });
+    }
+
+    let dbQuery = client
+      .from('courses')
+      .select('id, title, professor_name, semester, section, student_count, current_week, total_weeks, status, created_at', {
+        count: 'exact',
+      })
+      .in('id', enrolledIds)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (status !== 'all') {
+      dbQuery = dbQuery.eq('status', status);
+    }
+
+    if (semester !== 'all') {
+      dbQuery = dbQuery.eq('semester', semester);
+    }
+
+    if (query) {
+      dbQuery = dbQuery.or(`title.ilike.%${query}%,professor_name.ilike.%${query}%`);
+    }
+
+    const { data, error, count } = await dbQuery;
+
+    if (error) {
+      return fail('DB_ERROR', error.message, 500);
+    }
+
+    const rows = (data ?? []) as CourseRow[];
+    const courses = rows.map((row) => mapCourseRow(row));
+
+    return ok({ courses, total: count ?? courses.length, page, pageSize });
+  }
 
   let dbQuery = client
     .from('courses')
@@ -64,27 +136,7 @@ export async function GET(req: Request) {
 
   const rows = (data ?? []) as CourseRow[];
 
-  const courses = rows.map((row) => ({
-    id: row.id,
-    name: row.title,
-    title: row.title,
-    professor: row.professor_name,
-    semester: row.semester,
-    section: row.section,
-    studentCount: row.student_count,
-    students: row.student_count,
-    currentWeek: row.current_week,
-    totalWeeks: row.total_weeks,
-    status:
-      row.status === 'active'
-        ? '진행중'
-        : row.status === 'closed'
-          ? '종료'
-          : row.status === 'pending'
-            ? '대기'
-            : '대기',
-    createdAt: row.created_at.slice(0, 10),
-  }));
+  const courses = rows.map((row) => mapCourseRow(row));
 
   return ok({ courses, total: count ?? courses.length, page, pageSize });
 }

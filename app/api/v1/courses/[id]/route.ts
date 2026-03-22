@@ -15,6 +15,21 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   }
 
   const { id } = await params;
+
+  // Students must be enrolled to access course details
+  if (auth.role === 'student') {
+    const { data: enrollment } = await client
+      .from('enrollments')
+      .select('course_id')
+      .eq('course_id', id)
+      .eq('student_id', auth.userId)
+      .maybeSingle();
+
+    if (!enrollment) {
+      return fail('FORBIDDEN', '수강 신청된 강좌만 조회할 수 있습니다.', 403);
+    }
+  }
+
   const { data, error } = await client.from('courses').select('*').eq('id', id).maybeSingle();
 
   if (error) {

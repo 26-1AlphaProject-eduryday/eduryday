@@ -76,7 +76,7 @@ export async function proxy(request: NextRequest) {
   const role = isAdminEmail(email) ? 'admin' : normalizeRole(profile?.role);
   const status = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
 
-  if (status === 'pending' && pathname !== '/pending' && !pathname.startsWith('/auth/role')) {
+  if (status === 'pending' && pathname !== '/pending' && pathname !== '/signup' && !pathname.startsWith('/auth/')) {
     return NextResponse.redirect(new URL('/pending', request.url));
   }
 
@@ -84,8 +84,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login?error=suspended', request.url));
   }
 
-  if (!role && pathname !== '/auth/role' && pathname !== '/pending') {
-    return NextResponse.redirect(new URL('/auth/role', request.url));
+  if (!role && pathname !== '/signup' && pathname !== '/pending' && !pathname.startsWith('/auth/')) {
+    return NextResponse.redirect(new URL('/signup', request.url));
   }
 
   if (needRole && role && needRole !== role) {

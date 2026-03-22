@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
   const finalStatus = isAdminEmail(email) ? 'active' : normalizeStatus(profile?.status);
 
   if (!finalRole) {
-    return NextResponse.redirect(new URL('/auth/role', request.url));
+    return NextResponse.redirect(new URL('/signup', request.url));
   }
 
   if (finalStatus !== 'active') {
