@@ -186,7 +186,7 @@ export function AuthRolePage() {
     );
   }
 
-  const canRequestAdminRole = userEmail.toLowerCase() === 'eduryday@gmail.com';
+  const canRequestAdminRole = isAdminEmail(userEmail);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -229,7 +229,7 @@ export function AuthRolePage() {
           </div>
 
           <p className="mt-6 border-t border-gray-100 pt-4 text-center text-xs text-gray-500">
-            관리자 계정은 <span className="font-medium text-gray-700">eduryday@gmail.com</span> 이메일에서만 활성화됩니다.
+            관리자 계정은 지정된 관리자 이메일에서만 활성화됩니다.
           </p>
         </div>
       </div>

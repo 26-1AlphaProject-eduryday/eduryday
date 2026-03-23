@@ -24,7 +24,7 @@ export function PendingPage() {
         <p className="mt-3 text-sm text-gray-600">
           관리자 승인 후 서비스 이용이 가능합니다.
           <br />
-          승인 계정: <span className="font-medium text-gray-800">eduryday@gmail.com</span>
+          문의: <span className="font-medium text-gray-800">관리자에게 문의하세요</span>
         </p>
 
         <div className="mt-6 space-y-3">

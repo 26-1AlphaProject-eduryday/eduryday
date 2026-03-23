@@ -77,6 +77,16 @@ export async function GET() {
     return result.errorResponse;
   }
 
+  // Log profile access (login tracking) - fire and forget
+  if (result.client && result.profile) {
+    await result.client.from('activity_logs').insert({
+      type: 'login',
+      user_name: result.profile.name,
+      user_role: result.profile.role ?? 'unknown',
+      message: '프로필 조회 (로그인)',
+    }); // Fire and forget; errors are intentionally ignored
+  }
+
   return ok({ profile: result.profile });
 }
 

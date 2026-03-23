@@ -25,8 +25,7 @@ export function StudentEnrollPage() {
     const json = await res.json();
     if (json.ok) {
       setEnrolledCourses(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (json.data.enrollments ?? []).map((e: any) => ({
+        (json.data.enrollments ?? []).map((e: { id: string; course_id: string; courses?: { title?: string }; enrolled_at?: string }) => ({
           id: e.id,
           courseId: e.course_id,
           courseTitle: e.courses?.title ?? '-',
