@@ -42,5 +42,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return fail('DB_ERROR', error.message, 500);
   }
 
+  // Record grading activity log
+  await client.from('activity_logs').insert({
+    type: 'grading',
+    user_name: auth.email.split('@')[0],
+    user_role: auth.role ?? 'professor',
+    message: `채점 완료: submission ${id}`,
+  }); // Fire and forget; errors are intentionally ignored
+
   return ok({ id, ...('finalScore' in updatePayload ? { finalScore: body.finalScore, status: updatePayload.status } : {}), ...('feedback' in updatePayload ? { feedback: body.feedback } : {}) });
 }

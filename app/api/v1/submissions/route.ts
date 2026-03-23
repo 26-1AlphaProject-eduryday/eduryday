@@ -12,6 +12,7 @@ interface SubmissionRow {
   ai_analysis_variant: 'green' | 'yellow' | 'red';
   ai_sub_note: string | null;
   final_score: number | null;
+  feedback: string | null;
   status: 'submitted' | 'reviewing' | 'complete' | 'unsubmitted';
 }
 
@@ -45,7 +46,7 @@ export async function GET(req: Request) {
 
   let dbQuery = client
     .from('submissions')
-    .select('id, student_name, student_number, submitted_at, auto_score, tests_passed, ai_analysis, ai_analysis_variant, ai_sub_note, final_score, status')
+    .select('id, student_name, student_number, submitted_at, auto_score, tests_passed, ai_analysis, ai_analysis_variant, ai_sub_note, final_score, feedback, status')
     .order('submitted_at', { ascending: false });
 
   if (assignmentId) {
@@ -100,6 +101,7 @@ export async function GET(req: Request) {
     aiAnalysisVariant: row.ai_analysis_variant,
     aiSubNote: row.ai_sub_note ?? undefined,
     finalScore: row.final_score === null ? '0' : String(row.final_score),
+    feedback: row.feedback ?? undefined,
     status: mapStatus(row.status),
   }));
 
@@ -125,6 +127,20 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'assignmentId는 필수입니다.');
   }
 
+  // Check deadline
+  const { data: assignment } = await client
+    .from('assignments')
+    .select('deadline')
+    .eq('id', String(body.assignmentId))
+    .single();
+
+  if (assignment?.deadline) {
+    const deadlineDate = new Date(assignment.deadline);
+    if (new Date() > deadlineDate) {
+      return fail('DEADLINE_PASSED', '제출 마감일이 지났습니다.', 400);
+    }
+  }
+
   const { data, error } = await client
     .from('submissions')
     .insert({
@@ -141,6 +157,14 @@ export async function POST(req: Request) {
   if (error || !data) {
     return fail('DB_ERROR', error?.message ?? '제출에 실패했습니다.', 500);
   }
+
+  // After successful submission insert, record activity log
+  await client.from('activity_logs').insert({
+    type: 'submit',
+    user_name: String(body.studentName ?? auth.email.split('@')[0]),
+    user_role: auth.role ?? 'student',
+    message: `과제 제출: ${data.assignment_id}`,
+  }); // Fire and forget; errors are intentionally ignored
 
   return ok({ id: data.id, status: 'queued', assignmentId: data.assignment_id });
 }
