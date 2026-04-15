@@ -13,19 +13,13 @@ interface SubmissionRow {
   ai_sub_note: string | null;
   final_score: number | null;
   feedback: string | null;
-  status: 'submitted' | 'reviewing' | 'complete' | 'unsubmitted';
+  status: 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 }
 
 function mapStatus(status: SubmissionRow['status']) {
-  if (status === 'complete') {
-    return 'complete';
-  }
-
-  if (status === 'unsubmitted') {
-    return 'unsubmitted';
-  }
-
-  return 'reviewing';
+  if (status === 'graded') return 'complete';  // UI legacy label
+  if (status === 'unsubmitted') return 'unsubmitted';
+  return 'reviewing';  // for 'submitted' and 'grading'
 }
 
 export async function GET(req: Request) {
@@ -141,6 +135,8 @@ export async function POST(req: Request) {
     }
   }
 
+  const fileUrl = typeof body?.fileUrl === 'string' ? body.fileUrl : null;
+
   const { data, error } = await client
     .from('submissions')
     .insert({
@@ -149,6 +145,7 @@ export async function POST(req: Request) {
       student_name: String(body.studentName ?? auth.email.split('@')[0]),
       student_number: body.studentNumber ? String(body.studentNumber) : null,
       content: body.answer ? String(body.answer) : null,
+      file_url: fileUrl,
       status: 'submitted',
     })
     .select('id, assignment_id')

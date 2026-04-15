@@ -74,5 +74,15 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     return fail('DB_ERROR', error.message, 500);
   }
 
+  try {
+    await client.from('activity_logs').insert({
+      type: 'assignment_delete',
+      user_name: auth.email.split('@')[0],
+      user_role: auth.role ?? 'professor',
+      user_id: auth.userId,
+      message: `과제 삭제: ${id}`,
+    });
+  } catch {}
+
   return ok({ id });
 }

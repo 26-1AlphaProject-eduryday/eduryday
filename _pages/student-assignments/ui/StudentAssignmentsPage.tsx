@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
-import { Badge, TableSkeleton } from '@/shared/ui';
+import { Badge, FileUpload, TableSkeleton } from '@/shared/ui';
 
 type AssignmentStatus = 'pending' | 'submitted' | 'graded';
 
@@ -28,6 +28,8 @@ export function StudentAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [submitModalId, setSubmitModalId] = useState<string | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState('');
+  const [submitFileUrl, setSubmitFileUrl] = useState<string>('');
+  const [submitFileName, setSubmitFileName] = useState<string>('');
   const [submitLoading, setSubmitLoading] = useState(false);
 
   async function loadAssignments() {
@@ -76,18 +78,27 @@ export function StudentAssignmentsPage() {
   }, []);
 
   async function handleSubmit() {
-    if (!submitModalId || !submitAnswer.trim()) return;
+    const currentAssignment = assignments.find((a) => a.id === submitModalId);
+    const isFileType = currentAssignment?.type === '파일제출';
+    if (!submitModalId) return;
+    if (isFileType ? !submitFileUrl : !submitAnswer.trim()) return;
     setSubmitLoading(true);
     const res = await fetch('/api/v1/submissions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ assignmentId: submitModalId, answer: submitAnswer.trim() }),
+      body: JSON.stringify({
+        assignmentId: submitModalId,
+        answer: submitAnswer.trim() || submitFileName,
+        fileUrl: submitFileUrl || undefined,
+      }),
     });
     const json = await res.json();
     setSubmitLoading(false);
     if (json.ok) {
       setSubmitModalId(null);
       setSubmitAnswer('');
+      setSubmitFileUrl('');
+      setSubmitFileName('');
       await loadAssignments();
     }
   }
@@ -168,22 +179,52 @@ export function StudentAssignmentsPage() {
       {submitModalId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-gray-900">
-              {assignments.find(a => a.id === submitModalId)?.title}
-            </h3>
-            <textarea
-              value={submitAnswer}
-              onChange={(e) => setSubmitAnswer(e.target.value)}
-              placeholder="답안을 입력하세요"
-              rows={8}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
-            />
-            <div className="mt-4 flex items-center justify-end gap-3">
-              <button type="button" onClick={() => { setSubmitModalId(null); setSubmitAnswer(''); }} className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">취소</button>
-              <button type="button" disabled={submitLoading || !submitAnswer.trim()} onClick={handleSubmit} className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
-                {submitLoading ? '제출 중...' : '제출'}
-              </button>
-            </div>
+            {(() => {
+              const currentAssignment = assignments.find((a) => a.id === submitModalId);
+              const isFileType = currentAssignment?.type === '파일제출';
+              const canSubmit = isFileType ? !!submitFileUrl : !!submitAnswer.trim();
+              return (
+                <>
+                  <h3 className="mb-4 text-lg font-bold text-gray-900">
+                    {currentAssignment?.title}
+                  </h3>
+                  {isFileType ? (
+                    <FileUpload
+                      bucket="submission-files"
+                      onUploaded={(filePath, filename) => {
+                        setSubmitFileUrl(filePath);
+                        setSubmitFileName(filename);
+                      }}
+                    />
+                  ) : (
+                    <textarea
+                      value={submitAnswer}
+                      onChange={(e) => setSubmitAnswer(e.target.value)}
+                      placeholder="답안을 입력하세요"
+                      rows={8}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    />
+                  )}
+                  <div className="mt-4 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setSubmitModalId(null); setSubmitAnswer(''); setSubmitFileUrl(''); setSubmitFileName(''); }}
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      disabled={submitLoading || !canSubmit}
+                      onClick={handleSubmit}
+                      className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                      {submitLoading ? '제출 중...' : '제출'}
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

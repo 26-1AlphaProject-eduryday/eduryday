@@ -159,5 +159,15 @@ export async function POST(req: Request) {
     return fail('DB_ERROR', error?.message ?? '강좌 생성에 실패했습니다.', 500);
   }
 
+  try {
+    await client.from('activity_logs').insert({
+      type: 'course_create',
+      user_name: auth.email.split('@')[0],
+      user_role: auth.role ?? 'professor',
+      user_id: auth.userId,
+      message: `강좌 생성: ${data.title}`,
+    });
+  } catch {}
+
   return ok({ id: data.id, title: data.title });
 }

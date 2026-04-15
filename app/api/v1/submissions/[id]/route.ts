@@ -25,7 +25,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   if (typeof body?.finalScore === 'number') {
     updatePayload.final_score = body.finalScore;
-    updatePayload.status = body.finalScore > 0 ? 'complete' : 'reviewing';
+    updatePayload.status = body.finalScore > 0 ? 'graded' : 'grading';
     updatePayload.graded_at = new Date().toISOString();
   }
 

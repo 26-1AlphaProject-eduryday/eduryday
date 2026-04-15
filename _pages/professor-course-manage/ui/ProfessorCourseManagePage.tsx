@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
+import { FileUpload } from '@/shared/ui';
 
 interface ProfessorCourseManagePageProps {
   courseId: string;
@@ -47,6 +48,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
   const [addingLessonWeekId, setAddingLessonWeekId] = useState<string | null>(null);
   const [newLessonTitle, setNewLessonTitle] = useState('');
   const [newLessonType, setNewLessonType] = useState<Lesson['type']>('video');
+  const [newLessonFileUrl, setNewLessonFileUrl] = useState<string>('');
 
   async function loadCourse() {
     setLoading(true);
@@ -155,6 +157,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
         title: newLessonTitle.trim(),
         type: newLessonType,
         orderNum: weekLessons.length + 1,
+        fileUrl: newLessonFileUrl || undefined,
       }),
     });
     const json = await res.json();
@@ -162,6 +165,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
     if (json.ok) {
       setNewLessonTitle('');
       setNewLessonType('video');
+      setNewLessonFileUrl('');
       setAddingLessonWeekId(null);
       await loadWeeksAndLessons();
     }
@@ -337,38 +341,45 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
 
                         {/* Add lesson form */}
                         {isAddingLesson ? (
-                          <div className="mt-3 flex gap-2 border-l-2 border-gray-200 pl-4 flex-wrap">
-                            <input
-                              value={newLessonTitle}
-                              onChange={(e) => setNewLessonTitle(e.target.value)}
-                              onKeyDown={(e) => { if (e.key === 'Enter') handleAddLesson(week.id); }}
-                              placeholder="강의 제목"
-                              className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
+                          <div className="mt-3 border-l-2 border-gray-200 pl-4 space-y-2">
+                            <div className="flex gap-2 flex-wrap">
+                              <input
+                                value={newLessonTitle}
+                                onChange={(e) => setNewLessonTitle(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleAddLesson(week.id); }}
+                                placeholder="강의 제목"
+                                className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
+                              />
+                              <select
+                                value={newLessonType}
+                                onChange={(e) => setNewLessonType(e.target.value as Lesson['type'])}
+                                className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
+                              >
+                                <option value="video">영상</option>
+                                <option value="practice">실습</option>
+                                <option value="quiz">퀴즈</option>
+                                <option value="document">문서</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => handleAddLesson(week.id)}
+                                className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white"
+                              >
+                                추가
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { setAddingLessonWeekId(null); setNewLessonTitle(''); setNewLessonType('video'); setNewLessonFileUrl(''); }}
+                                className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600"
+                              >
+                                취소
+                              </button>
+                            </div>
+                            <FileUpload
+                              bucket="lesson-materials"
+                              onUploaded={(filePath) => setNewLessonFileUrl(filePath)}
+                              className="max-w-sm"
                             />
-                            <select
-                              value={newLessonType}
-                              onChange={(e) => setNewLessonType(e.target.value as Lesson['type'])}
-                              className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
-                            >
-                              <option value="video">영상</option>
-                              <option value="practice">실습</option>
-                              <option value="quiz">퀴즈</option>
-                              <option value="document">문서</option>
-                            </select>
-                            <button
-                              type="button"
-                              onClick={() => handleAddLesson(week.id)}
-                              className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white"
-                            >
-                              추가
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setAddingLessonWeekId(null); setNewLessonTitle(''); setNewLessonType('video'); }}
-                              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600"
-                            >
-                              취소
-                            </button>
                           </div>
                         ) : (
                           <button
