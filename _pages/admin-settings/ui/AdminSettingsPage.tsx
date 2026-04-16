@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminHeader } from '@/widgets/header';
 import { AdminSidebar } from '@/widgets/sidebar';
 import { Button, Input } from '@/shared/ui';
-
-const STORAGE_KEY = 'eduryday-admin-settings';
 
 type TabId = 'ai' | 'security' | 'notifications' | 'storage';
 
@@ -348,15 +346,43 @@ const TAB_CONTENT: Record<TabId, React.ReactNode> = {
 export function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('ai');
   const [saveMessage, setSaveMessage] = useState('');
+  const [settings, setSettings] = useState<Record<string, unknown>>({});
 
-  function handleSave() {
+  useEffect(() => {
+    fetch('/api/v1/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data?.settings) {
+          setSettings(data.data.settings);
+        }
+      })
+      .catch(() => {
+        // non-blocking: settings will remain empty defaults
+      });
+  }, []);
+
+  async function handleSave() {
+    const payload: Record<string, unknown> = {
+      ai: settings['ai'] ?? { model: 'claude-sonnet', maxQuestions: 100 },
+      security: settings['security'] ?? { sessionTimeout: 30 },
+      notifications: settings['notifications'] ?? { email: true, inApp: true },
+    };
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ savedAt: new Date().toISOString() }));
-      setSaveMessage('설정이 저장되었습니다.');
-      setTimeout(() => setSaveMessage(''), 3000);
+      const res = await fetch('/api/v1/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setSaveMessage('설정이 저장되었습니다.');
+      } else {
+        setSaveMessage('저장에 실패했습니다.');
+      }
     } catch {
       setSaveMessage('저장에 실패했습니다.');
     }
+    setTimeout(() => setSaveMessage(''), 3000);
   }
 
   return (

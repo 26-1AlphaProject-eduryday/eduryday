@@ -1,7 +1,41 @@
+'use client';
+
 import Link from 'next/link';
+import { useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { ProgressBar, Badge, Button } from '@/shared/ui';
 import type { CourseResource, StudentCourse, WeekStatus, Week } from '@/entities/course';
+
+function LessonCheckbox({ lessonId, initialCompleted }: { lessonId: string; initialCompleted: boolean }) {
+  const [completed, setCompleted] = useState(initialCompleted);
+  const [loading, setLoading] = useState(false);
+
+  async function toggle() {
+    setLoading(true);
+    const res = await fetch(`/api/v1/lessons/${lessonId}/complete`, { method: 'POST' });
+    const json = await res.json();
+    if (json.ok) {
+      setCompleted(json.data.completed);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={loading}
+      className="shrink-0"
+      aria-label={completed ? '완료 해제' : '완료 표시'}
+    >
+      {completed ? (
+        <span className="text-green-500" aria-label="시청완료">&#10003;</span>
+      ) : (
+        <span className="inline-block h-3.5 w-3.5 rounded-sm border border-gray-300" aria-label="미완료" />
+      )}
+    </button>
+  );
+}
 
 const statusLabel: Record<WeekStatus, string> = {
   done: '완료',
@@ -15,7 +49,7 @@ const statusClass: Record<WeekStatus, string> = {
   locked: 'text-gray-500',
 };
 
-export async function CourseDetailPage({
+export function CourseDetailPage({
   currentCourse,
   courseWeeks,
   courseResources,
@@ -89,23 +123,8 @@ export async function CourseDetailPage({
                             }`}
                             aria-current={lesson.active ? 'page' : undefined}
                           >
-                            {lesson.completed ? (
-                              <span
-                                className="text-green-500 shrink-0"
-                                aria-label="시청완료"
-                              >
-                                &#10003;
-                              </span>
-                            ) : (
-                              <span
-                                className="inline-block h-3.5 w-3.5 shrink-0 rounded-sm border border-gray-300"
-                                aria-label="미완료"
-                              />
-                            )}
+                            <LessonCheckbox lessonId={lesson.id} initialCompleted={lesson.completed} />
                             <span>{lesson.title}</span>
-                            {lesson.completed && (
-                              <span className="ml-auto text-xs text-gray-500">시청완료</span>
-                            )}
                           </div>
                         </li>
                       ))}
