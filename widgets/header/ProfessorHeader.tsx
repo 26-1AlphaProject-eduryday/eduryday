@@ -11,7 +11,6 @@ const PROFESSOR_NAV_ITEMS = [
   { label: '내 강좌', href: '/professor/courses' },
   { label: '과제 관리', href: '/professor/assignments' },
   { label: '채점 현황', href: '/professor/grades' },
-  { label: '성적 관리', href: '/professor/grades/manage' },
   { label: '공지사항', href: '/professor/announcements' },
   { label: '학습 분석', href: '/professor/analytics' },
 ];
@@ -53,7 +52,7 @@ export function ProfessorHeader() {
           >
             ☰
           </button>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/professor/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-md bg-gray-800" />
             <span className="text-lg font-bold text-gray-900">EduRyday</span>
           </Link>

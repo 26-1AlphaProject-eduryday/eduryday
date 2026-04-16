@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: '수강신청', href: '/student/enroll' },
   { label: '과제', href: '/student/assignments' },
   { label: '성적', href: '/student/grades' },
+  { label: 'AI 튜터', href: '/student/ai-tutor' },
   { label: '마이페이지', href: '/student/my-page' },
 ];
 

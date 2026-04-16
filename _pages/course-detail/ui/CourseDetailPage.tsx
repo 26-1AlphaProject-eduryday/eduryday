@@ -143,13 +143,13 @@ export function CourseDetailPage({
             <ol className="flex items-center gap-1.5 text-sm text-gray-500">
               <li>
                 <Link href="/student/courses" className="hover:text-gray-700 transition-colors">
-                  알고리즘 기초
+                  {currentCourse.title}
                 </Link>
               </li>
               <li aria-hidden="true">&rsaquo;</li>
-              <li>3주차</li>
+              <li>주차</li>
               <li aria-hidden="true">&rsaquo;</li>
-              <li className="text-gray-700 font-medium">실습 1: 정렬 구현</li>
+              <li className="text-gray-700 font-medium">강의</li>
             </ol>
           </nav>
 
@@ -240,13 +240,17 @@ export function CourseDetailPage({
 
                   {res.completed ? (
                     <span className="text-xs text-green-600 font-medium">시청완료</span>
-                  ) : (
+                  ) : res.file_url ? (
                     <Link
-                      href="#"
+                      href={res.file_url}
                       className="text-xs text-blue-600 hover:underline font-medium"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       다운로드
                     </Link>
+                  ) : (
+                    <span className="text-xs text-gray-400">미제공</span>
                   )}
                 </li>
               ))}

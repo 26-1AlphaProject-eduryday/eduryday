@@ -126,6 +126,16 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
       <main className="flex flex-1 flex-col md:flex-row overflow-hidden">
         {/* Left panel: problem description */}
         <div className="flex w-full flex-col border-b border-gray-200 bg-white md:w-1/2 md:border-b-0 md:border-r overflow-hidden">
+          {/* Back navigation */}
+          <div className="shrink-0 border-b border-gray-100 px-4 py-2">
+            <Link
+              href="/student/assignments"
+              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              &#8592; 과제 목록
+            </Link>
+          </div>
+
           {/* Problem tabs */}
           <div className="flex border-b border-gray-200 shrink-0" role="tablist">
             {(['문제', '강의 영상', '참고 자료'] as const).map((tab, i) => (
@@ -262,13 +272,21 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
           {/* Status bar */}
           {message && (
             <div
-              className={`shrink-0 border-t px-4 py-2 text-xs ${
+              className={`shrink-0 border-t px-4 py-2 text-xs flex items-center justify-between gap-3 ${
                 submitStatus === 'error'
                   ? 'border-red-200 bg-red-50 text-red-700'
                   : 'border-green-200 bg-green-50 text-green-700'
               }`}
             >
-              {message}
+              <span>{message}</span>
+              {submitStatus === 'success' && (
+                <Link
+                  href="/student/assignments"
+                  className="shrink-0 font-medium underline hover:no-underline"
+                >
+                  과제 목록으로 돌아가기
+                </Link>
+              )}
             </div>
           )}
         </div>

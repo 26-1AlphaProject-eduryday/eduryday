@@ -67,7 +67,7 @@ export function StudentHeader() {
           >
             ☰
           </button>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/student/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-md bg-gray-800" />
             <span className="text-lg font-bold text-gray-900">EduRyday</span>
           </Link>

@@ -51,7 +51,7 @@ export function AdminHeader() {
           >
             ☰
           </button>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/admin/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-md bg-white/20" />
             <span className="text-lg font-bold text-white">EduRyday</span>
           </Link>
