@@ -1,14 +1,32 @@
-import { SplitViewIdePage } from '@/_pages/split-view-ide/ui/SplitViewIdePage';
-import { getRouteAuthContext } from '@/shared/lib/supabase/route';
+import { redirect } from 'next/navigation';
+import { SplitViewIdePage } from '@/_pages/split-view-ide';
+import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
-export default async function IdeRoute() {
+export default async function StudentIdeRoute({ params }: { params: Promise<{ id: string }> }) {
   const auth = await getRouteAuthContext();
-  const studentName = auth?.email ?? '학생';
+  if (!auth || auth.role !== 'student') redirect('/login');
 
-  return (
-    <SplitViewIdePage
-      student={{ id: auth?.userId ?? '', name: studentName, email: auth?.email ?? '' }}
-      testResults={[]}
-    />
-  );
+  const { id } = await params;
+  const client = getServiceRoleClient();
+
+  let assignment = { id, title: '과제', description: '', language: 'python' };
+
+  if (client) {
+    const { data } = await client
+      .from('assignments')
+      .select('id, title, description, type')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (data) {
+      assignment = {
+        id: data.id,
+        title: data.title,
+        description: data.description ?? '',
+        language: data.type === 'coding' ? 'python' : 'python',
+      };
+    }
+  }
+
+  return <SplitViewIdePage assignment={assignment} studentName={auth.email.split('@')[0]} />;
 }

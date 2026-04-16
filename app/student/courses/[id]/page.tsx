@@ -23,6 +23,7 @@ interface LessonRow {
   title: string;
   type: 'lecture' | 'practice' | 'quiz';
   order_num: number;
+  completed_by: string[] | null;
 }
 
 export default async function CourseDetailRoute({ params }: { params: Promise<{ id: string }> }) {
@@ -50,23 +51,29 @@ export default async function CourseDetailRoute({ params }: { params: Promise<{ 
     client.from('course_weeks').select('id, number, title, status').eq('course_id', id).order('number', { ascending: true }),
     client
       .from('lessons')
-      .select('id, week_id, title, type, order_num')
+      .select('id, week_id, title, type, order_num, completed_by')
       .order('order_num', { ascending: true }),
   ]);
+
+  const allLessons = (lessonRows ?? []) as LessonRow[];
+  const totalLessons = allLessons.length;
+  const completedLessons = allLessons.filter((l) =>
+    Array.isArray(l.completed_by) && l.completed_by.includes(auth.userId),
+  ).length;
+  const progress = totalLessons > 0 ? Math.min(100, Math.round((completedLessons / totalLessons) * 100)) : 0;
 
   const currentCourse: StudentCourse | null = courseRow
     ? {
         id: courseRow.id,
         title: courseRow.title,
         professor: courseRow.professor_name,
-        progress:
-          courseRow.total_weeks > 0 ? Math.min(100, Math.round((courseRow.current_week / courseRow.total_weeks) * 100)) : 0,
+        progress,
       }
     : null;
 
   const lessonsByWeek = new Map<string, LessonRow[]>();
 
-  for (const lesson of (lessonRows ?? []) as LessonRow[]) {
+  for (const lesson of allLessons) {
     if (!lessonsByWeek.has(lesson.week_id)) {
       lessonsByWeek.set(lesson.week_id, []);
     }
@@ -83,7 +90,7 @@ export default async function CourseDetailRoute({ params }: { params: Promise<{ 
       id: lesson.id,
       title: lesson.title,
       type: lesson.type,
-      completed: false,
+      completed: Array.isArray(lesson.completed_by) && lesson.completed_by.includes(auth.userId),
       active: week.status === 'in-progress' && index === 0,
     })),
   }));
