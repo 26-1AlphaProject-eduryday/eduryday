@@ -3,12 +3,14 @@
 drop policy if exists submissions_write_all on public.submissions;
 
 -- Students can INSERT their own submissions only
+drop policy if exists submissions_student_insert on public.submissions;
 create policy submissions_student_insert on public.submissions
   for insert
   with check (auth.uid() = student_id);
 
 -- Students can SELECT their own submissions
 drop policy if exists submissions_select_all on public.submissions;
+drop policy if exists submissions_select_own on public.submissions;
 create policy submissions_select_own on public.submissions
   for select
   using (
@@ -21,6 +23,7 @@ create policy submissions_select_own on public.submissions
   );
 
 -- Professors and admins can UPDATE submissions (for grading)
+drop policy if exists submissions_staff_update on public.submissions;
 create policy submissions_staff_update on public.submissions
   for update
   using (
@@ -32,6 +35,7 @@ create policy submissions_staff_update on public.submissions
   );
 
 -- Only admins can DELETE submissions
+drop policy if exists submissions_admin_delete on public.submissions;
 create policy submissions_admin_delete on public.submissions
   for delete
   using (

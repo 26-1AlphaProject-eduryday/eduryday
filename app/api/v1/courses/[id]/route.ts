@@ -135,5 +135,15 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
     return fail('DB_ERROR', error.message, 500);
   }
 
+  try {
+    await client.from('activity_logs').insert({
+      type: 'course_delete',
+      user_name: auth.email.split('@')[0],
+      user_role: auth.role ?? 'admin',
+      user_id: auth.userId,
+      message: `강좌 삭제: ${id}`,
+    });
+  } catch {}
+
   return ok({ id });
 }

@@ -1,6 +1,11 @@
 import { streamText } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { createOpenAI } from '@ai-sdk/openai';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
+
+const openrouter = createOpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY ?? '',
+});
 
 const SYSTEM_PROMPT = `당신은 EduRyday AI 튜터입니다. 다음 규칙을 따르세요:
 1. 학생의 질문에 힌트와 설명으로 답변하되, 정답을 직접 알려주지 마세요.
@@ -20,7 +25,7 @@ export async function POST(req: Request) {
   }
 
   // Check API key
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENROUTER_API_KEY) {
     return new Response(JSON.stringify({ error: 'AI 서비스가 설정되지 않았습니다. 관리자에게 문의하세요.' }), { status: 503 });
   }
 
@@ -62,10 +67,10 @@ export async function POST(req: Request) {
     }
   }
 
-  const model = process.env.AI_MODEL ?? 'claude-sonnet-4-20250514';
+  const model = process.env.OPENROUTER_MODEL ?? 'nvidia/nemotron-3-super-120b-a12b:free';
 
   const result = streamText({
-    model: anthropic(model),
+    model: openrouter(model),
     system: SYSTEM_PROMPT,
     messages: normalizedMessages,
   });

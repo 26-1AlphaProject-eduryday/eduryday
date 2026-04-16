@@ -30,5 +30,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return fail('DB_ERROR', error.message, 500);
   }
 
+  try {
+    await adminClient.from('activity_logs').insert({
+      type: 'user_status_change',
+      user_name: auth.email.split('@')[0],
+      user_role: 'admin',
+      user_id: auth.userId,
+      message: `사용자 상태 변경: ${id} → ${status}`,
+    });
+  } catch {}
+
   return ok({ id, status });
 }

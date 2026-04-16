@@ -100,5 +100,15 @@ export async function POST(req: Request) {
     return fail('DB_ERROR', error?.message ?? '과제 생성에 실패했습니다.', 500);
   }
 
+  try {
+    await client.from('activity_logs').insert({
+      type: 'assignment_create',
+      user_name: auth.email.split('@')[0],
+      user_role: auth.role ?? 'professor',
+      user_id: auth.userId,
+      message: `과제 생성: ${data.title}`,
+    });
+  } catch {}
+
   return ok({ id: data.id, title: data.title, createdAt: data.created_at });
 }

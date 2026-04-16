@@ -205,6 +205,11 @@ function FooterSection() {
         </div>
         <div className="text-sm text-gray-700">© 2026 EduRyday. All rights reserved.</div>
       </div>
+      <div className="mt-6 flex items-center justify-center gap-6 text-xs text-gray-500">
+        <Link href="/privacy" className="hover:text-gray-900 hover:underline">개인정보처리방침</Link>
+        <span aria-hidden="true">|</span>
+        <Link href="/terms" className="hover:text-gray-900 hover:underline">이용약관</Link>
+      </div>
     </footer>
   );
 }
