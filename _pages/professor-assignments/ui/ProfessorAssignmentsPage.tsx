@@ -12,6 +12,7 @@ interface AssignmentRecord {
   id: string;
   title: string;
   course: string;
+  courseId: string;
   type: AssignmentType;
   deadline: string;
   submitted: number;
@@ -83,7 +84,7 @@ export function ProfessorAssignmentsPage() {
               <h1 className="text-2xl font-bold text-gray-900">과제 관리</h1>
               <p className="mt-1 text-sm text-gray-500">강좌별 과제를 출제하고 현황을 확인하세요</p>
             </div>
-            <a href="/professor/courses/create" className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">과제 출제하기</a>
+            <a href="/professor/courses" className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">과제 출제하기</a>
           </div>
 
           <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -123,7 +124,7 @@ export function ProfessorAssignmentsPage() {
                         <td className="px-4 py-4 text-gray-800">{assignment.submitted}/{assignment.total}명</td>
                         <td className="px-4 py-4 text-gray-800">{assignment.graded}/{assignment.submitted}건</td>
                         <td className="px-4 py-4"><Badge variant={STATUS_BADGE_VARIANTS[assignment.status]}>{STATUS_LABELS[assignment.status]}</Badge></td>
-                        <td className="px-4 py-4"><a href="/professor/courses/11111111-1111-1111-1111-111111111111/grading" className="text-xs font-medium text-blue-600 hover:text-blue-800">채점하기</a></td>
+                        <td className="px-4 py-4"><a href={`/professor/courses/${assignment.courseId}/grading`} className="text-xs font-medium text-blue-600 hover:text-blue-800">채점하기</a></td>
                       </tr>
                     ))
                   )}

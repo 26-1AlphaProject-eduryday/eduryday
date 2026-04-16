@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge, ProgressBar } from '@/shared/ui';
@@ -88,12 +89,12 @@ export async function ProfessorDashboardPage({
             <section className="col-span-2" aria-label="내 강좌">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-700">내 강좌</h2>
-                <button
-                  type="button"
+                <Link
+                  href="/professor/courses/create"
                   className="inline-flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 >
                   새 강좌 만들기
-                </button>
+                </Link>
               </div>
 
               {courses.length > 0 ? (
@@ -134,24 +135,24 @@ export async function ProfessorDashboardPage({
                           </div>
 
                           <div className="mt-4 flex gap-2">
-                            <button
-                              type="button"
+                            <Link
+                              href={`/professor/courses/${course.id}/manage`}
                               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
                             >
                               강좌관리
-                            </button>
-                            <button
-                              type="button"
+                            </Link>
+                            <Link
+                              href={`/professor/courses/${course.id}/assignments/create`}
                               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
                             >
                               과제출제
-                            </button>
-                            <button
-                              type="button"
+                            </Link>
+                            <Link
+                              href={`/professor/courses/${course.id}/grading`}
                               className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
                             >
                               채점하기
-                            </button>
+                            </Link>
                           </div>
                         </div>
                       </div>

@@ -9,6 +9,7 @@ interface AssignmentRow {
   status: string;
   submitted_count: number;
   graded_count: number;
+  course_id: string;
   courses: { title: string } | { title: string }[] | null;
 }
 
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
 
   let dbQuery = client
     .from('assignments')
-    .select('id, title, type, deadline, status, submitted_count, graded_count, courses(title)')
+    .select('id, title, type, deadline, status, submitted_count, graded_count, course_id, courses(title)')
     .order('created_at', { ascending: false });
 
   if (courseId) {
@@ -48,6 +49,7 @@ export async function GET(req: Request) {
     id: row.id,
     title: row.title,
     course: Array.isArray(row.courses) ? row.courses[0]?.title ?? '-' : row.courses?.title ?? '-',
+    courseId: row.course_id,
     type: row.type,
     deadline: row.deadline,
     submitted: row.submitted_count,

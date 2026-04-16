@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ProfessorHeader } from '@/widgets/header';
 
 interface CourseItem {
@@ -15,6 +17,7 @@ interface RubricCriterion {
 }
 
 export function CreateAssignmentPage() {
+  const router = useRouter();
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [courseId, setCourseId] = useState('');
   const [title, setTitle] = useState('');
@@ -75,9 +78,7 @@ export function CreateAssignmentPage() {
     if (json.ok) {
       setMessage(status === 'draft' ? '임시저장 완료' : '과제 게시 완료');
       if (status === 'active') {
-        setTitle('');
-        setDescription('');
-        setDeadline('');
+        router.push('/professor/assignments');
       }
     } else {
       setMessage(json.message ?? '저장에 실패했습니다.');
@@ -91,9 +92,9 @@ export function CreateAssignmentPage() {
       <div className="border-b border-gray-200 bg-white px-8 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <nav aria-label="경로" className="text-sm text-gray-500">
-            <span>EduRyday</span>
+            <Link href="/professor/dashboard" className="hover:text-gray-700 transition-colors">EduRyday</Link>
             <span className="mx-1.5 text-gray-300" aria-hidden="true">›</span>
-            <span>강좌</span>
+            <Link href="/professor/courses" className="hover:text-gray-700 transition-colors">강좌</Link>
             <span className="mx-1.5 text-gray-300" aria-hidden="true">›</span>
             <span className="font-medium text-gray-700">과제 생성</span>
           </nav>

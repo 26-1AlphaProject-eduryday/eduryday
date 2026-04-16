@@ -8,7 +8,6 @@ const NAV_ITEMS = [
   { label: '내 강좌', href: '/professor/courses' },
   { label: '과제 관리', href: '/professor/assignments' },
   { label: '채점 현황', href: '/professor/grades' },
-  { label: '성적 관리', href: '/professor/grades/manage' },
   { label: '학습 분석', href: '/professor/analytics' },
   { label: '공지사항', href: '/professor/announcements' },
 ];

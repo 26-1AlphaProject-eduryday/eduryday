@@ -22,6 +22,7 @@ export interface CourseResource {
   title: string;
   completed: boolean;
   isPdf?: boolean;
+  file_url?: string;
 }
 
 export interface StudentCourse {
