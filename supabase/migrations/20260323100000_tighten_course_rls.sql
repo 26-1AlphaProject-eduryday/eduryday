@@ -3,6 +3,7 @@
 
 -- COURSES
 drop policy if exists courses_select_all on public.courses;
+drop policy if exists courses_select_own on public.courses;
 create policy courses_select_own on public.courses
   for select
   using (
@@ -19,6 +20,7 @@ create policy courses_select_own on public.courses
 
 -- ASSIGNMENTS
 drop policy if exists assignments_select_all on public.assignments;
+drop policy if exists assignments_select_scoped on public.assignments;
 create policy assignments_select_scoped on public.assignments
   for select
   using (
@@ -34,6 +36,7 @@ create policy assignments_select_scoped on public.assignments
 
 -- ANNOUNCEMENTS
 drop policy if exists announcements_select_all on public.announcements;
+drop policy if exists announcements_select_scoped on public.announcements;
 create policy announcements_select_scoped on public.announcements
   for select
   using (

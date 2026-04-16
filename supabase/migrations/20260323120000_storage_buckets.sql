@@ -11,12 +11,14 @@ on conflict (id) do nothing;
 
 -- Storage RLS policies
 -- Students can upload/read their own submission files
+drop policy if exists "student_upload_own_submissions" on storage.objects;
 create policy "student_upload_own_submissions" on storage.objects
   for insert with check (
     bucket_id = 'submission-files'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
+drop policy if exists "student_read_own_submissions" on storage.objects;
 create policy "student_read_own_submissions" on storage.objects
   for select using (
     bucket_id = 'submission-files'
@@ -24,6 +26,7 @@ create policy "student_read_own_submissions" on storage.objects
   );
 
 -- Professors/admins can read all submission files
+drop policy if exists "staff_read_submissions" on storage.objects;
 create policy "staff_read_submissions" on storage.objects
   for select using (
     bucket_id = 'submission-files'
@@ -34,6 +37,7 @@ create policy "staff_read_submissions" on storage.objects
   );
 
 -- Professors can upload lesson materials and assignment files
+drop policy if exists "professor_upload_lessons" on storage.objects;
 create policy "professor_upload_lessons" on storage.objects
   for insert with check (
     bucket_id in ('lesson-materials', 'assignment-files')
@@ -43,6 +47,7 @@ create policy "professor_upload_lessons" on storage.objects
     )
   );
 
+drop policy if exists "professor_update_lessons" on storage.objects;
 create policy "professor_update_lessons" on storage.objects
   for update using (
     bucket_id in ('lesson-materials', 'assignment-files')
@@ -53,6 +58,7 @@ create policy "professor_update_lessons" on storage.objects
   );
 
 -- All authenticated users can read lesson materials and assignment files
+drop policy if exists "authenticated_read_lessons" on storage.objects;
 create policy "authenticated_read_lessons" on storage.objects
   for select using (
     bucket_id in ('lesson-materials', 'assignment-files')
