@@ -93,6 +93,7 @@ export async function POST(req: Request) {
       deadline: body.deadline ? String(body.deadline) : null,
       status: body.status === 'active' || body.status === 'closed' ? body.status : 'draft',
       rubric: Array.isArray(body.rubric) ? body.rubric : [],
+      test_cases: Array.isArray(body.testCases) ? body.testCases : [],
       created_by: auth.userId,
     })
     .select('id, title, created_at')

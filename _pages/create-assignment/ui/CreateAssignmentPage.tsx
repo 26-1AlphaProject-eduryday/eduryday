@@ -16,6 +16,12 @@ interface RubricCriterion {
   weight: number;
 }
 
+interface TestCase {
+  input: string;
+  expectedOutput: string;
+  weight: number;
+}
+
 export function CreateAssignmentPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<CourseItem[]>([]);
@@ -28,6 +34,9 @@ export function CreateAssignmentPage() {
   const [message, setMessage] = useState('');
   const [rubric, setRubric] = useState<RubricCriterion[]>([
     { id: '1', description: '', weight: 30 },
+  ]);
+  const [testCases, setTestCases] = useState<TestCase[]>([
+    { input: '', expectedOutput: '', weight: 100 },
   ]);
 
   useEffect(() => {
@@ -69,6 +78,7 @@ export function CreateAssignmentPage() {
           description: r.description.trim(),
           weight: r.weight,
         })),
+        testCases: testCases.filter(tc => tc.input.trim() || tc.expectedOutput.trim()),
       }),
     });
 
@@ -260,6 +270,95 @@ export function CreateAssignmentPage() {
               + 채점 기준 추가
             </button>
           </div>
+
+          {/* Test cases section — coding assignments only */}
+          {(type === 'coding') && (
+            <div className="mt-6">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900">테스트 케이스</h2>
+                  <p className="mt-0.5 text-xs text-gray-500">입력값과 기대 출력값을 입력하세요.</p>
+                </div>
+                <span className={`text-sm font-medium ${testCases.reduce((sum, tc) => sum + tc.weight, 0) === 100 ? 'text-green-600' : 'text-amber-600'}`}>
+                  총 가중치: {testCases.reduce((sum, tc) => sum + tc.weight, 0)}%
+                  {testCases.reduce((sum, tc) => sum + tc.weight, 0) !== 100 && ' (100%가 되어야 합니다)'}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {testCases.map((tc, index) => (
+                  <div key={index} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-xs font-medium text-gray-600">테스트 {index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setTestCases(testCases.filter((_, i) => i !== index))}
+                        disabled={testCases.length <= 1}
+                        className="rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs text-gray-500 hover:bg-red-50 hover:border-red-300 hover:text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                        aria-label={`테스트 ${index + 1} 삭제`}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor={`tc-input-${index}`} className="mb-1 block text-xs font-medium text-gray-600">입력값</label>
+                        <textarea
+                          id={`tc-input-${index}`}
+                          value={tc.input}
+                          onChange={(e) => {
+                            const updated = testCases.map((item, i) => i === index ? { ...item, input: e.target.value } : item);
+                            setTestCases(updated);
+                          }}
+                          rows={2}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="프로그램 입력값"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`tc-output-${index}`} className="mb-1 block text-xs font-medium text-gray-600">기대 출력</label>
+                        <textarea
+                          id={`tc-output-${index}`}
+                          value={tc.expectedOutput}
+                          onChange={(e) => {
+                            const updated = testCases.map((item, i) => i === index ? { ...item, expectedOutput: e.target.value } : item);
+                            setTestCases(updated);
+                          }}
+                          rows={2}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="기대 출력값"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <label htmlFor={`tc-weight-${index}`} className="text-xs font-medium text-gray-600">가중치</label>
+                      <input
+                        id={`tc-weight-${index}`}
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={tc.weight}
+                        onChange={(e) => {
+                          const updated = testCases.map((item, i) => i === index ? { ...item, weight: Number(e.target.value) } : item);
+                          setTestCases(updated);
+                        }}
+                        className="w-16 rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-center"
+                      />
+                      <span className="text-sm text-gray-500">%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setTestCases([...testCases, { input: '', expectedOutput: '', weight: 0 }])}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800"
+              >
+                + 테스트 케이스 추가
+              </button>
+            </div>
+          )}
 
           {message ? (
             <p className={`mt-4 text-sm ${message.includes('실패') || message.includes('오류') || message.includes('입력') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>
