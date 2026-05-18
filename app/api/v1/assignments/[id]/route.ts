@@ -24,6 +24,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     deadline?: string | null;
     status?: 'draft' | 'active' | 'closed';
     rubric?: unknown[];
+    test_cases?: unknown[];
   } = {};
 
   if (typeof body?.title === 'string') {
@@ -43,6 +44,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (Array.isArray(body?.rubric)) {
     payload.rubric = body.rubric;
+  }
+  if (Array.isArray(body?.testCases)) {
+    payload.test_cases = body.testCases;
   }
 
   const { error } = await client.from('assignments').update(payload).eq('id', id);
