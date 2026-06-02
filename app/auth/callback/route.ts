@@ -17,7 +17,7 @@ interface ProfileRow {
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') ?? '/';
+  const next = url.searchParams.get('next');
   const supabase = await getSupabaseAuthServerClient();
 
   if (!supabase || !code) {
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/pending', request.url));
   }
 
-  const targetPath = next.startsWith('/') && !next.startsWith('//') ? next : getDashboardPath(finalRole);
+  const targetPath = next?.startsWith('/') && !next.startsWith('//') ? next : getDashboardPath(finalRole);
 
   return NextResponse.redirect(new URL(targetPath, request.url));
 }

@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageCourse, canReadCourse } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,21 +17,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
   const { id } = await params;
 
-  if (auth.role === 'student') {
-    const { data: enrollment, error: enrollmentError } = await client
-      .from('enrollments')
-      .select('id')
-      .eq('course_id', id)
-      .eq('student_id', auth.userId)
-      .maybeSingle();
-
-    if (enrollmentError) {
-      return fail('DB_ERROR', enrollmentError.message, 500);
-    }
-
-    if (!enrollment) {
-      return fail('FORBIDDEN', '수강 중인 강좌만 조회할 수 있습니다.', 403);
-    }
+  if (!(await canReadCourse(client, id, auth))) {
+    return fail('FORBIDDEN', '접근 가능한 강좌가 아닙니다.', 403);
   }
 
   const { data, error } = await client.from('courses').select('*').eq('id', id).maybeSingle();
@@ -61,6 +49,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json().catch(() => null);
+
+  if (!(await canManageCourse(client, id, auth))) {
+    return fail('FORBIDDEN', '본인 강좌만 수정할 수 있습니다.', 403);
+  }
 
   const updatePayload: {
     title?: string;
@@ -129,6 +121,11 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   }
 
   const { id } = await params;
+
+  if (!(await canManageCourse(client, id, auth))) {
+    return fail('FORBIDDEN', '본인 강좌만 삭제할 수 있습니다.', 403);
+  }
+
   const { error } = await client.from('courses').delete().eq('id', id);
 
   if (error) {
@@ -137,7 +134,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
 
   try {
     await client.from('activity_logs').insert({
-      type: 'course_delete',
+      type: 'course',
       user_name: auth.email.split('@')[0],
       user_role: auth.role ?? 'admin',
       user_id: auth.userId,

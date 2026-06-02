@@ -1,4 +1,4 @@
-export type SubmissionStatus = 'complete' | 'reviewing' | 'unsubmitted' | 'grading' | 'graded';
+export type SubmissionStatus = 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 export type AiAnalysisVariant = 'green' | 'yellow' | 'red';
 
 export interface Submission {

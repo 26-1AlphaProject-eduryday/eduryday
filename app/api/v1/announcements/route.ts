@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageCourse, canReadCourse, getAccessibleCourseIds } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface AnnouncementRow {
@@ -27,6 +28,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const courseId = url.searchParams.get('courseId');
+  const accessibleCourseIds = await getAccessibleCourseIds(client, auth);
 
   let dbQuery = client
     .from('announcements')
@@ -34,7 +36,15 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false });
 
   if (courseId) {
+    if (!(await canReadCourse(client, courseId, auth))) {
+      return fail('FORBIDDEN', '접근 가능한 강좌가 아닙니다.', 403);
+    }
     dbQuery = dbQuery.eq('course_id', courseId);
+  } else if (accessibleCourseIds !== null) {
+    if (accessibleCourseIds.length === 0) {
+      return ok({ announcements: [] });
+    }
+    dbQuery = dbQuery.in('course_id', accessibleCourseIds);
   }
 
   const { data, error } = await dbQuery;
@@ -65,6 +75,10 @@ export async function POST(req: Request) {
     return fail('UNAUTHORIZED', '교수 또는 관리자 권한이 필요합니다.', 401);
   }
 
+  if (auth.status !== 'active') {
+    return fail('FORBIDDEN', '활성 계정만 공지를 작성할 수 있습니다.', 403);
+  }
+
   const client = getServiceRoleClient();
 
   if (!client) {
@@ -77,12 +91,18 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'title, content, courseId는 필수입니다.');
   }
 
+  const courseId = String(body.courseId);
+
+  if (!(await canManageCourse(client, courseId, auth))) {
+    return fail('FORBIDDEN', '본인 강좌에만 공지를 작성할 수 있습니다.', 403);
+  }
+
   const { data, error } = await client
     .from('announcements')
     .insert({
       title: String(body.title),
       content: String(body.content),
-      course_id: String(body.courseId),
+      course_id: courseId,
       pinned: Boolean(body.pinned),
       created_by: auth.userId,
     })

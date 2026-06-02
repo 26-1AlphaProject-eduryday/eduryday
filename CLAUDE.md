@@ -11,9 +11,10 @@ npm run dev          # Start dev server (localhost:3000)
 npm run build        # Production build
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
+npm test             # Vitest
 ```
 
-No test runner is configured yet.
+Vitest is configured for unit tests.
 
 ---
 

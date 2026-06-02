@@ -13,11 +13,16 @@ export default async function ProfessorAnalyticsRoute() {
     return <ProfessorAnalyticsPage statCards={[]} topMisconceptions={[]} weeklyParticipation={[]} questionPatterns={[]} />;
   }
 
-  // Get professor's courses
-  const { data: courses } = await client
+  // Get professor's courses. Admins can inspect aggregate analytics across all courses.
+  let coursesQuery = client
     .from('courses')
-    .select('id, title')
-    .eq('created_by', auth.userId);
+    .select('id, title');
+
+  if (auth.role === 'professor') {
+    coursesQuery = coursesQuery.or(`created_by.eq.${auth.userId},professor_id.eq.${auth.userId}`);
+  }
+
+  const { data: courses } = await coursesQuery;
 
   const courseIds = (courses ?? []).map((c: { id: string }) => c.id);
 
@@ -120,7 +125,7 @@ export default async function ProfessorAnalyticsRoute() {
     }));
 
   // Question patterns: group by submission status
-  const statusCounts = { submitted: 0, reviewing: 0, complete: 0, unsubmitted: 0 };
+  const statusCounts = { submitted: 0, grading: 0, graded: 0, unsubmitted: 0 };
   for (const sub of subs) {
     const s = sub.status as keyof typeof statusCounts;
     if (s in statusCounts) statusCounts[s]++;
@@ -129,14 +134,14 @@ export default async function ProfessorAnalyticsRoute() {
   const questionPatterns = [
     {
       category: '채점 완료',
-      count: statusCounts.complete,
-      percentage: Math.round((statusCounts.complete / totalSubs) * 100),
+      count: statusCounts.graded,
+      percentage: Math.round((statusCounts.graded / totalSubs) * 100),
       variant: 'default' as const,
     },
     {
-      category: '검토 중',
-      count: statusCounts.reviewing,
-      percentage: Math.round((statusCounts.reviewing / totalSubs) * 100),
+      category: '채점 중',
+      count: statusCounts.grading,
+      percentage: Math.round((statusCounts.grading / totalSubs) * 100),
       variant: 'yellow' as const,
     },
     {

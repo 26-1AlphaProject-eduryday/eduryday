@@ -1,13 +1,18 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canReadLesson } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await getRouteAuthContext();
-  if (!auth) return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (!auth || auth.role !== 'student') return fail('UNAUTHORIZED', '학생 권한이 필요합니다.', 401);
 
   const { id } = await params;
   const client = getServiceRoleClient();
   if (!client) return fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500);
+
+  if (!(await canReadLesson(client, id, auth))) {
+    return fail('FORBIDDEN', '수강 중인 강좌의 강의만 완료 처리할 수 있습니다.', 403);
+  }
 
   // Get current lesson
   const { data: lesson, error: lessonError } = await client

@@ -101,7 +101,7 @@ Update user profile.
 ```
 
 **Status auto-update**:
-- `eduryday@gmail.com` → `active`
+- Configured `ADMIN_EMAIL` → `admin` + `active`
 - Everyone else → `pending` (awaits admin approval)
 
 ---
@@ -329,20 +329,20 @@ List submissions. Can filter by assignment. Students see own submissions only.
         "aiAnalysisVariant": "green",
         "aiSubNote": "피드백 추가",
         "finalScore": "85",
-        "status": "complete"
+        "status": "graded"
       }
     ]
   }
 }
 ```
 
-**Status values**: `submitted`, `reviewing`, `complete`, `unsubmitted`
+**Status values**: `submitted`, `grading`, `graded`, `unsubmitted`
 
 ### POST /api/v1/submissions
 
 Submit assignment answer.
 
-**Auth**: Required (student or anyone submitting)
+**Auth**: Required (active student)
 
 **Request Body:**
 ```json
@@ -363,13 +363,13 @@ Submit assignment answer.
   "ok": true,
   "data": {
     "id": "uuid",
-    "status": "queued",
+    "status": "submitted",
     "assignmentId": "uuid"
   }
 }
 ```
 
-Submissions are immediately `queued` for grading. Status progression: `submitted` → `reviewing` → `complete`.
+Submissions are saved as `submitted`, then automatic/manual grading moves them through `grading` and `graded`.
 
 ### GET /api/v1/submissions/[id]
 
@@ -386,7 +386,7 @@ Update submission status/score. Professors/admins only.
 **Request Body**:
 ```json
 {
-  "status": "complete",
+  "status": "graded",
   "finalScore": 95,
   "feedback": "매우 좋은 제출입니다."
 }

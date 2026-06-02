@@ -12,7 +12,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.63",
     "@ai-sdk/openai": "^3.0.53",
     "@ai-sdk/react": "^3.0.136",
     "@monaco-editor/react": "^4.7.0",
@@ -20,8 +19,8 @@
     "@supabase/supabase-js": "^2.99.0",
     "@tailwindcss/postcss": "^4.2.1",
     "ai": "^6.0.134",
-    "next": "^16.1.6",
-    "postcss": "^8.5.8",
+    "next": "^16.2.6",
+    "postcss": "^8.5.15",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "tailwindcss": "^4.2.1"
@@ -31,9 +30,12 @@
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
     "@vitest/ui": "^4.1.4",
-    "eslint": "9.15.0",
+    "eslint": "^9.39.4",
     "eslint-config-next": "^16.1.6",
     "typescript": "5.7.2",
     "vitest": "^4.1.4"
+  },
+  "overrides": {
+    "postcss": "$postcss"
   }
 }

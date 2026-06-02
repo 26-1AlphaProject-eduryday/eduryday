@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { isAdminEmail } from '@/shared/lib/auth/profile';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 function isValidRole(value: unknown): value is 'student' | 'professor' {
@@ -44,15 +45,30 @@ async function getOrCreateProfile() {
   }
 
   if (data) {
+    if (isAdminEmail(data.email ?? auth.email) && (data.role !== 'admin' || data.status !== 'active')) {
+      const adminProfile = { ...data, role: 'admin' as const, status: 'active' as const };
+      const { error: adminUpdateError } = await client
+        .from('profiles')
+        .update({ role: adminProfile.role, status: adminProfile.status })
+        .eq('id', auth.userId);
+
+      if (adminUpdateError) {
+        return { auth, client, profile: null as ProfileRow | null, errorResponse: fail('DB_ERROR', adminUpdateError.message, 500) };
+      }
+
+      return { auth, client, profile: adminProfile, errorResponse: null };
+    }
+
     return { auth, client, profile: data, errorResponse: null };
   }
 
+  const isAdmin = isAdminEmail(auth.email);
   const fallbackProfile: ProfileRow = {
     id: auth.userId,
     email: auth.email,
     name: auth.email.split('@')[0] || '이름없음',
-    role: auth.role,
-    status: auth.status,
+    role: isAdmin ? 'admin' : auth.role,
+    status: isAdmin ? 'active' : auth.status,
     student_id: null,
     department: null,
   };
@@ -105,20 +121,21 @@ export async function PATCH(req: Request) {
   const trimmedDepartment = typeof body?.department === 'string' ? body.department.trim() : '';
   const trimmedStudentId = typeof body?.studentId === 'string' ? body.studentId.trim() : '';
   const role = body?.role;
+  const isAdmin = isAdminEmail(auth.email);
 
   if (trimmedName.length < 1) {
     return fail('VALIDATION_ERROR', 'name은 필수입니다.');
   }
 
-  if (role !== undefined && !isValidRole(role)) {
+  if (role !== undefined && !isAdmin && !isValidRole(role)) {
     return fail('VALIDATION_ERROR', 'role은 student 또는 professor만 가능합니다.');
   }
 
-  if (role !== undefined && trimmedDepartment.length < 1) {
+  if (role !== undefined && !isAdmin && trimmedDepartment.length < 1) {
     return fail('VALIDATION_ERROR', 'department는 필수입니다.');
   }
 
-  if (role === 'student' && trimmedStudentId.length < 1) {
+  if (!isAdmin && role === 'student' && trimmedStudentId.length < 1) {
     return fail('VALIDATION_ERROR', 'studentId는 학생 신청 시 필수입니다.');
   }
 
@@ -126,7 +143,7 @@ export async function PATCH(req: Request) {
     name: string;
     department?: string;
     student_id?: string | null;
-    role?: 'student' | 'professor';
+    role?: 'student' | 'professor' | 'admin';
     status?: 'pending' | 'active';
   } = {
     name: trimmedName,
@@ -140,11 +157,15 @@ export async function PATCH(req: Request) {
     updates.student_id = trimmedStudentId;
   }
 
-  if (role !== undefined) {
+  if (isAdmin) {
+    updates.role = 'admin';
+    updates.status = 'active';
+    updates.student_id = null;
+  } else if (role !== undefined) {
     updates.role = role;
     updates.department = trimmedDepartment;
     updates.student_id = role === 'student' ? trimmedStudentId : null;
-    updates.status = auth.email.toLowerCase() === 'eduryday@gmail.com' ? 'active' : 'pending';
+    updates.status = 'pending';
   }
 
   const { error } = await client

@@ -1,8 +1,11 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { refreshAssignmentSubmissionCounts } from '@/shared/lib/grading/submission-counts';
+import { canReadCourse, isStudentEnrolled } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface SubmissionRow {
   id: string;
+  assignment_id: string;
   student_name: string;
   student_number: string | null;
   submitted_at: string;
@@ -16,10 +19,17 @@ interface SubmissionRow {
   status: 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 }
 
-function mapStatus(status: SubmissionRow['status']) {
-  if (status === 'graded') return 'complete';  // UI legacy label
-  if (status === 'unsubmitted') return 'unsubmitted';
-  return 'reviewing';  // for 'submitted' and 'grading'
+interface AssignmentForSubmission {
+  id: string;
+  course_id: string;
+  deadline: string | null;
+  status: 'draft' | 'active' | 'closed';
+  type: 'coding' | 'essay' | 'multiple-choice' | 'file';
+}
+
+interface ProfileRow {
+  name: string;
+  student_id: string | null;
 }
 
 export async function GET(req: Request) {
@@ -37,14 +47,33 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const assignmentId = url.searchParams.get('assignmentId');
+  const courseId = url.searchParams.get('courseId');
 
   let dbQuery = client
     .from('submissions')
-    .select('id, student_name, student_number, submitted_at, auto_score, tests_passed, ai_analysis, ai_analysis_variant, ai_sub_note, final_score, feedback, status')
+    .select('id, assignment_id, student_name, student_number, submitted_at, auto_score, tests_passed, ai_analysis, ai_analysis_variant, ai_sub_note, final_score, feedback, status')
     .order('submitted_at', { ascending: false });
 
   if (assignmentId) {
     dbQuery = dbQuery.eq('assignment_id', assignmentId);
+  }
+
+  if (courseId) {
+    if (!(await canReadCourse(client, courseId, auth))) {
+      return fail('FORBIDDEN', '접근 가능한 강좌가 아닙니다.', 403);
+    }
+
+    const { data: assignmentRows } = await client
+      .from('assignments')
+      .select('id')
+      .eq('course_id', courseId);
+    const assignmentIds = ((assignmentRows ?? []) as { id: string }[]).map((row) => row.id);
+
+    if (assignmentIds.length === 0) {
+      return ok({ submissions: [] });
+    }
+
+    dbQuery = dbQuery.in('assignment_id', assignmentIds);
   }
 
   // Scope results by role
@@ -56,7 +85,7 @@ export async function GET(req: Request) {
     const { data: profCourses } = await client
       .from('courses')
       .select('id')
-      .eq('created_by', auth.userId);
+      .or(`created_by.eq.${auth.userId},professor_id.eq.${auth.userId}`);
     const profCourseIds = (profCourses ?? []).map((c: { id: string }) => c.id);
 
     if (profCourseIds.length === 0) {
@@ -86,6 +115,7 @@ export async function GET(req: Request) {
   const rows = (data ?? []) as unknown as SubmissionRow[];
   const submissions = rows.map((row) => ({
     id: row.id,
+    assignmentId: row.assignment_id,
     name: row.student_name,
     studentId: row.student_number ?? '-',
     submittedAt: row.submitted_at.replace('T', ' ').slice(5, 16),
@@ -94,9 +124,9 @@ export async function GET(req: Request) {
     aiAnalysis: row.ai_analysis ?? '-',
     aiAnalysisVariant: row.ai_analysis_variant,
     aiSubNote: row.ai_sub_note ?? undefined,
-    finalScore: row.final_score === null ? '0' : String(row.final_score),
+    finalScore: row.final_score === null ? '' : String(row.final_score),
     feedback: row.feedback ?? undefined,
-    status: mapStatus(row.status),
+    status: row.status,
   }));
 
   return ok({ submissions });
@@ -105,8 +135,12 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const auth = await getRouteAuthContext();
 
-  if (!auth) {
-    return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (!auth || auth.role !== 'student') {
+    return fail('UNAUTHORIZED', '학생 권한이 필요합니다.', 401);
+  }
+
+  if (auth.status !== 'active') {
+    return fail('FORBIDDEN', '활성 계정만 과제를 제출할 수 있습니다.', 403);
   }
 
   const client = getServiceRoleClient();
@@ -121,12 +155,35 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'assignmentId는 필수입니다.');
   }
 
-  // Check deadline
-  const { data: assignment } = await client
+  const assignmentId = String(body.assignmentId);
+  const answer = typeof body?.answer === 'string' ? body.answer.trim() : '';
+  const fileUrl = typeof body?.fileUrl === 'string' ? body.fileUrl : null;
+
+  if (!answer && !fileUrl) {
+    return fail('VALIDATION_ERROR', '답안 또는 파일은 필수입니다.');
+  }
+
+  const { data: assignment, error: assignmentError } = await client
     .from('assignments')
-    .select('deadline')
-    .eq('id', String(body.assignmentId))
-    .single();
+    .select('id, course_id, deadline, status, type')
+    .eq('id', assignmentId)
+    .maybeSingle<AssignmentForSubmission>();
+
+  if (assignmentError) {
+    return fail('DB_ERROR', assignmentError.message, 500);
+  }
+
+  if (!assignment) {
+    return fail('NOT_FOUND', '과제를 찾을 수 없습니다.', 404);
+  }
+
+  if (assignment.status !== 'active') {
+    return fail('FORBIDDEN', '게시된 과제만 제출할 수 있습니다.', 403);
+  }
+
+  if (!(await isStudentEnrolled(client, assignment.course_id, auth.userId))) {
+    return fail('FORBIDDEN', '수강 중인 강좌의 과제만 제출할 수 있습니다.', 403);
+  }
 
   if (assignment?.deadline) {
     const deadlineDate = new Date(assignment.deadline);
@@ -135,33 +192,66 @@ export async function POST(req: Request) {
     }
   }
 
-  const fileUrl = typeof body?.fileUrl === 'string' ? body.fileUrl : null;
+  const { data: profile } = await client
+    .from('profiles')
+    .select('name, student_id')
+    .eq('id', auth.userId)
+    .maybeSingle<ProfileRow>();
 
-  const { data, error } = await client
+  const submissionPayload = {
+    assignment_id: assignmentId,
+    student_id: auth.userId,
+    student_name: profile?.name ?? auth.email.split('@')[0],
+    student_number: profile?.student_id ?? null,
+    content: answer || null,
+    file_url: fileUrl,
+    status: 'submitted',
+    submitted_at: new Date().toISOString(),
+    auto_score: null,
+    final_score: null,
+    tests_passed: null,
+    ai_analysis: null,
+    feedback: null,
+  };
+
+  const { data: existingRows } = await client
     .from('submissions')
-    .insert({
-      assignment_id: String(body.assignmentId),
-      student_id: auth.userId,
-      student_name: String(body.studentName ?? auth.email.split('@')[0]),
-      student_number: body.studentNumber ? String(body.studentNumber) : null,
-      content: body.answer ? String(body.answer) : null,
-      file_url: fileUrl,
-      status: 'submitted',
-    })
-    .select('id, assignment_id')
-    .single();
+    .select('id')
+    .eq('assignment_id', assignmentId)
+    .eq('student_id', auth.userId)
+    .order('submitted_at', { ascending: false })
+    .limit(1);
+
+  const existingId = ((existingRows ?? []) as { id: string }[])[0]?.id;
+  const writeResult = existingId
+    ? await client
+        .from('submissions')
+        .update(submissionPayload)
+        .eq('id', existingId)
+        .select('id, assignment_id')
+        .single()
+    : await client
+        .from('submissions')
+        .insert(submissionPayload)
+        .select('id, assignment_id')
+        .single();
+
+  const { data, error } = writeResult;
 
   if (error || !data) {
     return fail('DB_ERROR', error?.message ?? '제출에 실패했습니다.', 500);
   }
 
+  await refreshAssignmentSubmissionCounts(client, data.assignment_id);
+
   // After successful submission insert, record activity log
   await client.from('activity_logs').insert({
     type: 'submit',
-    user_name: String(body.studentName ?? auth.email.split('@')[0]),
-    user_role: auth.role ?? 'student',
+    user_name: profile?.name ?? auth.email.split('@')[0],
+    user_role: 'student',
+    user_id: auth.userId,
     message: `과제 제출: ${data.assignment_id}`,
   }); // Fire and forget; errors are intentionally ignored
 
-  return ok({ id: data.id, status: 'queued', assignmentId: data.assignment_id });
+  return ok({ id: data.id, status: 'submitted', assignmentId: data.assignment_id });
 }

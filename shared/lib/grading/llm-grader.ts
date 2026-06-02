@@ -43,7 +43,7 @@ ${studentAnswer.slice(0, 10000)}
     const { text } = await generateText({
       model: openrouter(model),
       prompt,
-      maxTokens: 1000,
+      maxOutputTokens: 1000,
     });
 
     // Extract JSON from response

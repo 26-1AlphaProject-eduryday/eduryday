@@ -53,10 +53,18 @@ export function CourseDetailPage({
   currentCourse,
   courseWeeks,
   courseResources,
+  activeAssignment,
 }: {
   currentCourse: StudentCourse | null;
   courseWeeks: Week[];
   courseResources: CourseResource[];
+  activeAssignment?: {
+    id: string;
+    title: string;
+    description: string | null;
+    type: 'coding' | 'essay' | 'multiple-choice' | 'file';
+    deadline: string | null;
+  } | null;
 }) {
 
   if (!currentCourse) {
@@ -153,53 +161,62 @@ export function CourseDetailPage({
             </ol>
           </nav>
 
-          {/* Page title */}
           <h1 className="mb-6 text-2xl font-bold text-gray-800">
-            실습 1: 정렬 알고리즘 구현
+            {activeAssignment?.title ?? currentCourse.title}
           </h1>
 
           {/* Content card */}
           <div className="mb-6 bg-white rounded-xl border border-gray-200 p-6">
             {/* Badges row */}
             <div className="mb-5 flex flex-wrap items-center gap-2">
-              <Badge variant="blue" size="md">코딩 실습</Badge>
-              <Badge variant="default" size="md">난이도: 중</Badge>
-              <span className="text-sm text-gray-500">
-                마감&nbsp;
-                <time dateTime="2026-01-23T23:59">2026.01.23 23:59</time>
-              </span>
+              {activeAssignment ? (
+                <>
+                  <Badge variant="blue" size="md">
+                    {activeAssignment.type === 'coding'
+                      ? '코딩 실습'
+                      : activeAssignment.type === 'essay'
+                        ? '주관식'
+                        : activeAssignment.type === 'multiple-choice'
+                          ? '객관식'
+                          : '파일 제출'}
+                  </Badge>
+                  <span className="text-sm text-gray-500">
+                    마감&nbsp;
+                    {activeAssignment.deadline ? (
+                      <time dateTime={activeAssignment.deadline}>
+                        {activeAssignment.deadline.replace('T', ' ').slice(0, 16)}
+                      </time>
+                    ) : (
+                      '일정 미정'
+                    )}
+                  </span>
+                </>
+              ) : (
+                <Badge variant="default" size="md">등록된 과제 없음</Badge>
+              )}
             </div>
 
-            {/* Problem description */}
             <div className="space-y-4 text-sm text-gray-700 leading-relaxed">
               <div>
-                <h3 className="mb-1 font-semibold text-gray-800">문제 설명</h3>
-                <p>
-                  버블 정렬과 선택 정렬 알고리즘을 직접 구현하고, 두 알고리즘의 시간
-                  복잡도를 비교 분석하세요. 각 알고리즘의 특성을 이해하고 적절한 상황에
-                  적용할 수 있도록 합니다.
+                <h3 className="mb-1 font-semibold text-gray-800">
+                  {activeAssignment ? '과제 설명' : '강좌 안내'}
+                </h3>
+                <p className="whitespace-pre-wrap">
+                  {activeAssignment?.description?.trim()
+                    || (activeAssignment
+                      ? '과제 설명이 아직 등록되지 않았습니다.'
+                      : '현재 게시된 과제가 없습니다. 왼쪽 주차 목록에서 강의 자료와 진행 상태를 확인하세요.')}
                 </p>
-              </div>
-
-              <div>
-                <h3 className="mb-1 font-semibold text-gray-800">입력</h3>
-                <p>
-                  정수 배열 <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">arr</code>
-                  (1 &le; len(arr) &le; 1000, &minus;10000 &le; arr[i] &le; 10000)
-                </p>
-              </div>
-
-              <div>
-                <h3 className="mb-1 font-semibold text-gray-800">출력</h3>
-                <p>오름차순으로 정렬된 배열을 반환하세요.</p>
               </div>
             </div>
 
-            {/* Action buttons */}
             <div className="mt-6 flex items-center gap-3">
-              <Link href="/student/ide/1">
+              <Link
+                href={activeAssignment?.type === 'coding' ? `/student/ide/${activeAssignment.id}` : '/student/assignments'}
+                aria-disabled={!activeAssignment}
+              >
                 <Button variant="primary" size="md">
-                  실습 시작하기 &rarr;
+                  {activeAssignment?.type === 'coding' ? '실습 시작하기 →' : activeAssignment ? '과제 제출하기' : '과제 목록 보기'}
                 </Button>
               </Link>
               <Link href="/student/ai-tutor">
@@ -242,7 +259,7 @@ export function CourseDetailPage({
                     <span className="text-xs text-green-600 font-medium">시청완료</span>
                   ) : res.file_url ? (
                     <Link
-                      href={res.file_url}
+                      href={`/api/v1/upload/download-url?bucket=lesson-materials&path=${encodeURIComponent(res.file_url)}`}
                       className="text-xs text-blue-600 hover:underline font-medium"
                       target="_blank"
                       rel="noopener noreferrer"

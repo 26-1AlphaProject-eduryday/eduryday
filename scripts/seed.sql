@@ -24,8 +24,8 @@ on conflict (id) do nothing;
 
 insert into public.submissions (id, assignment_id, student_name, student_number, auto_score, final_score, tests_passed, ai_analysis, ai_analysis_variant, status)
 values
-  ('cccccccc-cccc-cccc-cccc-ccccccccccc1', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '김철수', '20223045', 85, 85, '테스트 17/20 통과', '정상', 'green', 'complete'),
-  ('cccccccc-cccc-cccc-cccc-ccccccccccc2', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '이영희', '20223067', 72, 72, '테스트 14/20 통과', '검토 필요', 'yellow', 'reviewing'),
+  ('cccccccc-cccc-cccc-cccc-ccccccccccc1', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '김철수', '20223045', 85, 85, '테스트 17/20 통과', '정상', 'green', 'graded'),
+  ('cccccccc-cccc-cccc-cccc-ccccccccccc2', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '이영희', '20223067', 72, 72, '테스트 14/20 통과', '검토 필요', 'yellow', 'grading'),
   ('cccccccc-cccc-cccc-cccc-ccccccccccc3', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', '최지원', '20223102', null, 0, '-', '-', 'red', 'unsubmitted')
 on conflict (id) do nothing;
 

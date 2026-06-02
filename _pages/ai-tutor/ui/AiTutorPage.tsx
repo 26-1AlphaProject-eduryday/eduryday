@@ -3,15 +3,21 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import type { UIMessage } from '@ai-sdk/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StudentHeader } from '@/widgets/header';
 import { StudentSidebar } from '@/widgets/sidebar';
 
 interface ConversationItem {
   id: string;
   title: string;
+  courseId: string | null;
   messageCount: number;
   updatedAt: string;
+}
+
+interface CourseOption {
+  id: string;
+  title: string;
 }
 
 function getMessageText(message: UIMessage): string {
@@ -23,19 +29,25 @@ function getMessageText(message: UIMessage): string {
 
 export function AiTutorPage() {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [courses, setCourses] = useState<CourseOption[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState('');
   const [sidebarLoading, setSidebarLoading] = useState(true);
   const [aiAvailable, setAiAvailable] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const courseTitleById = useMemo(
+    () => new Map(courses.map((course) => [course.id, course.title])),
+    [courses],
+  );
 
   const { messages, sendMessage, setMessages, status, error } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/v1/chat',
       prepareSendMessagesRequest: ({ messages: msgs, body, ...rest }) => ({
         ...rest,
-        body: { ...body, messages: msgs, conversationId: activeConversationId },
+        body: { ...body, messages: msgs, conversationId: activeConversationId, courseId: selectedCourseId || undefined },
       }),
     }),
     onFinish: async ({ message, messages: allMessages }) => {
@@ -76,9 +88,10 @@ export function AiTutorPage() {
     if (json.ok) {
       setConversations(
         (json.data.conversations ?? []).map(
-          (c: { id: string; title: string; message_count: number; updated_at?: string }) => ({
+          (c: { id: string; title: string; course_id: string | null; message_count: number; updated_at?: string }) => ({
             id: c.id,
             title: c.title,
+            courseId: c.course_id,
             messageCount: c.message_count,
             updatedAt: c.updated_at?.replace('T', ' ').slice(0, 16) ?? '',
           })
@@ -88,11 +101,20 @@ export function AiTutorPage() {
     setSidebarLoading(false);
   }
 
+  async function loadCourses() {
+    const res = await fetch('/api/v1/courses?pageSize=100', { cache: 'no-store' });
+    const json = await res.json();
+    if (json.ok) {
+      const rows = (json.data.courses ?? []) as { id: string; title?: string; name?: string }[];
+      setCourses(rows.map((course) => ({ id: course.id, title: course.title ?? course.name ?? '강좌' })));
+    }
+  }
+
   async function handleNewConversation() {
     const res = await fetch('/api/v1/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: '새 대화' }),
+      body: JSON.stringify({ title: '새 대화', courseId: selectedCourseId || undefined }),
     });
     const json = await res.json();
     if (json.ok) {
@@ -107,6 +129,7 @@ export function AiTutorPage() {
     const res = await fetch(`/api/v1/conversations/${id}`, { cache: 'no-store' });
     const json = await res.json();
     if (json.ok && json.data.conversation.messages) {
+      setSelectedCourseId(json.data.conversation.course_id ?? '');
       setMessages(json.data.conversation.messages);
     }
   }
@@ -129,6 +152,7 @@ export function AiTutorPage() {
   }
 
   useEffect(() => {
+    loadCourses();
     loadConversations();
   }, []);
 
@@ -142,6 +166,19 @@ export function AiTutorPage() {
         {/* Conversation list sidebar */}
         <aside className="hidden w-72 shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
           <div className="border-b border-gray-200 p-4">
+            <select
+              value={selectedCourseId}
+              onChange={(e) => setSelectedCourseId(e.target.value)}
+              className="mb-3 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300"
+              aria-label="AI 튜터 강좌 문맥"
+            >
+              <option value="">강좌 선택 안 함</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={handleNewConversation}
@@ -175,7 +212,10 @@ export function AiTutorPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{conv.title}</p>
-                        <p className="text-xs text-gray-400">{conv.messageCount}개 메시지</p>
+                        <p className="text-xs text-gray-400">
+                          {conv.courseId ? `${courseTitleById.get(conv.courseId) ?? '강좌'} · ` : ''}
+                          {conv.messageCount}개 메시지
+                        </p>
                       </div>
                     </button>
                     <button
@@ -205,7 +245,7 @@ export function AiTutorPage() {
                 <p className="text-sm text-gray-500">
                   AI 서비스 API 키가 설정되지 않았습니다.
                   <br />
-                  관리자에게 ANTHROPIC_API_KEY 설정을 요청해주세요.
+                  관리자에게 OPENROUTER_API_KEY 설정을 요청해주세요.
                 </p>
               </div>
             </div>

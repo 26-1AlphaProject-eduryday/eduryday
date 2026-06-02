@@ -21,9 +21,18 @@ interface LessonRow {
   id: string;
   week_id: string;
   title: string;
-  type: 'lecture' | 'practice' | 'quiz';
+  type: 'lecture' | 'practice' | 'quiz' | 'document';
+  file_url: string | null;
   order_num: number;
   completed_by: string[] | null;
+}
+
+interface AssignmentRow {
+  id: string;
+  title: string;
+  description: string | null;
+  type: 'coding' | 'essay' | 'multiple-choice' | 'file';
+  deadline: string | null;
 }
 
 export default async function CourseDetailRoute({ params }: { params: Promise<{ id: string }> }) {
@@ -46,14 +55,26 @@ export default async function CourseDetailRoute({ params }: { params: Promise<{ 
     return <CourseDetailPage currentCourse={null} courseWeeks={[]} courseResources={[]} />;
   }
 
-  const [{ data: courseRow }, { data: weekRows }, { data: lessonRows }] = await Promise.all([
+  const [{ data: courseRow }, { data: weekRows }, { data: assignmentRows }] = await Promise.all([
     client.from('courses').select('id, title, professor_name, current_week, total_weeks').eq('id', id).maybeSingle(),
     client.from('course_weeks').select('id, number, title, status').eq('course_id', id).order('number', { ascending: true }),
     client
-      .from('lessons')
-      .select('id, week_id, title, type, order_num, completed_by')
-      .order('order_num', { ascending: true }),
+      .from('assignments')
+      .select('id, title, description, type, deadline')
+      .eq('course_id', id)
+      .eq('status', 'active')
+      .order('deadline', { ascending: true })
+      .limit(1),
   ]);
+
+  const weekIds = ((weekRows ?? []) as CourseWeekRow[]).map((week) => week.id);
+  const { data: lessonRows } = weekIds.length > 0
+    ? await client
+        .from('lessons')
+        .select('id, week_id, title, type, file_url, order_num, completed_by')
+        .in('week_id', weekIds)
+        .order('order_num', { ascending: true })
+    : { data: [] };
 
   const allLessons = (lessonRows ?? []) as LessonRow[];
   const totalLessons = allLessons.length;
@@ -95,7 +116,24 @@ export default async function CourseDetailRoute({ params }: { params: Promise<{ 
     })),
   }));
 
-  const courseResources: CourseResource[] = [];
+  const courseResources: CourseResource[] = allLessons
+    .filter((lesson) => Boolean(lesson.file_url))
+    .map((lesson) => ({
+      id: lesson.id,
+      title: lesson.title,
+      completed: Array.isArray(lesson.completed_by) && lesson.completed_by.includes(auth.userId),
+      isPdf: lesson.file_url?.toLowerCase().endsWith('.pdf'),
+      file_url: lesson.file_url ?? undefined,
+    }));
 
-  return <CourseDetailPage currentCourse={currentCourse} courseWeeks={courseWeeks} courseResources={courseResources} />;
+  const activeAssignment = ((assignmentRows ?? []) as AssignmentRow[])[0] ?? null;
+
+  return (
+    <CourseDetailPage
+      currentCourse={currentCourse}
+      courseWeeks={courseWeeks}
+      courseResources={courseResources}
+      activeAssignment={activeAssignment}
+    />
+  );
 }

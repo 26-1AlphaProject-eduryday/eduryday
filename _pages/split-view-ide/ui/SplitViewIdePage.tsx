@@ -59,7 +59,9 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
   });
   const [language, setLanguage] = useState(assignment.language);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [runStatus, setRunStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [runOutput, setRunOutput] = useState('');
 
   function handleSave() {
     localStorage.setItem(`ide-code-${assignment.id}`, code);
@@ -91,6 +93,32 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
       setSubmitStatus('idle');
       setMessage('');
     }, 3000);
+  }
+
+  async function handleRun() {
+    setRunStatus('running');
+    setRunOutput('');
+
+    try {
+      const res = await fetch('/api/v1/code/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignmentId: assignment.id, code, language }),
+      });
+      const json = await res.json();
+
+      if (!json.ok) {
+        setRunStatus('error');
+        setRunOutput(json.message ?? '실행 실패');
+        return;
+      }
+
+      setRunStatus('success');
+      setRunOutput(`${json.data.summary} · ${json.data.score}점`);
+    } catch {
+      setRunStatus('error');
+      setRunOutput('네트워크 오류');
+    }
   }
 
   return (
@@ -213,8 +241,9 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
               </button>
               <button
                 type="button"
-                disabled
-                className="flex cursor-not-allowed items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white opacity-50"
+                onClick={handleRun}
+                disabled={runStatus === 'running'}
+                className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -229,7 +258,7 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
                     clipRule="evenodd"
                   />
                 </svg>
-                실행 (준비 중)
+                {runStatus === 'running' ? '실행 중...' : '실행'}
               </button>
               <button
                 type="button"
@@ -270,15 +299,15 @@ export function SplitViewIdePage({ assignment, studentName }: SplitViewIdePagePr
           </div>
 
           {/* Status bar */}
-          {message && (
+          {(message || runOutput) && (
             <div
               className={`shrink-0 border-t px-4 py-2 text-xs flex items-center justify-between gap-3 ${
-                submitStatus === 'error'
+                submitStatus === 'error' || runStatus === 'error'
                   ? 'border-red-200 bg-red-50 text-red-700'
                   : 'border-green-200 bg-green-50 text-green-700'
               }`}
             >
-              <span>{message}</span>
+              <span>{message || runOutput}</span>
               {submitStatus === 'success' && (
                 <Link
                   href="/student/assignments"

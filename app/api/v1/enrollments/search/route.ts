@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageCourse } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export async function GET(req: Request) {
@@ -14,6 +15,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = (url.searchParams.get('q') ?? '').trim();
   const courseId = url.searchParams.get('courseId');
+
+  if (courseId && !(await canManageCourse(client, courseId, auth))) {
+    return fail('FORBIDDEN', '본인 강좌에만 수강생을 검색할 수 있습니다.', 403);
+  }
 
   if (!q || q.length < 2) {
     return ok({ students: [] });
@@ -43,8 +48,10 @@ export async function GET(req: Request) {
     name: s.name,
     email: s.email,
     studentId: s.student_id,
+    student_id: s.student_id,
     department: s.department,
     enrolled: enrolledIds.has(s.id),
+    already_enrolled: enrolledIds.has(s.id),
   }));
 
   return ok({ students: result });

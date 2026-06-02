@@ -94,7 +94,7 @@ Stateful feature modules combining UI and logic.
 
 ## Dev Commands
 
-All commands use npm. **No test runner currently configured.**
+All commands use npm. Vitest is configured for unit tests.
 
 ```bash
 npm run dev          # Start Next.js dev server (localhost:3000)
@@ -102,6 +102,7 @@ npm run build        # Production build
 npm run start        # Start production server
 npm run lint         # Run ESLint
 npm run typecheck    # Type check with tsc --noEmit
+npm test             # Run Vitest tests
 ```
 
 ### Setup
@@ -112,26 +113,15 @@ npm install                    # Install dependencies
 
 ### Recommended Verification Sequence
 ```bash
-npm run lint && npm run typecheck && npm run build
+npm run lint && npm run typecheck && npm test && npm run build
 ```
 
 All commands run from repo root: `/Users/simjoon/develop/eduryday`
 
 ## Test Runner Status (Important)
-- No test script is defined in `package.json`
-- No `*.test.*` or `*.spec.*` files are present
-- Therefore there is no supported single-test command right now
-
-Use this instead today:
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
-- Optional manual validation via `npm run dev`
-
-If a test framework is added later, update this file with:
-- full-suite command
-- single-file command
-- single-test-by-name command
+- Full suite: `npm test`
+- Watch mode: `npm run test:watch`
+- Unit tests currently cover shared response/auth helpers; API and role-scope tests should be expanded before launch.
 
 ## Cursor / Copilot Instructions Check
 Checked and not found:
@@ -351,8 +341,8 @@ If checks fail:
 - [ ] Types are explicit and strict-safe
 - [ ] API routes use `ok()` / `fail()` helpers
 - [ ] No arbitrary redesigns from mockups
-- [ ] Lint, typecheck, build all pass
-- [ ] No fabricated test commands (tests not configured)
+- [ ] Lint, typecheck, test, build all pass
+- [ ] No fabricated commands
 
 ## Related Documentation
 

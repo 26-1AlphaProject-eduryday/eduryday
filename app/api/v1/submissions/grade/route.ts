@@ -1,4 +1,6 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageSubmission } from '@/shared/lib/supabase/access';
+import { refreshAssignmentSubmissionCounts } from '@/shared/lib/grading/submission-counts';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 import { runTestCases } from '@/shared/lib/grading/judge0';
 import { gradeWithLLM } from '@/shared/lib/grading/llm-grader';
@@ -6,7 +8,9 @@ import { readFileContent } from '@/shared/lib/grading/file-reader';
 
 export async function POST(req: Request) {
   const auth = await getRouteAuthContext();
-  if (!auth) return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (!auth || (auth.role !== 'professor' && auth.role !== 'admin')) {
+    return fail('UNAUTHORIZED', '교수 또는 관리자 권한이 필요합니다.', 401);
+  }
 
   const client = getServiceRoleClient();
   if (!client) return fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500);
@@ -15,6 +19,10 @@ export async function POST(req: Request) {
   const submissionId = body?.submissionId;
 
   if (!submissionId) return fail('VALIDATION_ERROR', 'submissionId는 필수입니다.');
+
+  if (!(await canManageSubmission(client, String(submissionId), auth))) {
+    return fail('FORBIDDEN', '본인 강좌의 제출물만 자동 채점할 수 있습니다.', 403);
+  }
 
   // Fetch submission with assignment data
   const { data: submission, error: subErr } = await client
@@ -82,6 +90,8 @@ export async function POST(req: Request) {
   const updatePayload: Record<string, unknown> = {
     status: 'graded',
     auto_score: autoScore,
+    final_score: autoScore,
+    graded_at: new Date().toISOString(),
     tests_passed: testsPassed,
     ai_analysis: aiAnalysis,
     ai_analysis_variant: aiAnalysisVariant,
@@ -92,6 +102,7 @@ export async function POST(req: Request) {
   }
 
   await client.from('submissions').update(updatePayload).eq('id', submissionId);
+  await refreshAssignmentSubmissionCounts(client, submission.assignment_id);
 
   return ok({
     submissionId,

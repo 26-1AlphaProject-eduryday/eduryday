@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { SplitViewIdePage } from '@/_pages/split-view-ide';
+import { canReadAssignment } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export default async function StudentIdeRoute({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +13,10 @@ export default async function StudentIdeRoute({ params }: { params: Promise<{ id
   let assignment = { id, title: '과제', description: '', language: 'python' };
 
   if (client) {
+    if (!(await canReadAssignment(client, id, auth))) {
+      redirect('/student/assignments');
+    }
+
     const { data } = await client
       .from('assignments')
       .select('id, title, description, type')

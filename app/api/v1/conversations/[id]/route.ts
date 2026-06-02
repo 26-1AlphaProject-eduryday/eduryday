@@ -5,6 +5,7 @@ import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await getRouteAuthContext();
   if (!auth) return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (auth.role !== 'student') return fail('FORBIDDEN', '학생만 AI 튜터 대화를 조회할 수 있습니다.', 403);
 
   const { id } = await params;
   const client = getServiceRoleClient();
@@ -27,6 +28,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await getRouteAuthContext();
   if (!auth) return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (auth.role !== 'student' || auth.status !== 'active') {
+    return fail('FORBIDDEN', '활성 학생만 AI 튜터 대화를 수정할 수 있습니다.', 403);
+  }
 
   const { id } = await params;
   const client = getServiceRoleClient();
@@ -55,6 +59,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await getRouteAuthContext();
   if (!auth) return fail('UNAUTHORIZED', '로그인이 필요합니다.', 401);
+  if (auth.role !== 'student') return fail('FORBIDDEN', '학생만 AI 튜터 대화를 삭제할 수 있습니다.', 403);
 
   const { id } = await params;
   const client = getServiceRoleClient();

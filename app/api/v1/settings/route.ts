@@ -36,9 +36,13 @@ export async function PATCH(req: Request) {
   // Upsert each key-value pair
   const entries = Object.entries(body);
   for (const [key, value] of entries) {
-    await client
+    const { error } = await client
       .from('admin_settings')
       .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+
+    if (error) {
+      return fail('DB_ERROR', error.message, 500);
+    }
   }
 
   return ok({ saved: entries.length });
