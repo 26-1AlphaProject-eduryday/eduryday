@@ -29,7 +29,7 @@ interface ProfessorGradeRow {
   submittedAt: string;
   autoScore: number | null;
   finalScore: number | null;
-  status: 'submitted' | 'reviewing' | 'complete' | 'unsubmitted';
+  status: 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 }
 
 interface ProfessorGradesPageProps {
@@ -182,8 +182,24 @@ export function ProfessorGradesPage({ rows, courses }: ProfessorGradesPageProps)
                             {row.finalScore === null ? <Badge variant="default">-</Badge> : <Badge variant={grade.variant}>{grade.label}</Badge>}
                           </td>
                           <td className="px-4 py-3.5 text-center">
-                            <Badge variant={row.status === 'complete' ? 'green' : row.status === 'unsubmitted' ? 'red' : 'yellow'}>
-                              {row.status === 'complete' ? '완료' : row.status === 'unsubmitted' ? '미제출' : '검토중'}
+                            <Badge
+                              variant={
+                                row.status === 'graded'
+                                  ? 'green'
+                                  : row.status === 'unsubmitted'
+                                    ? 'red'
+                                    : row.status === 'submitted'
+                                      ? 'blue'
+                                      : 'yellow'
+                              }
+                            >
+                              {row.status === 'graded'
+                                ? '채점완료'
+                                : row.status === 'unsubmitted'
+                                  ? '미제출'
+                                  : row.status === 'submitted'
+                                    ? '제출됨'
+                                    : '채점중'}
                             </Badge>
                           </td>
                         </tr>

@@ -57,7 +57,12 @@ function LoginCard() {
 
     setIsSubmitting(true);
 
-    const redirectTo = `${window.location.origin}/auth/callback`;
+    const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (redirectParam?.startsWith('/') && !redirectParam.startsWith('//')) {
+      callbackUrl.searchParams.set('next', redirectParam);
+    }
+    const redirectTo = callbackUrl.toString();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },

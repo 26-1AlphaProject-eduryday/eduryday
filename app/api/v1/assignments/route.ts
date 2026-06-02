@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageCourse, canReadCourse, getAccessibleCourseIds } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface AssignmentRow {
@@ -28,6 +29,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const courseId = url.searchParams.get('courseId');
+  const accessibleCourseIds = await getAccessibleCourseIds(client, auth);
 
   let dbQuery = client
     .from('assignments')
@@ -35,7 +37,19 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false });
 
   if (courseId) {
+    if (!(await canReadCourse(client, courseId, auth))) {
+      return fail('FORBIDDEN', '접근 가능한 강좌가 아닙니다.', 403);
+    }
     dbQuery = dbQuery.eq('course_id', courseId);
+  } else if (accessibleCourseIds !== null) {
+    if (accessibleCourseIds.length === 0) {
+      return ok({ assignments: [] });
+    }
+    dbQuery = dbQuery.in('course_id', accessibleCourseIds);
+  }
+
+  if (auth.role === 'student') {
+    dbQuery = dbQuery.eq('status', 'active');
   }
 
   const { data, error } = await dbQuery;
@@ -45,6 +59,23 @@ export async function GET(req: Request) {
   }
 
   const rows = (data ?? []) as unknown as AssignmentRow[];
+  const courseIds = Array.from(new Set(rows.map((row) => row.course_id)));
+  const enrollmentCountByCourse = new Map<string, number>();
+
+  if (courseIds.length > 0) {
+    const { data: enrollments } = await client
+      .from('enrollments')
+      .select('course_id')
+      .in('course_id', courseIds);
+
+    for (const enrollment of (enrollments ?? []) as { course_id: string }[]) {
+      enrollmentCountByCourse.set(
+        enrollment.course_id,
+        (enrollmentCountByCourse.get(enrollment.course_id) ?? 0) + 1,
+      );
+    }
+  }
+
   const assignments = rows.map((row) => ({
     id: row.id,
     title: row.title,
@@ -53,7 +84,7 @@ export async function GET(req: Request) {
     type: row.type,
     deadline: row.deadline,
     submitted: row.submitted_count,
-    total: Math.max(row.submitted_count, 1),
+    total: enrollmentCountByCourse.get(row.course_id) ?? row.submitted_count,
     graded: row.graded_count,
     status: row.status,
   }));
@@ -68,6 +99,10 @@ export async function POST(req: Request) {
     return fail('UNAUTHORIZED', '교수 또는 관리자 권한이 필요합니다.', 401);
   }
 
+  if (auth.status !== 'active') {
+    return fail('FORBIDDEN', '활성 계정만 과제를 생성할 수 있습니다.', 403);
+  }
+
   const client = getServiceRoleClient();
 
   if (!client) {
@@ -80,11 +115,17 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'title, courseId는 필수입니다.');
   }
 
+  const courseId = String(body.courseId);
+
+  if (!(await canManageCourse(client, courseId, auth))) {
+    return fail('FORBIDDEN', '본인 강좌에만 과제를 생성할 수 있습니다.', 403);
+  }
+
   const { data, error } = await client
     .from('assignments')
     .insert({
       title: String(body.title),
-      course_id: String(body.courseId),
+      course_id: courseId,
       description: body.description ? String(body.description) : null,
       type:
         body.type === 'essay' || body.type === 'multiple-choice' || body.type === 'file'
@@ -105,7 +146,7 @@ export async function POST(req: Request) {
 
   try {
     await client.from('activity_logs').insert({
-      type: 'assignment_create',
+      type: 'course',
       user_name: auth.email.split('@')[0],
       user_role: auth.role ?? 'professor',
       user_id: auth.userId,

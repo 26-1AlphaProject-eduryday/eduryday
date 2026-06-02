@@ -61,8 +61,8 @@ type UserRole = 'student' | 'professor' | 'admin';
 - `StudentCourse` — Course view for students (progress tracking)
 - `ProfessorCourse` — Course view for professors (management)
 - `Week` — Week structure within a course
-- `Lesson` — Individual lesson (lecture, practice, quiz)
-- `LessonType` — Type union: `'lecture' | 'practice' | 'quiz'`
+- `Lesson` — Individual lesson (lecture, practice, quiz, document)
+- `LessonType` — Type union: `'lecture' | 'practice' | 'quiz' | 'document'`
 - `WeekStatus` — Status union: `'done' | 'in-progress' | 'locked'`
 - `CourseResource` — Downloadable/viewable course material
 - `Deadline` — Course deadline item
@@ -171,7 +171,7 @@ type TestResultStatus = 'pass' | 'fail' | 'pending';
 
 **Exports:**
 - `Submission` — Student submission record
-- `SubmissionStatus` — Status union: `'complete' | 'reviewing' | 'unsubmitted'`
+- `SubmissionStatus` — Status union: `'submitted' | 'grading' | 'graded' | 'unsubmitted'`
 - `AiAnalysisVariant` — AI analysis color variant: `'green' | 'yellow' | 'red'`
 
 **Key types:**
@@ -190,7 +190,7 @@ interface Submission {
   status: SubmissionStatus;
 }
 
-type SubmissionStatus = 'complete' | 'reviewing' | 'unsubmitted';
+type SubmissionStatus = 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 type AiAnalysisVariant = 'green' | 'yellow' | 'red';
 ```
 

@@ -22,7 +22,7 @@ interface TestCase {
   weight: number;
 }
 
-export function CreateAssignmentPage() {
+export function CreateAssignmentPage({ initialCourseId }: { initialCourseId?: string }) {
   const router = useRouter();
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [courseId, setCourseId] = useState('');
@@ -48,12 +48,12 @@ export function CreateAssignmentPage() {
         const items = (json.data.courses ?? []) as { id: string; title?: string; name?: string }[];
         const mapped = items.map((item) => ({ id: item.id, title: item.title ?? item.name ?? '-' }));
         setCourses(mapped);
-        setCourseId(mapped[0]?.id ?? '');
+        setCourseId(mapped.some((course) => course.id === initialCourseId) ? initialCourseId ?? '' : mapped[0]?.id ?? '');
       }
     }
 
     loadCourses();
-  }, []);
+  }, [initialCourseId]);
 
   async function saveAssignment(status: 'draft' | 'active') {
     if (title.trim() === '') {

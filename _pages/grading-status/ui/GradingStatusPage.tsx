@@ -5,7 +5,7 @@ import { ProfessorHeader } from '@/widgets/header';
 import { ProfessorSidebar } from '@/widgets/sidebar';
 import { Badge, TableSkeleton } from '@/shared/ui';
 
-type SubmissionStatus = 'complete' | 'reviewing' | 'unsubmitted';
+type SubmissionStatus = 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 
 interface SubmissionRow {
   id: string;
@@ -22,19 +22,22 @@ interface SubmissionRow {
   status: SubmissionStatus;
 }
 
-const STATUS_BADGE: Record<SubmissionStatus, { label: string; variant: 'green' | 'yellow' | 'red' }> = {
-  complete: { label: '완료', variant: 'green' },
-  reviewing: { label: '검토중', variant: 'yellow' },
+const STATUS_BADGE: Record<SubmissionStatus, { label: string; variant: 'green' | 'blue' | 'yellow' | 'red' }> = {
+  submitted: { label: '제출됨', variant: 'blue' },
+  grading: { label: '채점중', variant: 'yellow' },
+  graded: { label: '채점완료', variant: 'green' },
   unsubmitted: { label: '미제출', variant: 'red' },
 };
 
-export function GradingStatusPage() {
+export function GradingStatusPage({ courseId }: { courseId?: string }) {
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [autoGradingId, setAutoGradingId] = useState<string | null>(null);
 
   async function loadSubmissions() {
     setLoading(true);
-    const res = await fetch('/api/v1/submissions', { cache: 'no-store' });
+    const params = courseId ? `?courseId=${encodeURIComponent(courseId)}` : '';
+    const res = await fetch(`/api/v1/submissions${params}`, { cache: 'no-store' });
     const json = await res.json();
 
     if (json.ok) {
@@ -46,7 +49,7 @@ export function GradingStatusPage() {
 
   useEffect(() => {
     loadSubmissions();
-  }, []);
+  }, [courseId]);
 
   async function updateScore(id: string, score: number) {
     const res = await fetch(`/api/v1/submissions/${id}`, {
@@ -70,8 +73,23 @@ export function GradingStatusPage() {
     });
   }
 
+  async function runAutoGrade(id: string) {
+    setAutoGradingId(id);
+    const res = await fetch('/api/v1/submissions/grade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ submissionId: id }),
+    });
+    const json = await res.json();
+    setAutoGradingId(null);
+
+    if (json.ok) {
+      await loadSubmissions();
+    }
+  }
+
   const submittedCount = useMemo(() => rows.filter((row) => row.status !== 'unsubmitted').length, [rows]);
-  const completeCount = useMemo(() => rows.filter((row) => row.status === 'complete').length, [rows]);
+  const completeCount = useMemo(() => rows.filter((row) => row.status === 'graded').length, [rows]);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -119,14 +137,15 @@ export function GradingStatusPage() {
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">AI 분석</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">최종 점수</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">피드백</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">자동 채점</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">상태</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
-                  <TableSkeleton columns={7} rows={3} />
+                  <TableSkeleton columns={8} rows={3} />
                 ) : rows.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">제출 데이터가 없습니다.</td></tr>
                 ) : (
                   rows.map((row) => (
                     <tr key={row.id} className={row.status === 'unsubmitted' ? 'bg-red-50' : ''}>
@@ -168,6 +187,16 @@ export function GradingStatusPage() {
                           onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                           className="w-40 rounded border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
                         />
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          disabled={row.status === 'unsubmitted' || autoGradingId === row.id}
+                          onClick={() => runAutoGrade(row.id)}
+                          className="rounded border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {autoGradingId === row.id ? '채점 중...' : '실행'}
+                        </button>
                       </td>
                       <td className="px-4 py-3"><Badge variant={STATUS_BADGE[row.status].variant}>{STATUS_BADGE[row.status].label}</Badge></td>
                     </tr>

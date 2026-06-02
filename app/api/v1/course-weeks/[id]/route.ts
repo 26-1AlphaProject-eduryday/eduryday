@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageWeek } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export async function PATCH(
@@ -15,6 +16,11 @@ export async function PATCH(
   if (!client) return fail('CONFIG_ERROR', 'Supabase service role 설정이 필요합니다.', 500);
 
   const { id } = await params;
+
+  if (!(await canManageWeek(client, id, auth))) {
+    return fail('FORBIDDEN', '본인 강좌의 주차만 수정할 수 있습니다.', 403);
+  }
+
   const body = await req.json().catch(() => null);
   if (!body) return fail('VALIDATION_ERROR', '요청 본문이 필요합니다.');
 

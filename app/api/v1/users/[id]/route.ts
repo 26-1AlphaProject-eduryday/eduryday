@@ -32,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   try {
     await adminClient.from('activity_logs').insert({
-      type: 'user_status_change',
+      type: 'access',
       user_name: auth.email.split('@')[0],
       user_role: 'admin',
       user_id: auth.userId,

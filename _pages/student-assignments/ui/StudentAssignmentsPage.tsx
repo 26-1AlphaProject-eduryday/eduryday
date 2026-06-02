@@ -13,7 +13,7 @@ interface Assignment {
   course: string;
   date: string;
   status: AssignmentStatus;
-  type: '코딩' | '주관식' | '파일제출';
+  type: '코딩' | '주관식' | '객관식' | '파일제출';
   score?: number;
 }
 
@@ -43,15 +43,23 @@ export function StudentAssignmentsPage() {
     const subJson = await subRes.json();
 
     if (asgJson.ok) {
-      const submissionByTitle = new Map<string, { status: AssignmentStatus; score?: number }>();
+      const submissionByAssignment = new Map<string, { status: AssignmentStatus; score?: number }>();
 
       if (subJson.ok) {
-        const submissions = (subJson.data.submissions ?? []) as { status: 'complete' | 'reviewing' | 'unsubmitted'; finalScore: string; name: string }[];
+        const submissions = (subJson.data.submissions ?? []) as {
+          assignmentId: string;
+          status: 'submitted' | 'grading' | 'graded' | 'unsubmitted';
+          finalScore: string;
+        }[];
         for (const submission of submissions) {
-          const mappedStatus: AssignmentStatus = submission.status === 'complete' ? 'graded' : submission.status === 'reviewing' ? 'submitted' : 'pending';
-          submissionByTitle.set(submission.name, {
+          const mappedStatus: AssignmentStatus = submission.status === 'graded'
+            ? 'graded'
+            : submission.status === 'unsubmitted'
+              ? 'pending'
+              : 'submitted';
+          submissionByAssignment.set(submission.assignmentId, {
             status: mappedStatus,
-            score: submission.finalScore !== '0' ? Number(submission.finalScore) : undefined,
+            score: submission.status === 'graded' ? Number(submission.finalScore) : undefined,
           });
         }
       }
@@ -63,9 +71,9 @@ export function StudentAssignmentsPage() {
           title: row.title,
           course: row.course,
           date: row.deadline ? row.deadline.replace('T', ' ').slice(0, 16) : '-',
-          status: submissionByTitle.get(row.title)?.status ?? 'pending',
-          type: row.type === 'coding' ? '코딩' : row.type === 'essay' ? '주관식' : '파일제출',
-          score: submissionByTitle.get(row.title)?.score,
+          status: submissionByAssignment.get(row.id)?.status ?? 'pending',
+          type: row.type === 'coding' ? '코딩' : row.type === 'essay' ? '주관식' : row.type === 'multiple-choice' ? '객관식' : '파일제출',
+          score: submissionByAssignment.get(row.id)?.score,
         })),
       );
     }

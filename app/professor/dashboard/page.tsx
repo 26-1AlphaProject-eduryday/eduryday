@@ -12,7 +12,7 @@ interface CourseRow {
 
 interface SubmissionRow {
   id: string;
-  status: 'submitted' | 'reviewing' | 'complete' | 'unsubmitted';
+  status: 'submitted' | 'grading' | 'graded' | 'unsubmitted';
 }
 
 interface ProfileRow {
@@ -27,14 +27,13 @@ export default async function ProfessorDashboardRoute() {
     return <ProfessorDashboardPage professor={{ name: '교수', title: '님' }} courses={[]} stats={[]} activities={[]} />;
   }
 
-  const [{ data: profile }, { data: courseRows }, { data: submissionRows }] = await Promise.all([
+  const [{ data: profile }, { data: courseRows }] = await Promise.all([
     client.from('profiles').select('name').eq('id', auth.userId).maybeSingle(),
     client
       .from('courses')
       .select('id, title, semester, student_count, current_week, total_weeks')
-      .eq('created_by', auth.userId)
+      .or(`created_by.eq.${auth.userId},professor_id.eq.${auth.userId}`)
       .order('created_at', { ascending: false }),
-    client.from('submissions').select('id, status').order('submitted_at', { ascending: false }).limit(20),
   ]);
 
   const courses = ((courseRows ?? []) as CourseRow[]).map((row) => ({
@@ -46,9 +45,30 @@ export default async function ProfessorDashboardRoute() {
     totalWeeks: row.total_weeks,
   }));
 
+  const courseIds = courses.map((course) => course.id);
+  let submissionRows: SubmissionRow[] = [];
+
+  if (courseIds.length > 0) {
+    const { data: assignmentRows } = await client
+      .from('assignments')
+      .select('id')
+      .in('course_id', courseIds);
+    const assignmentIds = ((assignmentRows ?? []) as { id: string }[]).map((row) => row.id);
+
+    if (assignmentIds.length > 0) {
+      const { data } = await client
+        .from('submissions')
+        .select('id, status')
+        .in('assignment_id', assignmentIds)
+        .order('submitted_at', { ascending: false })
+        .limit(20);
+      submissionRows = (data ?? []) as SubmissionRow[];
+    }
+  }
+
   const totalStudents = courses.reduce((sum, course) => sum + course.students, 0);
-  const pendingReviews = ((submissionRows ?? []) as SubmissionRow[]).filter((row) => row.status === 'reviewing').length;
-  const completedReviews = ((submissionRows ?? []) as SubmissionRow[]).filter((row) => row.status === 'complete').length;
+  const pendingReviews = submissionRows.filter((row) => row.status === 'submitted' || row.status === 'grading').length;
+  const completedReviews = submissionRows.filter((row) => row.status === 'graded').length;
 
   const stats = [
     { label: '운영중인 강좌', value: `${courses.length}개` },

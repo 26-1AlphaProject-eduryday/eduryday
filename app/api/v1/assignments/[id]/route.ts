@@ -1,4 +1,5 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageAssignment } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,6 +17,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json().catch(() => null);
+
+  if (!(await canManageAssignment(client, id, auth))) {
+    return fail('FORBIDDEN', '본인 강좌의 과제만 수정할 수 있습니다.', 403);
+  }
 
   const payload: {
     title?: string;
@@ -72,6 +77,11 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   }
 
   const { id } = await params;
+
+  if (!(await canManageAssignment(client, id, auth))) {
+    return fail('FORBIDDEN', '본인 강좌의 과제만 삭제할 수 있습니다.', 403);
+  }
+
   const { error } = await client.from('assignments').delete().eq('id', id);
 
   if (error) {
@@ -80,7 +90,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
 
   try {
     await client.from('activity_logs').insert({
-      type: 'assignment_delete',
+      type: 'course',
       user_name: auth.email.split('@')[0],
       user_role: auth.role ?? 'professor',
       user_id: auth.userId,

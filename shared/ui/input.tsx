@@ -12,6 +12,7 @@ interface InputProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
   autoComplete?: string;
 }
 
@@ -27,6 +28,7 @@ export function Input({
   onChange,
   required = false,
   disabled = false,
+  readOnly = false,
   autoComplete,
 }: InputProps) {
   const inputId = id ?? name;
@@ -52,6 +54,7 @@ export function Input({
         onChange={onChange}
         required={required}
         disabled={disabled}
+        readOnly={readOnly}
         autoComplete={autoComplete}
         className={`rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 transition-colors focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 ${className}`.trim()}
       />

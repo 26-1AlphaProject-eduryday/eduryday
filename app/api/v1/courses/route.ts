@@ -4,7 +4,7 @@ import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase
 interface CourseRow {
   id: string;
   title: string;
-   description: string | null;
+  description: string | null;
   professor_name: string;
   semester: string;
   section: string | null;
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
   }
 
   if (auth.role === 'professor') {
-    dbQuery = dbQuery.eq('created_by', auth.userId);
+    dbQuery = dbQuery.or(`created_by.eq.${auth.userId},professor_id.eq.${auth.userId}`);
   }
 
   if (status !== 'all') {
@@ -139,12 +139,12 @@ export async function POST(req: Request) {
 
   const { data, error } = await client
     .from('courses')
-      .insert({
-        title: String(body.title),
-        description: body.description ? String(body.description) : null,
-        professor_name: String(body.professorName ?? auth.email.split('@')[0]),
-        professor_id: auth.role === 'professor' ? auth.userId : null,
-        semester: String(body.semester),
+    .insert({
+      title: String(body.title),
+      description: body.description ? String(body.description) : null,
+      professor_name: String(body.professorName ?? auth.email.split('@')[0]),
+      professor_id: auth.role === 'professor' ? auth.userId : null,
+      semester: String(body.semester),
       section: body.section ? String(body.section) : null,
       student_count: Number(body.studentCount ?? 0),
       current_week: Number(body.currentWeek ?? 1),
@@ -161,7 +161,7 @@ export async function POST(req: Request) {
 
   try {
     await client.from('activity_logs').insert({
-      type: 'course_create',
+      type: 'course',
       user_name: auth.email.split('@')[0],
       user_role: auth.role ?? 'professor',
       user_id: auth.userId,

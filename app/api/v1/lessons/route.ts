@@ -1,5 +1,12 @@
 import { fail, ok } from '@/shared/lib/api/response';
+import { canManageWeek, canReadWeek } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
+
+const LESSON_TYPES = ['lecture', 'practice', 'quiz', 'document'] as const;
+
+function isLessonType(value: unknown): value is (typeof LESSON_TYPES)[number] {
+  return LESSON_TYPES.includes(value as (typeof LESSON_TYPES)[number]);
+}
 
 export async function GET(req: Request) {
   const auth = await getRouteAuthContext();
@@ -12,6 +19,10 @@ export async function GET(req: Request) {
   const weekId = url.searchParams.get('weekId');
 
   if (!weekId) return fail('VALIDATION_ERROR', 'weekId는 필수입니다.');
+
+  if (!(await canReadWeek(client, weekId, auth))) {
+    return fail('FORBIDDEN', '접근 가능한 주차가 아닙니다.', 403);
+  }
 
   const { data, error } = await client
     .from('lessons')
@@ -39,12 +50,23 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'weekId, title, type은 필수입니다.');
   }
 
+  const weekId = String(body.weekId);
+  const type = String(body.type);
+
+  if (!isLessonType(type)) {
+    return fail('VALIDATION_ERROR', 'type은 lecture|practice|quiz|document 중 하나여야 합니다.');
+  }
+
+  if (!(await canManageWeek(client, weekId, auth))) {
+    return fail('FORBIDDEN', '본인 강좌의 주차에만 레슨을 생성할 수 있습니다.', 403);
+  }
+
   const { data, error } = await client
     .from('lessons')
     .insert({
-      week_id: body.weekId,
+      week_id: weekId,
       title: String(body.title),
-      type: String(body.type),
+      type,
       file_url: body.fileUrl ? String(body.fileUrl) : null,
       order_num: body.orderNum != null ? Number(body.orderNum) : null,
     })

@@ -1,5 +1,6 @@
 import { ProfessorAnnouncementsPage } from '@/_pages/professor-announcements/ui/ProfessorAnnouncementsPage';
-import { getServiceRoleClient } from '@/shared/lib/supabase/route';
+import { getAccessibleCourseIds } from '@/shared/lib/supabase/access';
+import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface AnnouncementJoinRow {
   id: string;
@@ -13,22 +14,34 @@ interface AnnouncementJoinRow {
 }
 
 export default async function ProfessorAnnouncementsRoute() {
+  const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 
-  if (!client) {
+  if (!auth || !client || (auth.role !== 'professor' && auth.role !== 'admin')) {
     return <ProfessorAnnouncementsPage courses={[]} announcements={[]} />;
   }
 
-  const [courseRows, announcementRows] = await Promise.all([
-    client
-      .from('courses')
-      .select('id, title, semester, student_count, current_week, total_weeks')
-      .order('created_at', { ascending: false }),
-    client
-      .from('announcements')
-      .select('id, title, content, course_id, pinned, views, created_at, courses(title)')
-      .order('created_at', { ascending: false }),
-  ]);
+  const accessibleCourseIds = await getAccessibleCourseIds(client, auth);
+
+  if (accessibleCourseIds !== null && accessibleCourseIds.length === 0) {
+    return <ProfessorAnnouncementsPage courses={[]} announcements={[]} />;
+  }
+
+  let coursesQuery = client
+    .from('courses')
+    .select('id, title, semester, student_count, current_week, total_weeks')
+    .order('created_at', { ascending: false });
+  let announcementsQuery = client
+    .from('announcements')
+    .select('id, title, content, course_id, pinned, views, created_at, courses(title)')
+    .order('created_at', { ascending: false });
+
+  if (accessibleCourseIds !== null) {
+    coursesQuery = coursesQuery.in('id', accessibleCourseIds);
+    announcementsQuery = announcementsQuery.in('course_id', accessibleCourseIds);
+  }
+
+  const [courseRows, announcementRows] = await Promise.all([coursesQuery, announcementsQuery]);
 
   const courses = (courseRows.data ?? []).map((row) => ({
     id: row.id,

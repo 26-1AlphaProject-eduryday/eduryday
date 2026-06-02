@@ -31,8 +31,9 @@ interface Lesson {
   id: string;
   weekId: string;
   title: string;
-  type: 'video' | 'practice' | 'quiz' | 'document';
+  type: 'lecture' | 'practice' | 'quiz' | 'document';
   orderNum: number;
+  fileUrl: string | null;
 }
 
 export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePageProps) {
@@ -47,7 +48,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
   const [newWeekTitle, setNewWeekTitle] = useState('');
   const [addingLessonWeekId, setAddingLessonWeekId] = useState<string | null>(null);
   const [newLessonTitle, setNewLessonTitle] = useState('');
-  const [newLessonType, setNewLessonType] = useState<Lesson['type']>('video');
+  const [newLessonType, setNewLessonType] = useState<Lesson['type']>('lecture');
   const [newLessonFileUrl, setNewLessonFileUrl] = useState<string>('');
 
   async function loadCourse() {
@@ -72,7 +73,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
       return;
     }
 
-    const fetchedWeeks: CourseWeek[] = weeksJson.data ?? [];
+    const fetchedWeeks: CourseWeek[] = weeksJson.data?.weeks ?? [];
     setWeeks(fetchedWeeks);
 
     const allLessons: Lesson[] = [];
@@ -80,8 +81,24 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
       fetchedWeeks.map(async (week) => {
         const lessonsRes = await fetch(`/api/v1/lessons?weekId=${week.id}`, { cache: 'no-store' });
         const lessonsJson = await lessonsRes.json();
-        if (lessonsJson.ok && Array.isArray(lessonsJson.data)) {
-          allLessons.push(...(lessonsJson.data as Lesson[]));
+        if (lessonsJson.ok && Array.isArray(lessonsJson.data?.lessons)) {
+          allLessons.push(
+            ...(lessonsJson.data.lessons as {
+              id: string;
+              week_id: string;
+              title: string;
+              type: Lesson['type'];
+              file_url: string | null;
+              order_num: number;
+            }[]).map((lesson) => ({
+              id: lesson.id,
+              weekId: lesson.week_id,
+              title: lesson.title,
+              type: lesson.type,
+              fileUrl: lesson.file_url,
+              orderNum: lesson.order_num,
+            })),
+          );
         }
       })
     );
@@ -93,7 +110,6 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
   useEffect(() => {
     loadCourse();
     loadWeeksAndLessons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
   async function saveChanges() {
@@ -164,7 +180,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
 
     if (json.ok) {
       setNewLessonTitle('');
-      setNewLessonType('video');
+      setNewLessonType('lecture');
       setNewLessonFileUrl('');
       setAddingLessonWeekId(null);
       await loadWeeksAndLessons();
@@ -197,7 +213,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
   };
 
   const typeLabel: Record<Lesson['type'], string> = {
-    video: '영상',
+    lecture: '강의',
     practice: '실습',
     quiz: '퀴즈',
     document: '문서',
@@ -355,10 +371,10 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
                                 onChange={(e) => setNewLessonType(e.target.value as Lesson['type'])}
                                 className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
                               >
-                                <option value="video">영상</option>
-                                <option value="practice">실습</option>
-                                <option value="quiz">퀴즈</option>
-                                <option value="document">문서</option>
+                              <option value="lecture">강의</option>
+                              <option value="practice">실습</option>
+                              <option value="quiz">퀴즈</option>
+                              <option value="document">문서</option>
                               </select>
                               <button
                                 type="button"
@@ -369,7 +385,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
                               </button>
                               <button
                                 type="button"
-                                onClick={() => { setAddingLessonWeekId(null); setNewLessonTitle(''); setNewLessonType('video'); setNewLessonFileUrl(''); }}
+                                onClick={() => { setAddingLessonWeekId(null); setNewLessonTitle(''); setNewLessonType('lecture'); setNewLessonFileUrl(''); }}
                                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600"
                               >
                                 취소
@@ -384,7 +400,7 @@ export function ProfessorCourseManagePage({ courseId }: ProfessorCourseManagePag
                         ) : (
                           <button
                             type="button"
-                            onClick={() => { setAddingLessonWeekId(week.id); setNewLessonTitle(''); setNewLessonType('video'); }}
+                            onClick={() => { setAddingLessonWeekId(week.id); setNewLessonTitle(''); setNewLessonType('lecture'); }}
                             className="mt-3 border-l-2 border-gray-200 pl-4 text-sm text-blue-600 hover:text-blue-700"
                           >
                             + 강의 추가

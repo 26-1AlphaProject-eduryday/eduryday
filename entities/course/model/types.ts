@@ -1,4 +1,4 @@
-export type LessonType = 'lecture' | 'practice' | 'quiz';
+export type LessonType = 'lecture' | 'practice' | 'quiz' | 'document';
 export type WeekStatus = 'done' | 'in-progress' | 'locked';
 
 export interface Lesson {
