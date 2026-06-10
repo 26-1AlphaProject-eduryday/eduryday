@@ -15,9 +15,145 @@ import {
 // Sub-sections
 // ---------------------------------------------------------------------------
 
+function ProductPreview() {
+  const navItems = ['대시보드', '강좌', '과제', 'AI 튜터'];
+  const courseItems = [
+    { title: '알고리즘 기초', progress: 68, meta: '3주차 · 정렬' },
+    { title: '자료구조', progress: 42, meta: '스택과 큐 실습' },
+  ];
+
+  return (
+    <div
+      id="product-preview"
+      className="relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
+      aria-label="EduRyday 제품 화면 미리보기"
+    >
+      <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+        <span className="ml-3 text-xs font-medium text-gray-500">eduryday.app/student/dashboard</span>
+      </div>
+
+      <div className="grid min-h-[430px] grid-cols-[104px_1fr] bg-gray-50 sm:grid-cols-[132px_1fr]">
+        <aside className="border-r border-gray-200 bg-white px-3 py-4">
+          <div className="mb-5 flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-900 text-xs font-bold text-white">
+              E
+            </div>
+            <span className="hidden text-sm font-bold text-gray-900 sm:inline">EduRyday</span>
+          </div>
+          <nav className="space-y-1" aria-label="미리보기 메뉴">
+            {navItems.map((item, index) => (
+              <div
+                key={item}
+                className={`rounded-md px-2 py-2 text-xs font-medium ${
+                  index === 0 ? 'bg-gray-900 text-white' : 'text-gray-500'
+                }`}
+              >
+                {item}
+              </div>
+            ))}
+          </nav>
+        </aside>
+
+        <main className="min-w-0 p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-blue-600">오늘의 학습</p>
+              <h2 className="text-lg font-bold text-gray-900">정렬 알고리즘 실습</h2>
+            </div>
+            <div className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600">
+              D-2
+            </div>
+          </div>
+
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {[
+              ['수강 강좌', '4개'],
+              ['평균 점수', '87점'],
+              ['AI 질문', '12건'],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-md border border-gray-200 bg-white p-3">
+                <p className="text-[11px] text-gray-500">{label}</p>
+                <p className="mt-1 text-base font-bold text-gray-900">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-[0.88fr_1.12fr]">
+            <section className="space-y-3">
+              {courseItems.map((course) => (
+                <div key={course.title} className="rounded-md border border-gray-200 bg-white p-3">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">{course.title}</h3>
+                      <p className="mt-0.5 text-xs text-gray-500">{course.meta}</p>
+                    </div>
+                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700">
+                      진행중
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                    <div className="h-full rounded-full bg-blue-500" style={{ width: `${course.progress}%` }} />
+                  </div>
+                </div>
+              ))}
+
+              <div className="rounded-md border border-gray-200 bg-white p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900">AI 튜터</h3>
+                  <span className="text-[11px] text-gray-400">실시간</span>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <p className="rounded-md bg-gray-100 px-3 py-2 text-gray-700">퀵 정렬 기준값은 어떻게 잡나요?</p>
+                  <p className="ml-5 rounded-md bg-blue-50 px-3 py-2 text-blue-800">
+                    먼저 분할 기준과 최악 케이스를 비교해보세요.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="overflow-hidden rounded-md border border-gray-800 bg-gray-950">
+              <div className="flex items-center justify-between border-b border-gray-800 px-3 py-2">
+                <span className="text-xs font-medium text-gray-200">Split-View IDE</span>
+                <span className="rounded bg-green-500 px-2 py-0.5 text-[11px] font-semibold text-white">3/3 통과</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_0.82fr]">
+                <pre className="min-h-[188px] overflow-hidden p-3 text-[11px] leading-5 text-gray-200">
+{`def sort_numbers(items):
+    if len(items) <= 1:
+        return items
+
+    pivot = items[len(items) // 2]
+    left = [n for n in items if n < pivot]
+    mid = [n for n in items if n == pivot]
+    right = [n for n in items if n > pivot]
+    return sort_numbers(left) + mid + sort_numbers(right)`}
+                </pre>
+                <div className="border-t border-gray-800 bg-gray-900 p-3 sm:border-l sm:border-t-0">
+                  <h3 className="mb-2 text-xs font-semibold text-gray-200">자동 채점</h3>
+                  <div className="space-y-2">
+                    {['기본 케이스', '중복 값', '빈 배열'].map((test) => (
+                      <div key={test} className="flex items-center justify-between rounded bg-gray-800 px-2 py-1.5">
+                        <span className="text-[11px] text-gray-300">{test}</span>
+                        <span className="text-[11px] font-semibold text-green-400">PASS</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function HeroSection() {
   return (
-    <section className="px-8 py-20">
+    <section className="px-6 py-16 sm:px-8 lg:py-20">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
         {/* Left: copy */}
         <div>
@@ -39,7 +175,7 @@ function HeroSection() {
               무료로 시작하기
             </Link>
             <Link
-              href="#features"
+              href="#product-preview"
               className="rounded-lg border border-gray-300 bg-white px-8 py-4 text-lg text-gray-700 transition-colors hover:bg-gray-100"
             >
               데모 보기
@@ -47,18 +183,7 @@ function HeroSection() {
           </div>
         </div>
 
-        <div className="relative h-96 overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-slate-100 via-white to-gray-200">
-          <div className="absolute -left-8 top-10 h-44 w-44 rounded-full bg-blue-200/50 blur-2xl" />
-          <div className="absolute right-8 top-16 h-32 w-32 rounded-full bg-emerald-200/50 blur-2xl" />
-          <div className="absolute bottom-6 left-8 right-8 rounded-xl border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
-            <div className="mb-2 h-3 w-28 rounded bg-gray-300" />
-            <div className="mb-3 h-2 w-full rounded bg-gray-200" />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-20 rounded-lg bg-gray-100" />
-              <div className="h-20 rounded-lg bg-gray-100" />
-            </div>
-          </div>
-        </div>
+        <ProductPreview />
       </div>
     </section>
   );
