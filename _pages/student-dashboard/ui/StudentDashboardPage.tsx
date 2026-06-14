@@ -28,6 +28,54 @@ interface DashboardStat {
   value: string;
 }
 
+const COURSE_VISUALS = [
+  {
+    accent: 'from-blue-600 to-cyan-500',
+    eyebrow: 'Graph',
+    marks: ['BFS', 'DFS', 'Queue'],
+  },
+  {
+    accent: 'from-violet-600 to-fuchsia-500',
+    eyebrow: 'Data',
+    marks: ['Stack', 'Tree', 'Hash'],
+  },
+  {
+    accent: 'from-emerald-600 to-teal-500',
+    eyebrow: 'Web',
+    marks: ['React', 'API', 'State'],
+  },
+];
+
+function CourseVisual({ index, title }: { index: number; title: string }) {
+  const visual = COURSE_VISUALS[index % COURSE_VISUALS.length];
+
+  return (
+    <div
+      className={`relative h-32 overflow-hidden bg-gradient-to-br ${visual.accent}`}
+      aria-hidden="true"
+    >
+      <div className="absolute left-4 top-4 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
+        {visual.eyebrow}
+      </div>
+      <div className="absolute bottom-4 left-4 right-4">
+        <p className="text-lg font-bold text-white">{title}</p>
+        <div className="mt-3 flex gap-2">
+          {visual.marks.map((mark) => (
+            <span
+              key={mark}
+              className="rounded-md bg-white/18 px-2 py-1 text-[11px] font-medium text-white"
+            >
+              {mark}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
+      <div className="absolute bottom-6 right-6 h-12 w-12 rounded-xl border border-white/25 bg-white/10" />
+    </div>
+  );
+}
+
 export async function StudentDashboardPage({
   student,
   courses,
@@ -87,19 +135,14 @@ export async function StudentDashboardPage({
 
             {courses.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {courses.map((course) => (
+                {courses.map((course, index) => (
                   <Link
                     key={course.id}
                     href={`/student/courses/${course.id}`}
                     className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                     aria-label={`${course.title} 강좌 상세 보기`}
                   >
-                    <div
-                      className="h-32 bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center"
-                      aria-hidden="true"
-                    >
-                      <span className="text-xs text-gray-400">강좌 썸네일</span>
-                    </div>
+                    <CourseVisual index={index} title={course.title} />
 
                     <div className="p-4">
                       <h3 className="font-bold text-gray-700">{course.title}</h3>

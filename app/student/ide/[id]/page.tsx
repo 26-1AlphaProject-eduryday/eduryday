@@ -1,9 +1,14 @@
 import { redirect } from 'next/navigation';
 import { SplitViewIdePage } from '@/_pages/split-view-ide';
+import { demoIdeAssignment, demoStudent, isVideoDemoMode } from '@/entities/demo-video';
 import { canReadAssignment } from '@/shared/lib/supabase/access';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export default async function StudentIdeRoute({ params }: { params: Promise<{ id: string }> }) {
+  if (isVideoDemoMode()) {
+    return <SplitViewIdePage assignment={demoIdeAssignment} studentName={demoStudent.name} />;
+  }
+
   const auth = await getRouteAuthContext();
   if (!auth || auth.role !== 'student') redirect('/login');
 

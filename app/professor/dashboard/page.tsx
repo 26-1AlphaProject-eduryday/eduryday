@@ -1,4 +1,12 @@
 import { ProfessorDashboardPage } from '@/_pages/professor-dashboard/ui/ProfessorDashboardPage';
+import {
+  demoProfessor,
+  demoProfessorActivities,
+  demoProfessorCourses,
+  demoProfessorStats,
+  demoSubmissionSummary,
+  isVideoDemoMode,
+} from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface CourseRow {
@@ -20,6 +28,18 @@ interface ProfileRow {
 }
 
 export default async function ProfessorDashboardRoute() {
+  if (isVideoDemoMode()) {
+    return (
+      <ProfessorDashboardPage
+        professor={demoProfessor}
+        courses={demoProfessorCourses}
+        stats={demoProfessorStats}
+        activities={demoProfessorActivities}
+        submissionSummary={demoSubmissionSummary}
+      />
+    );
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 

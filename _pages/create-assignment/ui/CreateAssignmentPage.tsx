@@ -22,24 +22,46 @@ interface TestCase {
   weight: number;
 }
 
-export function CreateAssignmentPage({ initialCourseId }: { initialCourseId?: string }) {
+interface AssignmentDraft {
+  title?: string;
+  description?: string;
+  deadline?: string;
+  type?: 'coding' | 'essay' | 'multiple-choice' | 'file';
+  rubric?: RubricCriterion[];
+  testCases?: TestCase[];
+}
+
+export function CreateAssignmentPage({
+  initialCourseId,
+  initialCourses,
+  initialDraft,
+}: {
+  initialCourseId?: string;
+  initialCourses?: CourseItem[];
+  initialDraft?: AssignmentDraft;
+}) {
   const router = useRouter();
-  const [courses, setCourses] = useState<CourseItem[]>([]);
-  const [courseId, setCourseId] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [type, setType] = useState<'coding' | 'essay' | 'multiple-choice' | 'file'>('coding');
+  const hasInitialCourses = initialCourses !== undefined;
+  const [courses, setCourses] = useState<CourseItem[]>(initialCourses ?? []);
+  const [courseId, setCourseId] = useState(initialCourseId ?? initialCourses?.[0]?.id ?? '');
+  const [title, setTitle] = useState(initialDraft?.title ?? '');
+  const [description, setDescription] = useState(initialDraft?.description ?? '');
+  const [deadline, setDeadline] = useState(initialDraft?.deadline ?? '');
+  const [type, setType] = useState<'coding' | 'essay' | 'multiple-choice' | 'file'>(initialDraft?.type ?? 'coding');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-  const [rubric, setRubric] = useState<RubricCriterion[]>([
-    { id: '1', description: '', weight: 30 },
-  ]);
-  const [testCases, setTestCases] = useState<TestCase[]>([
-    { input: '', expectedOutput: '', weight: 100 },
-  ]);
+  const [rubric, setRubric] = useState<RubricCriterion[]>(
+    initialDraft?.rubric ?? [{ id: '1', description: '', weight: 30 }],
+  );
+  const [testCases, setTestCases] = useState<TestCase[]>(
+    initialDraft?.testCases ?? [{ input: '', expectedOutput: '', weight: 100 }],
+  );
 
   useEffect(() => {
+    if (hasInitialCourses) {
+      return;
+    }
+
     async function loadCourses() {
       const res = await fetch('/api/v1/courses?page=1&pageSize=50', { cache: 'no-store' });
       const json = await res.json();
@@ -53,7 +75,7 @@ export function CreateAssignmentPage({ initialCourseId }: { initialCourseId?: st
     }
 
     loadCourses();
-  }, [initialCourseId]);
+  }, [hasInitialCourses, initialCourseId]);
 
   async function saveAssignment(status: 'draft' | 'active') {
     if (title.trim() === '') {
@@ -63,6 +85,12 @@ export function CreateAssignmentPage({ initialCourseId }: { initialCourseId?: st
 
     setSubmitting(true);
     setMessage('');
+
+    if (hasInitialCourses) {
+      setSubmitting(false);
+      setMessage(status === 'draft' ? '임시저장 완료' : '과제 게시 완료');
+      return;
+    }
 
     const res = await fetch('/api/v1/assignments', {
       method: 'POST',

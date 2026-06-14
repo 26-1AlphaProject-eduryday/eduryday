@@ -1,8 +1,13 @@
 import { redirect } from 'next/navigation';
 import { ProfessorAnalyticsPage } from '@/_pages/professor-analytics';
+import { demoAnalytics, isVideoDemoMode } from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 export default async function ProfessorAnalyticsRoute() {
+  if (isVideoDemoMode()) {
+    return <ProfessorAnalyticsPage {...demoAnalytics} />;
+  }
+
   const auth = await getRouteAuthContext();
   if (!auth || (auth.role !== 'professor' && auth.role !== 'admin')) {
     redirect('/login');

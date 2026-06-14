@@ -20,6 +20,81 @@ interface CourseOption {
   title: string;
 }
 
+const DEMO_COURSES: CourseOption[] = [
+  { id: 'algorithms-bfs', title: '알고리즘 실습' },
+  { id: 'data-structures', title: '자료구조' },
+  { id: 'web-programming', title: '웹프로그래밍' },
+];
+
+const DEMO_CONVERSATIONS: ConversationItem[] = [
+  {
+    id: 'demo-bfs-help',
+    title: 'BFS 방문 처리 질문',
+    courseId: 'algorithms-bfs',
+    messageCount: 4,
+    updatedAt: '2026-06-14 09:42',
+  },
+  {
+    id: 'demo-complexity',
+    title: '시간 복잡도 설명',
+    courseId: 'algorithms-bfs',
+    messageCount: 3,
+    updatedAt: '2026-06-13 21:15',
+  },
+  {
+    id: 'demo-react-state',
+    title: 'React 상태 끌어올리기',
+    courseId: 'web-programming',
+    messageCount: 5,
+    updatedAt: '2026-06-12 18:30',
+  },
+];
+
+const DEMO_MESSAGES = [
+  {
+    id: 'demo-message-1',
+    role: 'user',
+    parts: [
+      {
+        type: 'text',
+        text: 'BFS에서 visited를 큐에 넣을 때 처리해야 하나요, 꺼낼 때 처리해야 하나요?',
+      },
+    ],
+  },
+  {
+    id: 'demo-message-2',
+    role: 'assistant',
+    parts: [
+      {
+        type: 'text',
+        text:
+          '중복 방문을 막으려면 보통 큐에 넣는 순간 visited 처리하는 편이 안전합니다.\n\n예를 들어 A와 B가 동시에 C를 가리킬 때, 꺼낼 때 처리하면 C가 큐에 두 번 들어갈 수 있어요. 지금 코드에서는 enqueue 직전에 visited.add(next_node)를 호출하는지 확인해보세요.',
+      },
+    ],
+  },
+  {
+    id: 'demo-message-3',
+    role: 'user',
+    parts: [
+      {
+        type: 'text',
+        text: '그럼 시간 복잡도 설명은 어떻게 쓰면 좋을까요?',
+      },
+    ],
+  },
+  {
+    id: 'demo-message-4',
+    role: 'assistant',
+    parts: [
+      {
+        type: 'text',
+        text:
+          '인접 리스트 기준으로 각 정점은 한 번 방문되고, 각 간선도 최대 한 번 확인됩니다. 그래서 시간 복잡도는 O(V + E), 공간 복잡도는 visited와 queue 때문에 O(V)라고 정리하면 됩니다.',
+      },
+    ],
+  },
+] as UIMessage[];
+
 function getMessageText(message: UIMessage): string {
   for (const part of message.parts) {
     if (part.type === 'text') return part.text;
@@ -27,12 +102,16 @@ function getMessageText(message: UIMessage): string {
   return '';
 }
 
-export function AiTutorPage() {
-  const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [courses, setCourses] = useState<CourseOption[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [sidebarLoading, setSidebarLoading] = useState(true);
+export function AiTutorPage({ demoMode = false }: { demoMode?: boolean }) {
+  const [conversations, setConversations] = useState<ConversationItem[]>(
+    demoMode ? DEMO_CONVERSATIONS : [],
+  );
+  const [courses, setCourses] = useState<CourseOption[]>(demoMode ? DEMO_COURSES : []);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(
+    demoMode ? 'demo-bfs-help' : null,
+  );
+  const [selectedCourseId, setSelectedCourseId] = useState(demoMode ? 'algorithms-bfs' : '');
+  const [sidebarLoading, setSidebarLoading] = useState(!demoMode);
   const [aiAvailable, setAiAvailable] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,6 +130,10 @@ export function AiTutorPage() {
       }),
     }),
     onFinish: async ({ message, messages: allMessages }) => {
+      if (demoMode) {
+        return;
+      }
+
       const convId = activeConversationId;
       if (convId) {
         const firstUserMsg = allMessages.find((m) => m.role === 'user');
@@ -111,6 +194,22 @@ export function AiTutorPage() {
   }
 
   async function handleNewConversation() {
+    if (demoMode) {
+      setActiveConversationId('demo-new');
+      setMessages([]);
+      setConversations((items) => [
+        {
+          id: 'demo-new',
+          title: '새 대화',
+          courseId: selectedCourseId || null,
+          messageCount: 0,
+          updatedAt: '2026-06-14 10:12',
+        },
+        ...items.filter((item) => item.id !== 'demo-new'),
+      ]);
+      return;
+    }
+
     const res = await fetch('/api/v1/conversations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -126,6 +225,13 @@ export function AiTutorPage() {
 
   async function handleSelectConversation(id: string) {
     setActiveConversationId(id);
+    if (demoMode) {
+      const conversation = DEMO_CONVERSATIONS.find((item) => item.id === id);
+      setSelectedCourseId(conversation?.courseId ?? '');
+      setMessages(DEMO_MESSAGES);
+      return;
+    }
+
     const res = await fetch(`/api/v1/conversations/${id}`, { cache: 'no-store' });
     const json = await res.json();
     if (json.ok && json.data.conversation.messages) {
@@ -135,6 +241,15 @@ export function AiTutorPage() {
   }
 
   async function handleDeleteConversation(id: string) {
+    if (demoMode) {
+      setConversations((items) => items.filter((item) => item.id !== id));
+      if (activeConversationId === id) {
+        setActiveConversationId(null);
+        setMessages([]);
+      }
+      return;
+    }
+
     await fetch(`/api/v1/conversations/${id}`, { method: 'DELETE' });
     if (activeConversationId === id) {
       setActiveConversationId(null);
@@ -148,13 +263,41 @@ export function AiTutorPage() {
     const text = inputValue.trim();
     if (!text || isLoading) return;
     setInputValue('');
+    if (demoMode) {
+      setMessages([
+        ...messages,
+        {
+          id: `demo-user-${Date.now()}`,
+          role: 'user',
+          parts: [{ type: 'text', text }],
+        } as UIMessage,
+        {
+          id: `demo-assistant-${Date.now()}`,
+          role: 'assistant',
+          parts: [
+            {
+              type: 'text',
+              text: '좋은 질문이에요. 먼저 현재 코드에서 큐에 들어가는 시점과 visited가 바뀌는 시점을 나란히 확인해보면 원인을 찾을 수 있습니다.',
+            },
+          ],
+        } as UIMessage,
+      ]);
+      return;
+    }
+
     sendMessage({ text });
   }
 
   useEffect(() => {
+    if (demoMode) {
+      setMessages(DEMO_MESSAGES);
+      setSidebarLoading(false);
+      return;
+    }
+
     loadCourses();
     loadConversations();
-  }, []);
+  }, [demoMode, setMessages]);
 
   return (
     <div className="flex h-screen flex-col bg-white">

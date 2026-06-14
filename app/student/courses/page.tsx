@@ -1,4 +1,5 @@
 import { StudentCoursesPage } from '@/_pages/student-courses/ui/StudentCoursesPage';
+import { demoStudentCourses, isVideoDemoMode } from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface EnrollmentRow {
@@ -14,6 +15,10 @@ interface CourseRow {
 }
 
 export default async function StudentCoursesRoute() {
+  if (isVideoDemoMode()) {
+    return <StudentCoursesPage courses={demoStudentCourses} />;
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 

@@ -1,4 +1,5 @@
 import { StudentGradesPage } from '@/_pages/student-grades/ui/StudentGradesPage';
+import { demoStudentGrades, isVideoDemoMode } from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface SubmissionJoinRow {
@@ -21,6 +22,10 @@ interface SubmissionJoinRow {
 }
 
 export default async function StudentGradesRoute() {
+  if (isVideoDemoMode()) {
+    return <StudentGradesPage grades={demoStudentGrades} />;
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 

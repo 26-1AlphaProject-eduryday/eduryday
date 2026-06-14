@@ -14,10 +14,25 @@ import {
   SUBMISSION_VIDEO_HEIGHT,
   SUBMISSION_VIDEO_WIDTH,
 } from './EduRydaySubmissionDemo';
+import {
+  EduRydayProductDemo,
+  PRODUCT_VIDEO_DURATION_SECONDS,
+  PRODUCT_VIDEO_FPS,
+  PRODUCT_VIDEO_HEIGHT,
+  PRODUCT_VIDEO_WIDTH,
+} from './EduRydayProductDemo';
 
 export const RemotionRoot = () => {
   return (
     <>
+      <Composition
+        id="EduRydayProductDemo"
+        component={EduRydayProductDemo}
+        durationInFrames={PRODUCT_VIDEO_DURATION_SECONDS * PRODUCT_VIDEO_FPS}
+        fps={PRODUCT_VIDEO_FPS}
+        height={PRODUCT_VIDEO_HEIGHT}
+        width={PRODUCT_VIDEO_WIDTH}
+      />
       <Composition
         id="EduRydaySubmissionDemo"
         component={EduRydaySubmissionDemo}

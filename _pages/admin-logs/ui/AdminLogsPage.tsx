@@ -32,15 +32,25 @@ const LOG_BADGE: Record<LogType, { label: string; variant: 'red' | 'blue' | 'gre
   course: { label: '강좌', variant: 'default' },
 };
 
-export function AdminLogsPage() {
-  const [logs, setLogs] = useState<LogRecord[]>([]);
-  const [total, setTotal] = useState(0);
+export function AdminLogsPage({
+  initialData,
+}: {
+  initialData?: LogResponse;
+}) {
+  const hasInitialData = initialData !== undefined;
+  const [logs, setLogs] = useState<LogRecord[]>(initialData?.logs ?? []);
+  const [total, setTotal] = useState(initialData?.total ?? 0);
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
   const pageSize = 10;
 
   async function loadLogs() {
+    if (hasInitialData) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const params = new URLSearchParams({
@@ -62,8 +72,10 @@ export function AdminLogsPage() {
   }
 
   useEffect(() => {
-    loadLogs();
-  }, [page, typeFilter]);
+    if (!hasInitialData) {
+      loadLogs();
+    }
+  }, [page, typeFilter, hasInitialData]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total]);
 

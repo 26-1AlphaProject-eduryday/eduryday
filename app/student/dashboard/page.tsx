@@ -1,4 +1,11 @@
 import { StudentDashboardPage } from '@/_pages/student-dashboard/ui/StudentDashboardPage';
+import {
+  demoStudent,
+  demoStudentCourses,
+  demoStudentDeadlines,
+  demoStudentStats,
+  isVideoDemoMode,
+} from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface EnrollmentRow {
@@ -25,6 +32,17 @@ interface SubmissionCountRow {
 }
 
 export default async function StudentDashboardRoute() {
+  if (isVideoDemoMode()) {
+    return (
+      <StudentDashboardPage
+        student={demoStudent}
+        courses={demoStudentCourses}
+        deadlines={demoStudentDeadlines}
+        stats={demoStudentStats}
+      />
+    );
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 

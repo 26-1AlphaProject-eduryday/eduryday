@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { ProfessorGradesPage } from '@/_pages/professor-grades/ui/ProfessorGradesPage';
+import { demoProfessorGrades, isVideoDemoMode } from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface CourseRow {
@@ -31,6 +32,15 @@ interface SubmissionJoinRow {
 }
 
 export default async function ProfessorGradesRoute() {
+  if (isVideoDemoMode()) {
+    return (
+      <ProfessorGradesPage
+        rows={demoProfessorGrades.rows}
+        courses={demoProfessorGrades.courses}
+      />
+    );
+  }
+
   const auth = await getRouteAuthContext();
 
   if (!auth || (auth.role !== 'professor' && auth.role !== 'admin')) {
