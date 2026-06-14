@@ -1,5 +1,12 @@
 import { CourseDetailPage } from '@/_pages/course-detail/ui/CourseDetailPage';
 import type { CourseResource, StudentCourse, Week } from '@/entities/course';
+import {
+  demoActiveAssignment,
+  demoCourse,
+  demoCourseResources,
+  demoCourseWeeks,
+  isVideoDemoMode,
+} from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface CourseRow {
@@ -36,6 +43,17 @@ interface AssignmentRow {
 }
 
 export default async function CourseDetailRoute({ params }: { params: Promise<{ id: string }> }) {
+  if (isVideoDemoMode()) {
+    return (
+      <CourseDetailPage
+        currentCourse={demoCourse}
+        courseWeeks={demoCourseWeeks}
+        courseResources={demoCourseResources}
+        activeAssignment={demoActiveAssignment}
+      />
+    );
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
   const { id } = await params;

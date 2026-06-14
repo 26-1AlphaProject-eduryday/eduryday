@@ -23,9 +23,14 @@ const STATUS_CONFIG: Record<AssignmentStatus, { label: string; variant: 'yellow'
   graded: { label: '채점완료', variant: 'green' },
 };
 
-export function StudentAssignmentsPage() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(true);
+export function StudentAssignmentsPage({
+  initialAssignments,
+}: {
+  initialAssignments?: Assignment[];
+}) {
+  const hasInitialAssignments = initialAssignments !== undefined;
+  const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments ?? []);
+  const [loading, setLoading] = useState(!hasInitialAssignments);
   const [submitModalId, setSubmitModalId] = useState<string | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState('');
   const [submitFileUrl, setSubmitFileUrl] = useState<string>('');
@@ -33,6 +38,11 @@ export function StudentAssignmentsPage() {
   const [submitLoading, setSubmitLoading] = useState(false);
 
   async function loadAssignments() {
+    if (hasInitialAssignments) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const [asgRes, subRes] = await Promise.all([
@@ -82,14 +92,30 @@ export function StudentAssignmentsPage() {
   }
 
   useEffect(() => {
-    loadAssignments();
-  }, []);
+    if (!hasInitialAssignments) {
+      loadAssignments();
+    }
+  }, [hasInitialAssignments]);
 
   async function handleSubmit() {
     const currentAssignment = assignments.find((a) => a.id === submitModalId);
     const isFileType = currentAssignment?.type === '파일제출';
     if (!submitModalId) return;
     if (isFileType ? !submitFileUrl : !submitAnswer.trim()) return;
+
+    if (hasInitialAssignments) {
+      setAssignments((items) =>
+        items.map((item) =>
+          item.id === submitModalId ? { ...item, status: 'submitted' } : item,
+        ),
+      );
+      setSubmitModalId(null);
+      setSubmitAnswer('');
+      setSubmitFileUrl('');
+      setSubmitFileName('');
+      return;
+    }
+
     setSubmitLoading(true);
     const res = await fetch('/api/v1/submissions', {
       method: 'POST',

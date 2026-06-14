@@ -1,4 +1,5 @@
 import { AdminDashboardPage } from '@/_pages/admin-dashboard/ui/AdminDashboardPage';
+import { demoAdminDashboard, isVideoDemoMode } from '@/entities/demo-video';
 import { getRouteAuthContext, getServiceRoleClient } from '@/shared/lib/supabase/route';
 
 interface ProfileCountRow {
@@ -21,6 +22,10 @@ interface LogRow {
 }
 
 export default async function AdminDashboardRoute() {
+  if (isVideoDemoMode()) {
+    return <AdminDashboardPage {...demoAdminDashboard} />;
+  }
+
   const auth = await getRouteAuthContext();
   const client = getServiceRoleClient();
 

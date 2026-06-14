@@ -14,11 +14,27 @@ interface CourseItem {
   totalWeeks: number;
 }
 
-export function ProfessorCoursesPage() {
-  const [courses, setCourses] = useState<CourseItem[]>([]);
-  const [loading, setLoading] = useState(true);
+const COURSE_ACCENTS = [
+  'from-blue-500 to-cyan-400',
+  'from-violet-500 to-fuchsia-400',
+  'from-emerald-500 to-teal-400',
+];
+
+export function ProfessorCoursesPage({
+  initialCourses,
+}: {
+  initialCourses?: CourseItem[];
+}) {
+  const hasInitialCourses = initialCourses !== undefined;
+  const [courses, setCourses] = useState<CourseItem[]>(initialCourses ?? []);
+  const [loading, setLoading] = useState(!hasInitialCourses);
 
   async function loadCourses() {
+    if (hasInitialCourses) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const res = await fetch('/api/v1/courses?page=1&pageSize=50', { cache: 'no-store' });
     const json = await res.json();
@@ -50,8 +66,10 @@ export function ProfessorCoursesPage() {
   }
 
   useEffect(() => {
-    loadCourses();
-  }, []);
+    if (!hasInitialCourses) {
+      loadCourses();
+    }
+  }, [hasInitialCourses]);
 
   const avgProgress = useMemo(() => {
     if (courses.length === 0) {
@@ -107,12 +125,17 @@ export function ProfessorCoursesPage() {
               ) : courses.length === 0 ? (
                 <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">강좌가 없습니다.</div>
               ) : (
-                courses.map((course) => {
+                courses.map((course, index) => {
                   const progress = Math.round((course.currentWeek / Math.max(course.totalWeeks, 1)) * 100);
                   return (
                     <article key={course.id} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                       <div className="flex items-start gap-4">
-                        <div className="h-20 w-20 flex-shrink-0 rounded-lg border border-dashed border-gray-300 bg-gray-100" aria-hidden="true" />
+                        <div
+                          className={`flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${COURSE_ACCENTS[index % COURSE_ACCENTS.length]} text-xl font-bold text-white`}
+                          aria-hidden="true"
+                        >
+                          {index + 1}
+                        </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-base font-bold text-gray-800">{course.title}</h2>

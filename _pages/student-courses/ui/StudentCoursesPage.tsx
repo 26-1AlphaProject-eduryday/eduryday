@@ -14,12 +14,63 @@ const COURSE_CATEGORIES: Record<string, { label: string; variant: 'blue' | 'gree
   '1': { label: '알고리즘', variant: 'blue' },
   '2': { label: '자료구조', variant: 'purple' },
   '3': { label: '웹개발', variant: 'green' },
+  'algorithms-bfs': { label: '알고리즘', variant: 'blue' },
+  'data-structures': { label: '자료구조', variant: 'purple' },
+  'web-programming': { label: '웹개발', variant: 'green' },
 };
+
+const COURSE_VISUALS = [
+  {
+    accent: 'from-blue-600 to-cyan-500',
+    eyebrow: 'Graph Search',
+    marks: ['BFS', 'DFS', 'Shortest Path'],
+  },
+  {
+    accent: 'from-violet-600 to-fuchsia-500',
+    eyebrow: 'Data Structure',
+    marks: ['Stack', 'Queue', 'Tree'],
+  },
+  {
+    accent: 'from-emerald-600 to-teal-500',
+    eyebrow: 'Frontend',
+    marks: ['React', 'State', 'API'],
+  },
+];
 
 function getCategoryColor(progress: number): 'blue' | 'green' | 'gray' {
   if (progress >= 70) return 'green';
   if (progress >= 30) return 'blue';
   return 'gray';
+}
+
+function CourseVisual({ index, title }: { index: number; title: string }) {
+  const visual = COURSE_VISUALS[index % COURSE_VISUALS.length];
+
+  return (
+    <div
+      className={`relative h-36 overflow-hidden border-b border-white/10 bg-gradient-to-br ${visual.accent}`}
+      aria-hidden="true"
+    >
+      <div className="absolute left-5 top-5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
+        {visual.eyebrow}
+      </div>
+      <div className="absolute bottom-5 left-5 right-5">
+        <p className="text-xl font-bold text-white">{title}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {visual.marks.map((mark) => (
+            <span
+              key={mark}
+              className="rounded-md bg-white/18 px-2 py-1 text-[11px] font-medium text-white"
+            >
+              {mark}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/15" />
+      <div className="absolute bottom-7 right-7 h-14 w-14 rounded-xl border border-white/25 bg-white/10" />
+    </div>
+  );
 }
 
 export async function StudentCoursesPage({ courses }: { courses: StudentCourseItem[] }) {
@@ -65,7 +116,7 @@ export async function StudentCoursesPage({ courses }: { courses: StudentCourseIt
           {/* Course grid */}
           <section aria-label="강좌 목록">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {courses.map((course) => {
+              {courses.map((course, index) => {
                 const category = COURSE_CATEGORIES[course.id];
                 const barColor = getCategoryColor(course.progress);
 
@@ -76,13 +127,7 @@ export async function StudentCoursesPage({ courses }: { courses: StudentCourseIt
                     className="block overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md"
                     aria-label={`${course.title} 강좌 상세 보기`}
                   >
-                    {/* Thumbnail */}
-                    <div
-                      className="flex h-36 items-center justify-center border-b border-dashed border-gray-200 bg-gray-100"
-                      aria-hidden="true"
-                    >
-                      <span className="text-xs text-gray-400">강좌 썸네일</span>
-                    </div>
+                    <CourseVisual index={index} title={course.title} />
 
                     <div className="p-5">
                       {/* Category badge */}

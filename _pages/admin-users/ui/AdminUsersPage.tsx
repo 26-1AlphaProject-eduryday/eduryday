@@ -43,24 +43,34 @@ const STATUS_BADGE: Record<UserStatus, 'green' | 'red' | 'yellow'> = {
   승인대기: 'yellow',
 };
 
-export function AdminUsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [total, setTotal] = useState(0);
+export function AdminUsersPage({
+  initialData,
+}: {
+  initialData?: UserResponse;
+}) {
+  const hasInitialData = initialData !== undefined;
+  const [users, setUsers] = useState<AdminUser[]>(initialData?.users ?? []);
+  const [total, setTotal] = useState(initialData?.total ?? 0);
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
-  const [stats, setStats] = useState<UserResponse['stats']>({
+  const [stats, setStats] = useState<UserResponse['stats']>(initialData?.stats ?? {
     totalUsers: 0,
     students: 0,
     professors: 0,
     active: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
 
   const pageSize = 10;
 
   async function loadUsers() {
+    if (hasInitialData) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const params = new URLSearchParams({
@@ -85,8 +95,10 @@ export function AdminUsersPage() {
   }
 
   useEffect(() => {
-    loadUsers();
-  }, [page, roleFilter, statusFilter]);
+    if (!hasInitialData) {
+      loadUsers();
+    }
+  }, [page, roleFilter, statusFilter, hasInitialData]);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -95,6 +107,15 @@ export function AdminUsersPage() {
   }
 
   async function updateUserStatus(userId: string, action: 'approve' | 'suspend' | 'activate') {
+    if (hasInitialData) {
+      const nextStatus: UserStatus =
+        action === 'approve' || action === 'activate' ? '활성' : '정지';
+      setUsers((items) =>
+        items.map((user) => (user.id === userId ? { ...user, status: nextStatus } : user)),
+      );
+      return;
+    }
+
     const res = await fetch(`/api/v1/users/${userId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

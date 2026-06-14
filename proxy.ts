@@ -51,6 +51,11 @@ function requiredRole(pathname: string): AppRole | null {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const { supabase, response } = getSupabaseMiddlewareClient(request);
+  const isVideoDemo = process.env.EDURYDAY_VIDEO_DEMO === '1';
+
+  if (isVideoDemo && !pathname.startsWith('/api/')) {
+    return response;
+  }
 
   if (!supabase) {
     return response;

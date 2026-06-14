@@ -9,7 +9,12 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "video:capture": "node scripts/capture-video-screenshots.mjs",
+    "video:studio": "remotion studio video/remotion/index.ts",
+    "video:render": "remotion render video/remotion/index.ts EduRydayProductDemo docs/video/eduryday-submission-demo.mp4 --codec=h264 --crf=18 --overwrite",
+    "video:render:product": "remotion render video/remotion/index.ts EduRydayProductDemo docs/video/eduryday-product-demo.mp4 --codec=h264 --crf=18 --overwrite",
+    "video:render:legacy": "remotion render video/remotion/index.ts EduRydayFinalDemo docs/video/eduryday-final-demo.mp4 --codec=h264 --crf=18 --overwrite"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.53",
@@ -26,12 +31,15 @@
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.475",
     "@types/node": "22.10.2",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
     "@vitest/ui": "^4.1.4",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.1.6",
+    "playwright-core": "^1.60.0",
+    "remotion": "^4.0.475",
     "typescript": "5.7.2",
     "vitest": "^4.1.4"
   },

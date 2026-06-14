@@ -39,6 +39,13 @@ interface AdminActivityLog {
   ip: string;
 }
 
+interface AdminDailyActivity {
+  day: string;
+  logins: number;
+  submissions: number;
+  aiQuestions: number;
+}
+
 type LogType = 'login' | 'submit' | 'ai' | 'course';
 
 const LOG_BADGE: Record<LogType, { label: string; variant: 'blue' | 'green' | 'purple' | 'yellow' }> = {
@@ -54,13 +61,19 @@ export async function AdminDashboardPage({
   serverResources,
   alerts,
   activityLogs,
+  dailyActivity = [],
 }: {
   stats: AdminStat[];
   userDistribution: AdminDistribution[];
   serverResources: AdminResource[];
   alerts: AdminAlert[];
   activityLogs: AdminActivityLog[];
+  dailyActivity?: AdminDailyActivity[];
 }) {
+  const maxDailyActivity = Math.max(
+    1,
+    ...dailyActivity.flatMap((item) => [item.logins, item.submissions, item.aiQuestions]),
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -226,7 +239,7 @@ export async function AdminDashboardPage({
             </section>
           </div>
 
-          {/* Daily activity chart placeholder */}
+          {/* Daily activity chart */}
           <section
             aria-label="일별 활동 현황"
             className="mb-8 rounded-xl border border-gray-200 bg-white p-6"
@@ -243,12 +256,52 @@ export async function AdminDashboardPage({
                 <option value="90d">최근 90일</option>
               </select>
             </div>
-            <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-500">차트 데이터 준비 중</p>
-                <p className="mt-1 text-xs text-gray-400">추후 업데이트 예정입니다</p>
+            {dailyActivity.length > 0 ? (
+              <div>
+                <div className="grid h-52 grid-cols-7 items-end gap-4 rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
+                  {dailyActivity.map((item) => (
+                    <div key={item.day} className="flex h-full flex-col justify-end">
+                      <div className="flex flex-1 items-end justify-center gap-1.5">
+                        <div
+                          className="w-3 rounded-t bg-blue-500"
+                          style={{ height: `${Math.max(8, (item.logins / maxDailyActivity) * 100)}%` }}
+                          aria-label={`${item.day} 로그인 ${item.logins}건`}
+                        />
+                        <div
+                          className="w-3 rounded-t bg-green-500"
+                          style={{ height: `${Math.max(8, (item.submissions / maxDailyActivity) * 100)}%` }}
+                          aria-label={`${item.day} 제출 ${item.submissions}건`}
+                        />
+                        <div
+                          className="w-3 rounded-t bg-purple-500"
+                          style={{ height: `${Math.max(8, (item.aiQuestions / maxDailyActivity) * 100)}%` }}
+                          aria-label={`${item.day} AI 질문 ${item.aiQuestions}건`}
+                        />
+                      </div>
+                      <p className="mt-3 text-center text-xs font-medium text-gray-500">{item.day}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center gap-5 text-xs text-gray-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                    로그인
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                    과제 제출
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
+                    AI 질문
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <p className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm text-gray-500">
+                일별 활동 데이터가 아직 없습니다.
+              </p>
+            )}
           </section>
 
           {/* Activity log table */}

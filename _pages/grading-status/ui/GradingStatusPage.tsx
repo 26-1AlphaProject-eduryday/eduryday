@@ -29,12 +29,24 @@ const STATUS_BADGE: Record<SubmissionStatus, { label: string; variant: 'green' |
   unsubmitted: { label: '미제출', variant: 'red' },
 };
 
-export function GradingStatusPage({ courseId }: { courseId?: string }) {
-  const [rows, setRows] = useState<SubmissionRow[]>([]);
-  const [loading, setLoading] = useState(true);
+export function GradingStatusPage({
+  courseId,
+  initialRows,
+}: {
+  courseId?: string;
+  initialRows?: SubmissionRow[];
+}) {
+  const hasInitialRows = initialRows !== undefined;
+  const [rows, setRows] = useState<SubmissionRow[]>(initialRows ?? []);
+  const [loading, setLoading] = useState(!hasInitialRows);
   const [autoGradingId, setAutoGradingId] = useState<string | null>(null);
 
   async function loadSubmissions() {
+    if (hasInitialRows) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const params = courseId ? `?courseId=${encodeURIComponent(courseId)}` : '';
     const res = await fetch(`/api/v1/submissions${params}`, { cache: 'no-store' });
@@ -48,10 +60,21 @@ export function GradingStatusPage({ courseId }: { courseId?: string }) {
   }
 
   useEffect(() => {
-    loadSubmissions();
-  }, [courseId]);
+    if (!hasInitialRows) {
+      loadSubmissions();
+    }
+  }, [courseId, hasInitialRows]);
 
   async function updateScore(id: string, score: number) {
+    if (hasInitialRows) {
+      setRows((items) =>
+        items.map((item) =>
+          item.id === id ? { ...item, finalScore: String(score), status: 'graded' } : item,
+        ),
+      );
+      return;
+    }
+
     const res = await fetch(`/api/v1/submissions/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -66,6 +89,13 @@ export function GradingStatusPage({ courseId }: { courseId?: string }) {
   }
 
   async function updateFeedback(id: string, feedback: string) {
+    if (hasInitialRows) {
+      setRows((items) =>
+        items.map((item) => (item.id === id ? { ...item, feedback } : item)),
+      );
+      return;
+    }
+
     await fetch(`/api/v1/submissions/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -75,6 +105,25 @@ export function GradingStatusPage({ courseId }: { courseId?: string }) {
 
   async function runAutoGrade(id: string) {
     setAutoGradingId(id);
+    if (hasInitialRows) {
+      setRows((items) =>
+        items.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                autoScore: item.autoScore === '-' ? '86점' : item.autoScore,
+                testsPassed: item.testsPassed === '-' ? '테스트 10/12 통과' : item.testsPassed,
+                aiAnalysis: '정상',
+                aiAnalysisVariant: 'green',
+                status: 'graded',
+              }
+            : item,
+        ),
+      );
+      setAutoGradingId(null);
+      return;
+    }
+
     const res = await fetch('/api/v1/submissions/grade', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -28,16 +28,42 @@ interface ProfessorActivity {
   text: string;
 }
 
+interface SubmissionSummary {
+  label: string;
+  submitted: number;
+  graded: number;
+  pending: number;
+}
+
+const COURSE_ACCENTS = [
+  'from-blue-500 to-cyan-400',
+  'from-violet-500 to-fuchsia-400',
+  'from-emerald-500 to-teal-400',
+];
+
+function CourseIcon({ index }: { index: number }) {
+  return (
+    <div
+      className={`flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${COURSE_ACCENTS[index % COURSE_ACCENTS.length]} text-lg font-bold text-white`}
+      aria-hidden="true"
+    >
+      {index + 1}
+    </div>
+  );
+}
+
 export async function ProfessorDashboardPage({
   professor,
   courses,
   stats,
   activities,
+  submissionSummary = [],
 }: {
   professor: ProfessorSummary;
   courses: ProfessorCourseCard[];
   stats: ProfessorStat[];
   activities: ProfessorActivity[];
+  submissionSummary?: SubmissionSummary[];
 }) {
 
   return (
@@ -99,17 +125,14 @@ export async function ProfessorDashboardPage({
 
               {courses.length > 0 ? (
                 <div className="space-y-4">
-                  {courses.map((course) => (
+                  {courses.map((course, index) => (
                     <article
                       key={course.id}
                       className="rounded-xl border border-gray-200 bg-white p-6"
                       aria-label={`${course.title} 강좌 카드`}
                     >
                       <div className="flex items-start gap-4">
-                        <div
-                          className="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-200 border border-dashed border-gray-300"
-                          aria-hidden="true"
-                        />
+                        <CourseIcon index={index} />
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -201,16 +224,56 @@ export async function ProfessorDashboardPage({
             </section>
           </div>
 
-          {/* Submission summary chart placeholder */}
+          {/* Submission summary chart */}
           <section aria-label="제출 현황 요약">
             <h2 className="mb-4 text-lg font-semibold text-gray-700">
               제출 현황 요약
             </h2>
-            <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 bg-gray-50">
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-500">차트 데이터 준비 중</p>
-                <p className="mt-1 text-xs text-gray-400">추후 업데이트 예정입니다</p>
-              </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              {submissionSummary.length > 0 ? (
+                <div className="space-y-5">
+                  {submissionSummary.map((item) => {
+                    const total = Math.max(item.submitted, item.graded + item.pending, 1);
+                    const gradedPercent = Math.round((item.graded / total) * 100);
+                    const pendingPercent = Math.round((item.pending / total) * 100);
+
+                    return (
+                      <div key={item.label}>
+                        <div className="mb-2 flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-800">{item.label}</span>
+                          <span className="text-gray-500">
+                            제출 {item.submitted}건 · 채점 {item.graded}건 · 검토 {item.pending}건
+                          </span>
+                        </div>
+                        <div className="flex h-3 overflow-hidden rounded-full bg-gray-100">
+                          <div
+                            className="bg-blue-500"
+                            style={{ width: `${gradedPercent}%` }}
+                            aria-label={`${item.label} 채점 완료 ${gradedPercent}%`}
+                          />
+                          <div
+                            className="bg-yellow-400"
+                            style={{ width: `${pendingPercent}%` }}
+                            aria-label={`${item.label} 검토 대기 ${pendingPercent}%`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="flex items-center gap-4 border-t border-gray-100 pt-4 text-xs text-gray-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                      채점 완료
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                      검토 대기
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">제출 현황 데이터가 아직 없습니다.</p>
+              )}
             </div>
           </section>
         </main>
